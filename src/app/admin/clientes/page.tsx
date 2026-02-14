@@ -36,8 +36,9 @@ export default function AdminClientesPage() {
         month: "2-digit",
         year: "numeric",
       })
+    } catch {
+      return "-"
     }
-    return "-"
   }
 
   if (loading) {
