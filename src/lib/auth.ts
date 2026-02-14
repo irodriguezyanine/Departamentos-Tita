@@ -52,7 +52,8 @@ export const authOptions: NextAuthOptions = {
         (session.user as { id?: string }).id = token.id as string
         try {
           const db = await getDb()
-          const user = await db.collection("users").findOne({ _id: new ObjectId(token.id) })
+          const userId = String(token.id)
+          const user = await db.collection("users").findOne({ _id: new ObjectId(userId) })
           const displayName = (user as { displayName?: string } | null)?.displayName
           if (displayName?.trim()) session.user.name = displayName.trim()
           else if (token.name) session.user.name = token.name as string
