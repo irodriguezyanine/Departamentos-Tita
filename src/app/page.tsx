@@ -10,6 +10,7 @@ import {
   Car,
   ShieldCheck,
   Building2,
+  Shirt,
 } from "lucide-react"
 import Image from "next/image"
 
@@ -155,7 +156,7 @@ export default function HomePage() {
               { icon: Car, title: "Estacionamiento", desc: "Para visitas y residentes" },
               { icon: ShieldCheck, title: "Conserjería 24 hrs", desc: "Seguridad y atención permanente" },
               { icon: Waves, title: "Sala de usos múltiples", desc: "Espacios compartidos" },
-              { icon: UtensilsCrossed, title: "Lavandería", desc: "Comodidad total" },
+              { icon: Shirt, title: "Lavandería", desc: "Comodidad total" },
             ].map((item, i) => (
               <motion.div
                 key={item.title}
