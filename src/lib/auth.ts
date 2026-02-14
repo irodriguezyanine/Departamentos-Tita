@@ -49,7 +49,7 @@ export const authOptions: NextAuthOptions = {
     },
     async session({ session, token }) {
       if (session.user && token.id) {
-        (session.user as { id?: string }).id = token.id
+        (session.user as { id?: string }).id = token.id as string
         try {
           const db = await getDb()
           const user = await db.collection("users").findOne({ _id: new ObjectId(token.id) })
