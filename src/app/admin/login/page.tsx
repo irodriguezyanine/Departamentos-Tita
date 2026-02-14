@@ -1,11 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import { useState, Suspense } from "react"
 import { signIn } from "next-auth/react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 
-export default function AdminLoginPage() {
+function LoginForm() {
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
@@ -102,5 +102,17 @@ export default function AdminLoginPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function AdminLoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-tita-primary/5 via-white to-tita-ocean/5">
+        <p className="text-slate-500">Cargando...</p>
+      </div>
+    }>
+      <LoginForm />
+    </Suspense>
   )
 }
