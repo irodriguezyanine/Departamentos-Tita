@@ -20,9 +20,9 @@ async function seed() {
     const db = await getDb()
 
     const usersCollection = db.collection("users")
+    const hashedPassword = await bcrypt.hash(ADMIN_PASSWORD, 12)
     const existingAdmin = await usersCollection.findOne({ username: ADMIN_USER })
     if (!existingAdmin) {
-      const hashedPassword = await bcrypt.hash(ADMIN_PASSWORD, 12)
       await usersCollection.insertOne({
         username: ADMIN_USER,
         password: hashedPassword,
@@ -30,6 +30,12 @@ async function seed() {
         role: "admin",
         createdAt: new Date(),
       })
+    } else {
+      // Actualizar contraseña por si cambió o hubo algún problema
+      await usersCollection.updateOne(
+        { username: ADMIN_USER },
+        { $set: { password: hashedPassword, displayName: ADMIN_DISPLAY_NAME } }
+      )
     }
 
     const departamentosCollection = db.collection("departamentos")
