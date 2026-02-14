@@ -67,7 +67,7 @@ function LoginForm() {
                 required
                 autoComplete="email"
                 className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-tita-primary focus:border-tita-primary"
-                placeholder="dalal@vtr.net"
+                placeholder=""
               />
             </div>
             <div>
