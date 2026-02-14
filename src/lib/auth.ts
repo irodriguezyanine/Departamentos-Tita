@@ -5,6 +5,8 @@ import { ObjectId } from "mongodb"
 import { getDb } from "./db"
 
 export const authOptions: NextAuthOptions = {
+  debug: process.env.NODE_ENV === "development",
+  trustHost: true,
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -13,13 +15,15 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Contraseña", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials?.username || !credentials?.password) return null
+        const username = credentials?.username?.trim()
+        const password = credentials?.password
+        if (!username || !password) return null
 
         const db = await getDb()
-        const user = await db.collection("users").findOne({ username: credentials.username })
+        const user = await db.collection("users").findOne({ username })
 
         if (!user) return null
-        const valid = await bcrypt.compare(credentials.password, user.password)
+        const valid = await bcrypt.compare(password, user.password)
         if (!valid) return null
 
         const displayName = (user as { displayName?: string }).displayName

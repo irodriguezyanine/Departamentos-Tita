@@ -60,7 +60,7 @@ export default async function AdminDashboardPage() {
 
       <div className="mt-12 p-6 bg-amber-50 border border-amber-200 rounded-xl">
         <p className="text-sm text-amber-800">
-          <strong>Importante:</strong> Ejecuta <code className="bg-amber-100 px-1 rounded">/api/seed</code> una vez para crear el usuario administrador (dalal@vtr.net) y los departamentos iniciales.
+          <strong>Si no puedes iniciar sesión:</strong> Visita <code className="bg-amber-100 px-1 rounded">/api/ensure-admin</code> para crear o restablecer el usuario administrador.
         </p>
       </div>
     </div>

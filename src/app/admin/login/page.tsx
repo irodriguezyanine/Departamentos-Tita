@@ -93,12 +93,25 @@ function LoginForm() {
             </button>
           </form>
 
-          <Link
-            href="/"
-            className="block text-center mt-6 text-sm text-slate-500 hover:text-tita-primary"
-          >
-            ← Volver al inicio
-          </Link>
+          <div className="mt-6 space-y-2 text-center">
+            <Link
+              href="/"
+              className="block text-sm text-slate-500 hover:text-tita-primary"
+            >
+              ← Volver al inicio
+            </Link>
+            <p className="text-xs text-slate-400">
+              ¿No puedes entrar?{" "}
+              <a
+                href="/api/ensure-admin"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-tita-primary hover:underline"
+              >
+                Crear/restablecer usuario admin
+              </a>
+            </p>
+          </div>
         </div>
       </div>
     </div>
