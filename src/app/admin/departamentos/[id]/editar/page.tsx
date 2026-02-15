@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
-import { ArrowLeft, Save, Upload, GripVertical } from "lucide-react"
+import { ArrowLeft, Save, Upload, GripVertical, Star, X } from "lucide-react"
 import Image from "next/image"
 
 interface ImagenItem {
@@ -107,6 +107,14 @@ export default function EditarDepartamentoPage() {
   const removeImage = (index: number) => {
     if (!dept) return
     const newImgs = dept.imagenes.filter((_, i) => i !== index)
+    setDept({ ...dept, imagenes: newImgs })
+  }
+
+  const setAsPortada = (index: number) => {
+    if (!dept || index === 0) return
+    const imgs = [...dept.imagenes]
+    const [selected] = imgs.splice(index, 1)
+    const newImgs = [selected, ...imgs].map((img, i) => ({ ...img, orden: i }))
     setDept({ ...dept, imagenes: newImgs })
   }
 
@@ -255,12 +263,34 @@ export default function EditarDepartamentoPage() {
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <button
-                  onClick={() => removeImage(i)}
-                  className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded opacity-0 group-hover:opacity-100 transition-opacity"
-                >
-                  ×
-                </button>
+                <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button
+                    onClick={() => setAsPortada(i)}
+                    title={i === 0 ? "Foto de portada" : "Establecer como foto de portada"}
+                    className={`p-1 rounded ${
+                      i === 0
+                        ? "bg-tita-oro text-white"
+                        : "bg-white/90 text-slate-600 hover:bg-tita-oro hover:text-white"
+                    }`}
+                  >
+                    <Star
+                      className="w-4 h-4"
+                      fill={i === 0 ? "currentColor" : "none"}
+                    />
+                  </button>
+                  <button
+                    onClick={() => removeImage(i)}
+                    title="Eliminar foto"
+                    className="p-1 bg-red-500 text-white rounded hover:bg-red-600"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+                {i === 0 && (
+                  <span className="absolute bottom-1 left-1 px-1.5 py-0.5 bg-tita-oro/90 text-white text-[10px] font-medium rounded">
+                    Portada
+                  </span>
+                )}
               </div>
             ))}
             <label

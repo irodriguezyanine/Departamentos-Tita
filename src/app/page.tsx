@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import { motion } from "framer-motion"
 import {
@@ -15,6 +16,12 @@ import {
 import Image from "next/image"
 import { getDepartamentoBySlug } from "@/data/departamentos-static"
 
+interface DeptFromApi {
+  slug: string
+  name: string
+  imagenes?: { url: string; orden?: number }[]
+}
+
 const fadeIn = {
   initial: { opacity: 0, y: 30 },
   animate: { opacity: 1, y: 0 },
@@ -22,6 +29,35 @@ const fadeIn = {
 }
 
 export default function HomePage() {
+  const [deptsFromApi, setDeptsFromApi] = useState<DeptFromApi[]>([])
+
+  useEffect(() => {
+    fetch("/api/departamentos")
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) setDeptsFromApi(data)
+      })
+      .catch(() => {})
+  }, [])
+
+  const DEPARTAMENTOS = [
+    { slug: "4c-torre-galapagos", name: "4 C Torre Galápagos" },
+    { slug: "13d-torre-cabo-hornos", name: "13 D Torre Cabo de Hornos" },
+    { slug: "17c-torre-isla-grande", name: "17 C Torre Isla Grande" },
+    { slug: "16c-torre-juan-fernandez", name: "16 C Torre Juan Fernández" },
+    { slug: "18c-torre-juan-fernandez", name: "18 C Torre Juan Fernández" },
+  ]
+
+  const getThumbUrl = (slug: string) => {
+    const fromApi = deptsFromApi.find((d) => d.slug === slug)
+    if (fromApi?.imagenes?.length) {
+      const sorted = [...fromApi.imagenes].sort((a, b) => (a.orden ?? 0) - (b.orden ?? 0))
+      return sorted[0].url
+    }
+    const staticDept = getDepartamentoBySlug(slug)
+    return staticDept?.imagenes?.[0]?.url
+  }
+
   return (
     <div>
       {/* Hero - Estilo Colliers: imagen de fondo con overlay rectangular verde oscuro */}
@@ -234,15 +270,8 @@ export default function HomePage() {
           </motion.div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[
-              { slug: "4c-torre-galapagos", name: "4 C Torre Galápagos" },
-              { slug: "13d-torre-cabo-hornos", name: "13 D Torre Cabo de Hornos" },
-              { slug: "17c-torre-isla-grande", name: "17 C Torre Isla Grande" },
-              { slug: "16c-torre-juan-fernandez", name: "16 C Torre Juan Fernández" },
-              { slug: "18c-torre-juan-fernandez", name: "18 C Torre Juan Fernández" },
-            ].map((dept, i) => {
-              const staticDept = getDepartamentoBySlug(dept.slug)
-              const thumbUrl = staticDept?.imagenes?.[0]?.url
+            {DEPARTAMENTOS.map((dept, i) => {
+              const thumbUrl = getThumbUrl(dept.slug)
               return (
               <motion.div
                 key={dept.slug}
