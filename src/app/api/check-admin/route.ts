@@ -43,11 +43,15 @@ export async function GET() {
     })
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error)
+    const isBadAuth = msg.toLowerCase().includes("auth") || msg.toLowerCase().includes("authentication")
+    const hint = isBadAuth
+      ? "MONGODB_URI: usuario o contraseña incorrectos. En MongoDB Atlas: Database Access → verifica el usuario. Si la contraseña tiene caracteres especiales (@ # : etc.), codifícala en URL (ej: @ → %40)."
+      : "Revisa MONGODB_URI en Vercel. En MongoDB Atlas: Network Access → Add IP → 0.0.0.0/0"
     return NextResponse.json(
       {
         ok: false,
         mongo: "Error de conexión: " + msg,
-        hint: "Revisa MONGODB_URI en Vercel. En MongoDB Atlas: Network Access → Add IP → 0.0.0.0/0",
+        hint,
       },
       { status: 500 }
     )
