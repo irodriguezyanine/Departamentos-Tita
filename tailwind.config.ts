@@ -15,6 +15,9 @@ const config: Config = {
           accent: "#f59e0b",
           sand: "#fef3c7",
           ocean: "#06b6d4",
+          verde: "#0a2e1b",
+          "verde-medio": "#0d3d2a",
+          "verde-oscuro": "#062018",
         },
       },
       fontFamily: {

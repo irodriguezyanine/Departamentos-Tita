@@ -48,6 +48,24 @@ async function seed() {
           updatedAt: new Date(),
         }))
       )
+    } else {
+      for (const dept of DEPARTAMENTOS_INICIALES) {
+        await departamentosCollection.updateOne(
+          { slug: dept.slug },
+          {
+            $set: {
+              dormitorios: dept.dormitorios,
+              banos: dept.banos,
+              terraza: dept.terraza,
+              logia: dept.logia,
+              orientacion: dept.orientacion,
+              notaEspecial: dept.notaEspecial,
+              descripcion: dept.descripcion,
+              updatedAt: new Date(),
+            },
+          }
+        )
+      }
     }
 
     return NextResponse.json({

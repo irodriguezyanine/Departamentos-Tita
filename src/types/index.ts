@@ -5,6 +5,12 @@ export interface Departamento {
   torre: string
   precio: number
   descripcion: string
+  dormitorios: number
+  banos: number
+  terraza: boolean
+  logia: boolean
+  orientacion: string
+  notaEspecial?: string
   imagenes: ImagenDepartamento[]
   layout?: LayoutElement[]
   disponible: boolean

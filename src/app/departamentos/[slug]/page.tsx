@@ -5,7 +5,17 @@ import { useParams } from "next/navigation"
 import Link from "next/link"
 import { motion } from "framer-motion"
 import Image from "next/image"
-import { ArrowLeft, MapPin, DollarSign } from "lucide-react"
+import {
+  ArrowLeft,
+  MapPin,
+  DollarSign,
+  Bed,
+  Bath,
+  Sun,
+  Compass,
+  Home,
+  Camera,
+} from "lucide-react"
 
 interface Departamento {
   _id: string
@@ -14,9 +24,17 @@ interface Departamento {
   torre: string
   precio: number
   descripcion: string
+  dormitorios?: number
+  banos?: number
+  terraza?: boolean
+  logia?: boolean
+  orientacion?: string
+  notaEspecial?: string
   imagenes: { url: string; orden: number; width?: number; height?: number }[]
   layout?: unknown[]
 }
+
+const ESPACIOS_FOTOS = 12
 
 export default function DepartamentoPage() {
   const params = useParams()
@@ -36,7 +54,7 @@ export default function DepartamentoPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
         <div className="animate-pulse text-slate-400">Cargando...</div>
       </div>
     )
@@ -44,9 +62,9 @@ export default function DepartamentoPage() {
 
   if (!dept) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4">
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-slate-50">
         <p className="text-slate-600">Departamento no encontrado</p>
-        <Link href="/" className="text-tita-primary font-medium hover:underline">
+        <Link href="/" className="text-tita-verde font-medium hover:underline">
           Volver al inicio
         </Link>
       </div>
@@ -60,109 +78,193 @@ export default function DepartamentoPage() {
   const formatPrice = (n: number) =>
     new Intl.NumberFormat("es-CL").format(n) + " / noche"
 
+  const specs = [
+    { icon: Bed, label: "Dormitorios", value: dept.dormitorios ?? 4 },
+    { icon: Bath, label: "Baños", value: dept.banos ?? 3 },
+    { icon: Sun, label: "Terraza", value: dept.terraza !== false ? "Sí" : "No" },
+    { icon: Home, label: "Logia", value: dept.logia !== false ? "Sí" : "No" },
+    { icon: Compass, label: "Orientación", value: dept.orientacion || "—" },
+  ]
+
   return (
-    <div className="min-h-screen">
-      {/* Header */}
-      <div className="bg-tita-primary text-white py-12 md:py-16">
-        <div className="max-w-6xl mx-auto px-4">
+    <div className="min-h-screen bg-white">
+      {/* Hero con imagen principal */}
+      <section className="relative min-h-[60vh] md:min-h-[70vh] flex items-end">
+        <div className="absolute inset-0">
+          {imagenes[0] ? (
+            <Image
+              src={imagenes[0].url}
+              alt={dept.name}
+              fill
+              className="object-cover"
+              priority
+              sizes="100vw"
+            />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-tita-verde-oscuro to-tita-verde flex items-center justify-center">
+              <div className="text-center text-white/60">
+                <Camera className="w-16 h-16 mx-auto mb-2 opacity-50" />
+                <p className="text-sm">Foto principal</p>
+                <p className="text-xs mt-1">Se sube desde el panel de administrador</p>
+              </div>
+            </div>
+          )}
+        </div>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+        <div className="relative z-10 w-full max-w-6xl mx-auto px-4 pb-12 pt-24">
           <Link
             href="/#departamentos"
-            className="inline-flex items-center gap-2 text-white/90 hover:text-white mb-6"
+            className="inline-flex items-center gap-2 text-white/90 hover:text-white mb-6 text-sm"
           >
             <ArrowLeft className="w-4 h-4" />
             Volver a departamentos
           </Link>
-          <h1 className="font-display text-3xl md:text-4xl font-bold">{dept.name}</h1>
-          <p className="text-white/90 mt-2">{dept.torre}</p>
-          <div className="flex items-center gap-4 mt-4">
-            <span className="flex items-center gap-2 font-semibold">
+          <h1 className="font-display text-3xl md:text-5xl font-bold text-white drop-shadow-lg">
+            {dept.name}
+          </h1>
+          <p className="text-white/90 mt-2 text-lg">{dept.torre}</p>
+          <div className="flex flex-wrap items-center gap-6 mt-6">
+            <span className="flex items-center gap-2 text-white font-semibold text-lg">
               <DollarSign className="w-5 h-5" />
               {formatPrice(dept.precio)}
             </span>
-            <span className="flex items-center gap-2 text-white/80">
+            <span className="flex items-center gap-2 text-white/90">
               <MapPin className="w-4 h-4" />
               Puerto Pacífico, Viña del Mar
             </span>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Galería artística - masonry/parallax style */}
-      <div className="max-w-6xl mx-auto px-4 py-16">
-        {imagenes.length > 0 ? (
-          <div className="space-y-8 md:space-y-12">
-            {imagenes.map((img, i) => {
-              const isWide = i % 3 === 0
-              const isTall = i % 4 === 1
+      {/* Especificaciones */}
+      <section className="py-12 md:py-16 bg-white border-b border-slate-100">
+        <div className="max-w-6xl mx-auto px-4">
+          <h2 className="font-display text-xl font-semibold text-slate-800 mb-8">
+            Características
+          </h2>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
+            {specs.map((spec, i) => (
+              <motion.div
+                key={spec.label}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.05 }}
+                className="flex flex-col items-center p-4 rounded-xl bg-slate-50 border border-slate-100"
+              >
+                <spec.icon className="w-8 h-8 text-tita-verde mb-2" />
+                <span className="text-xs text-slate-500 uppercase tracking-wide">
+                  {spec.label}
+                </span>
+                <span className="font-semibold text-slate-800 mt-1">{spec.value}</span>
+              </motion.div>
+            ))}
+          </div>
+          {dept.notaEspecial && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-xl"
+            >
+              <p className="text-amber-800 text-sm">
+                <strong>Nota:</strong> {dept.notaEspecial}
+              </p>
+            </motion.div>
+          )}
+        </div>
+      </section>
+
+      {/* Galería de fotos */}
+      <section className="py-16 md:py-24 bg-slate-50">
+        <div className="max-w-6xl mx-auto px-4">
+          <h2 className="font-display text-2xl font-bold text-slate-800 mb-4">
+            Galería
+          </h2>
+          <p className="text-slate-600 mb-12 max-w-2xl">
+            Las fotos se gestionan desde el panel de administrador. Cada espacio está listo para que Dalal suba las imágenes de cada departamento.
+          </p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+            {Array.from({ length: ESPACIOS_FOTOS }).map((_, i) => {
+              const displayImg = imagenes[i]
               return (
                 <motion.div
                   key={i}
-                  initial={{ opacity: 0, y: 60 }}
+                  initial={{ opacity: 0, y: 30 }}
                   whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-50px" }}
-                  transition={{ duration: 0.7, delay: i * 0.1 }}
-                  className={`relative overflow-hidden rounded-2xl ${
-                    isWide ? "aspect-[21/9]" : isTall ? "aspect-[3/4] max-w-md mx-auto" : "aspect-[4/3]"
+                  viewport={{ once: true, margin: "-20px" }}
+                  transition={{ delay: (i % 6) * 0.05 }}
+                  className={`relative overflow-hidden rounded-xl ${
+                    i === 0 ? "sm:col-span-2 sm:row-span-2" : ""
                   }`}
                 >
-                  <Image
-                    src={img.url}
-                    alt={`${dept.name} - Foto ${i + 1}`}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 768px) 100vw, 800px"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 hover:opacity-100 transition-opacity" />
+                  <div
+                    className={`relative bg-slate-200 ${
+                      i === 0 ? "aspect-[16/10] sm:aspect-[4/3]" : "aspect-[4/3]"
+                    }`}
+                  >
+                    {displayImg ? (
+                      <Image
+                        src={displayImg.url}
+                        alt={`${dept.name} - Foto ${i + 1}`}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-400 p-4">
+                        <Camera className="w-10 h-10 mb-2 opacity-40" />
+                        <span className="text-xs text-center">
+                          Espacio {i + 1}
+                        </span>
+                        <span className="text-[10px] text-slate-400 mt-1">
+                          Subir desde admin
+                        </span>
+                      </div>
+                    )}
+                  </div>
                 </motion.div>
               )
             })}
           </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className="aspect-[4/3] rounded-xl bg-slate-200 flex items-center justify-center"
-              >
-                <span className="text-slate-400">Foto {i}</span>
-              </div>
-            ))}
-          </div>
-        )}
+        </div>
+      </section>
 
-        {/* Descripción */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="mt-16 md:mt-24 max-w-3xl"
-        >
-          <h2 className="font-display text-2xl font-bold text-tita-primary mb-4">
+      {/* Descripción */}
+      <section className="py-16 md:py-24 bg-white">
+        <div className="max-w-6xl mx-auto px-4">
+          <h2 className="font-display text-2xl font-bold text-slate-800 mb-6">
             Sobre este departamento
           </h2>
-          <p className="text-slate-600 leading-relaxed text-lg">
-            {dept.descripcion || "Departamento acogedor en el exclusivo Condominio Puerto Pacífico, con todas las comodidades para una estadía inolvidable en Viña del Mar."}
-          </p>
-        </motion.div>
+          <div className="prose prose-lg max-w-none text-slate-600">
+            <p className="leading-relaxed">
+              {dept.descripcion ||
+                "Departamento acogedor en el exclusivo Condominio Puerto Pacífico, con todas las comodidades para una estadía inolvidable en Viña del Mar."}
+            </p>
+            <p className="mt-4 leading-relaxed">
+              Ubicado frente a playa Las Salinas, a pasos de Marina Arauco, con piscinas,
+              gimnasio, conserjería 24 horas y todas las amenidades del condominio.
+            </p>
+          </div>
+        </div>
+      </section>
 
-        {/* CTA */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="mt-16 p-8 bg-tita-sand/30 rounded-2xl text-center"
-        >
-          <p className="text-xl font-semibold text-slate-800 mb-4">
-            ¿Te interesa este departamento?
+      {/* CTA Contacto */}
+      <section className="py-16 md:py-24 bg-tita-verde-oscuro">
+        <div className="max-w-3xl mx-auto px-4 text-center">
+          <h2 className="font-display text-2xl md:text-3xl font-bold text-white mb-4">
+            ¿Te interesa {dept.name}?
+          </h2>
+          <p className="text-white/90 mb-8">
+            Contáctanos para consultar disponibilidad y reservar tu estadía.
           </p>
           <a
             href="mailto:dalal@vtr.net"
-            className="inline-block px-8 py-4 bg-tita-primary text-white font-semibold rounded-full hover:bg-tita-primary-light transition-colors"
+            className="inline-block px-10 py-4 bg-white text-tita-verde font-semibold rounded-full hover:bg-tita-verde-medio/10 transition-colors shadow-lg"
           >
             Contactar
           </a>
-        </motion.div>
-      </div>
+        </div>
+      </section>
     </div>
   )
 }

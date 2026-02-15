@@ -21,6 +21,12 @@ interface Departamento {
   torre: string
   precio: number
   descripcion: string
+  dormitorios?: number
+  banos?: number
+  terraza?: boolean
+  logia?: boolean
+  orientacion?: string
+  notaEspecial?: string
   disponible: boolean
   imagenes: ImagenItem[]
 }
@@ -136,6 +142,69 @@ export default function EditarDepartamentoPage() {
             onChange={(e) => setDept({ ...dept, precio: parseInt(e.target.value) || 0 })}
             className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-tita-primary"
           />
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Dormitorios</label>
+            <input
+              type="number"
+              min={1}
+              value={dept.dormitorios ?? 4}
+              onChange={(e) => setDept({ ...dept, dormitorios: parseInt(e.target.value) || 4 })}
+              className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-tita-primary"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Baños</label>
+            <input
+              type="number"
+              min={1}
+              value={dept.banos ?? 3}
+              onChange={(e) => setDept({ ...dept, banos: parseInt(e.target.value) || 3 })}
+              className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-tita-primary"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Orientación</label>
+            <select
+              value={dept.orientacion ?? ""}
+              onChange={(e) => setDept({ ...dept, orientacion: e.target.value })}
+              className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-tita-primary"
+            >
+              <option value="Reñaca">Reñaca</option>
+              <option value="Valparaíso">Valparaíso</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Nota especial</label>
+            <input
+              type="text"
+              value={dept.notaEspecial ?? ""}
+              onChange={(e) => setDept({ ...dept, notaEspecial: e.target.value })}
+              placeholder="Ej: Dos dormitorios unidos"
+              className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-tita-primary"
+            />
+          </div>
+        </div>
+        <div className="flex gap-6">
+          <label className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={dept.terraza !== false}
+              onChange={(e) => setDept({ ...dept, terraza: e.target.checked })}
+              className="rounded border-slate-300"
+            />
+            Terraza
+          </label>
+          <label className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={dept.logia !== false}
+              onChange={(e) => setDept({ ...dept, logia: e.target.checked })}
+              className="rounded border-slate-300"
+            />
+            Logia
+          </label>
         </div>
         <div>
           <label className="block text-sm font-medium text-slate-700 mb-1">Descripción</label>
