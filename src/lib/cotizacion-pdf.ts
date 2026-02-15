@@ -1,6 +1,6 @@
 /**
  * Generación de PDF profesional para cotizaciones - Departamentos Tita
- * Diseño tipo tarjetas con bordes y jerarquía visual
+ * Diseño tipo tarjetas con bordes redondeados y columnas alineadas
  */
 
 import { jsPDF } from "jspdf"
@@ -19,10 +19,15 @@ const BORDE = [203, 213, 225] as [number, number, number] // #cbd5e1
 
 const MARGIN = 18
 const PAGE_WIDTH = 210
+const PAGE_HEIGHT = 297
 const CONTENT_WIDTH = PAGE_WIDTH - MARGIN * 2
 const CARD_PADDING = 6
 const CARD_GAP = 10
+const RADIUS = 3 // Bordes levemente redondeados
 
+// Columnas alineadas: etiquetas a la izquierda, valores alineados a la derecha
+const VALUE_RIGHT = MARGIN + CONTENT_WIDTH - 8
+const LABEL_LEFT = MARGIN + CARD_PADDING + 3
 
 function formatDate(s: string): string {
   if (!s) return "-"
@@ -71,7 +76,7 @@ function drawHeader(doc: jsPDF): number {
 }
 
 /**
- * Dibuja una tarjeta con borde y título con acento dorado
+ * Dibuja una tarjeta con borde redondeado y título
  */
 function drawCard(
   doc: jsPDF,
@@ -82,10 +87,10 @@ function drawCard(
   const headerH = 10
   const totalH = headerH + contentHeight + CARD_PADDING * 2
 
-  // Borde de la tarjeta
+  // Borde de la tarjeta con esquinas redondeadas
   doc.setDrawColor(...BORDE)
   doc.setLineWidth(0.4)
-  doc.rect(MARGIN, startY, CONTENT_WIDTH, totalH, "S")
+  doc.roundedRect(MARGIN, startY, CONTENT_WIDTH, totalH, RADIUS, RADIUS, "S")
 
   // Header con acento dorado a la izquierda
   doc.setFillColor(...VERDE)
@@ -96,14 +101,14 @@ function drawCard(
   doc.setTextColor(...VERDE)
   doc.setFontSize(11)
   doc.setFont("helvetica", "bold")
-  doc.text(title, MARGIN + 3 + CARD_PADDING, startY + 6.5)
+  doc.text(title, LABEL_LEFT, startY + 6.5)
 
   const contentY = startY + headerH + CARD_PADDING
   return { contentY, endY: startY + totalH }
 }
 
 /**
- * Fila dentro de una tarjeta con separador sutil
+ * Fila con etiqueta a la izquierda y valor alineado a la derecha
  */
 function drawCardRow(
   doc: jsPDF,
@@ -115,10 +120,10 @@ function drawCardRow(
   doc.setFontSize(9)
   doc.setFont("helvetica", "normal")
   doc.setTextColor(...SLATE)
-  doc.text(label, MARGIN + CARD_PADDING + 3, y)
+  doc.text(label, LABEL_LEFT, y)
   doc.setFont("helvetica", highlight ? "bold" : "normal")
   doc.setTextColor(...(highlight ? VERDE : SLATE))
-  doc.text(value, MARGIN + 95, y)
+  doc.text(value, VALUE_RIGHT, y, { align: "right" })
   return y + 6
 }
 
@@ -132,16 +137,29 @@ function drawHighlightBox(
   y: number
 ): number {
   const boxH = 12
+  const boxW = CONTENT_WIDTH - CARD_PADDING * 2 - 6
+  const boxX = LABEL_LEFT
   doc.setFillColor(...BEIGE_CLARO)
   doc.setDrawColor(...ORO)
   doc.setLineWidth(0.5)
-  doc.rect(MARGIN + CARD_PADDING + 3, y - 4, CONTENT_WIDTH - CARD_PADDING * 2 - 6, boxH, "FD")
+  doc.roundedRect(boxX, y - 4, boxW, boxH, RADIUS, RADIUS, "FD")
   doc.setFontSize(10)
   doc.setFont("helvetica", "bold")
   doc.setTextColor(...VERDE)
-  doc.text(label, MARGIN + CARD_PADDING + 6, y + 2)
-  doc.text(value, MARGIN + CONTENT_WIDTH - CARD_PADDING - 45, y + 2)
+  doc.text(label, boxX + 4, y + 2)
+  doc.text(value, boxX + boxW - 4, y + 2, { align: "right" })
   return y + boxH + 4
+}
+
+/**
+ * Verifica si hay espacio y añade nueva página si es necesario
+ */
+function ensureSpace(doc: jsPDF, y: number, needed: number): number {
+  if (y + needed > PAGE_HEIGHT - 35) {
+    doc.addPage()
+    return 20
+  }
+  return y
 }
 
 export function generarPDFCotizacion(cot: CotizacionArriendo): jsPDF {
@@ -168,6 +186,7 @@ export function generarPDFCotizacion(cot: CotizacionArriendo): jsPDF {
   y = datosEnd + CARD_GAP
 
   // ─── Tarjeta: Costos ───
+  y = ensureSpace(doc, y, 120)
   const costosRows = 11
   const { contentY: costosY, endY: costosEnd } = drawCard(
     doc,
@@ -190,6 +209,7 @@ export function generarPDFCotizacion(cot: CotizacionArriendo): jsPDF {
   y = costosEnd + CARD_GAP
 
   // ─── Tarjeta: Pagos ───
+  y = ensureSpace(doc, y, 80)
   const pagosRows = 4
   const { contentY: pagosY, endY: pagosEnd } = drawCard(
     doc,
@@ -205,20 +225,21 @@ export function generarPDFCotizacion(cot: CotizacionArriendo): jsPDF {
   y = drawCardRow(doc, "Fecha pago saldo", formatDate(cot.fechaPagoSaldo || ""), y)
   y = pagosEnd + CARD_GAP
 
-  // ─── Tarjeta: Datos para depósito (dos columnas) ───
-  const depH = 22
+  // ─── Tarjeta: Datos para depósito (siempre al final, en nueva página si hace falta) ───
+  const depH = 30
+  y = ensureSpace(doc, y, depH + 60)
   const { contentY: depY, endY: depEnd } = drawCard(doc, "Datos para depósito", y, depH)
   y = depY
 
   const colWidth = (CONTENT_WIDTH - CARD_PADDING * 2 - 6 - 8) / 2
-  const col1X = MARGIN + CARD_PADDING + 3
+  const col1X = LABEL_LEFT
   const col2X = col1X + colWidth + 8
 
-  // Columna 1: Nacional (sub-tarjeta)
+  // Sub-tarjetas con bordes redondeados
   doc.setFillColor(...BEIGE_CLARO)
   doc.setDrawColor(...BORDE)
   doc.setLineWidth(0.3)
-  doc.rect(col1X, y, colWidth, 22, "FD")
+  doc.roundedRect(col1X, y, colWidth, 28, RADIUS, RADIUS, "FD")
   doc.setFontSize(8)
   doc.setFont("helvetica", "bold")
   doc.setTextColor(...VERDE)
@@ -227,11 +248,11 @@ export function generarPDFCotizacion(cot: CotizacionArriendo): jsPDF {
   doc.setTextColor(...SLATE)
   doc.text(DATOS_DEPOSITO.nacional.nombre, col1X + 4, y + 11)
   doc.text(`RUT ${DATOS_DEPOSITO.nacional.rut}`, col1X + 4, y + 15)
-  doc.text(`${DATOS_DEPOSITO.nacional.banco} · Cuenta ${DATOS_DEPOSITO.nacional.cuenta}`, col1X + 4, y + 19)
+  doc.text(`${DATOS_DEPOSITO.nacional.banco}`, col1X + 4, y + 19)
+  doc.text(`Cuenta ${DATOS_DEPOSITO.nacional.cuenta}`, col1X + 4, y + 23)
 
-  // Columna 2: Western Union (sub-tarjeta)
   doc.setFillColor(...BEIGE_CLARO)
-  doc.rect(col2X, y, colWidth, 22, "FD")
+  doc.roundedRect(col2X, y, colWidth, 28, RADIUS, RADIUS, "FD")
   doc.setFont("helvetica", "bold")
   doc.setTextColor(...VERDE)
   doc.text("Western Union", col2X + 4, y + 6)
@@ -239,34 +260,41 @@ export function generarPDFCotizacion(cot: CotizacionArriendo): jsPDF {
   doc.setTextColor(...SLATE)
   doc.text(DATOS_DEPOSITO.westernUnion.nombre, col2X + 4, y + 11)
   doc.text(`RUT ${DATOS_DEPOSITO.westernUnion.rut}`, col2X + 4, y + 15)
-  doc.text(`${DATOS_DEPOSITO.westernUnion.domicilio} · Cel. ${DATOS_DEPOSITO.westernUnion.celular}`, col2X + 4, y + 19)
+  doc.text(DATOS_DEPOSITO.westernUnion.domicilio, col2X + 4, y + 19)
+  doc.text(`Celular ${DATOS_DEPOSITO.westernUnion.celular}`, col2X + 4, y + 23)
 
   y = depEnd + CARD_GAP
 
   // ─── Tarjeta: Observaciones (si hay) ───
   if (cot.observaciones?.trim()) {
+    y = ensureSpace(doc, y, 40)
     const obsLines = doc.splitTextToSize(cot.observaciones, CONTENT_WIDTH - CARD_PADDING * 2 - 12)
     const obsH = Math.max(18, obsLines.length * 5 + 8)
     const { contentY: obsY, endY: obsEnd } = drawCard(doc, "Observaciones", y, obsH)
     doc.setFontSize(9)
     doc.setFont("helvetica", "normal")
     doc.setTextColor(...SLATE)
-    doc.text(obsLines, MARGIN + CARD_PADDING + 3, obsY + 4)
+    doc.text(obsLines, LABEL_LEFT, obsY + 4)
     y = obsEnd + CARD_GAP
   }
 
-  // ─── Footer ───
-  doc.setDrawColor(...ORO)
-  doc.setLineWidth(0.5)
-  doc.line(MARGIN, 282, PAGE_WIDTH - MARGIN, 282)
-  doc.setFontSize(8)
-  doc.setTextColor(...SLATE_LIGHT)
-  doc.text(
-    "Departamentos Tita · Condominio Puerto Pacífico · Viña del Mar",
-    PAGE_WIDTH / 2,
-    288,
-    { align: "center" }
-  )
+  // ─── Footer (en cada página) ───
+  const pageCount = doc.getNumberOfPages()
+  for (let p = 1; p <= pageCount; p++) {
+    doc.setPage(p)
+    const footerY = PAGE_HEIGHT - 15
+    doc.setDrawColor(...ORO)
+    doc.setLineWidth(0.5)
+    doc.line(MARGIN, footerY - 8, PAGE_WIDTH - MARGIN, footerY - 8)
+    doc.setFontSize(8)
+    doc.setTextColor(...SLATE_LIGHT)
+    doc.text(
+      "Departamentos Tita · Condominio Puerto Pacífico · Viña del Mar",
+      PAGE_WIDTH / 2,
+      footerY,
+      { align: "center" }
+    )
+  }
 
   return doc
 }

@@ -7,6 +7,8 @@ export interface CotizacionArriendo {
   _id?: string
   numero?: string
   nombreArrendatario: string
+  emailArrendatario?: string
+  telefonoArrendatario?: string
   departamento: string
   torre: string
   estacionamiento?: string

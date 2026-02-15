@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { getDb } from "@/lib/db"
+import { upsertClienteDesdeCotizacion } from "@/lib/clientes"
 
 export const dynamic = "force-dynamic"
 
@@ -56,6 +57,14 @@ export async function POST(request: Request) {
     }
 
     const result = await db.collection("cotizaciones").insertOne(doc)
+
+    await upsertClienteDesdeCotizacion({
+      nombreArrendatario: rest.nombreArrendatario as string,
+      emailArrendatario: rest.emailArrendatario as string | undefined,
+      telefonoArrendatario: rest.telefonoArrendatario as string | undefined,
+      departamento: rest.departamento as string | undefined,
+      torre: rest.torre as string | undefined,
+    }).catch((e) => console.error("Error al sincronizar cliente:", e))
 
     return NextResponse.json({
       _id: result.insertedId.toString(),

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { getDb } from "@/lib/db"
+import { upsertClienteDesdeCotizacion } from "@/lib/clientes"
 import { ObjectId } from "mongodb"
 
 export async function GET(
@@ -62,6 +63,14 @@ export async function PUT(
       { _id: new ObjectId(id) },
       { $set: update }
     )
+
+    await upsertClienteDesdeCotizacion({
+      nombreArrendatario: (body.nombreArrendatario as string) || "",
+      emailArrendatario: body.emailArrendatario as string | undefined,
+      telefonoArrendatario: body.telefonoArrendatario as string | undefined,
+      departamento: body.departamento as string | undefined,
+      torre: body.torre as string | undefined,
+    }).catch((e) => console.error("Error al sincronizar cliente:", e))
 
     return NextResponse.json({ success: true })
   } catch (error) {

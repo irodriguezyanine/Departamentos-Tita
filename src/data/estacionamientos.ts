@@ -41,3 +41,20 @@ export function formatEstacionamientos(estacionamientos: Estacionamiento[]): str
     .map((e) => `Nivel ${e.nivel}, ${e.numero}`)
     .join(" · ")
 }
+
+/** Lista de TODOS los estacionamientos de todos los departamentos para selector */
+export interface EstacionamientoOpcion {
+  value: string
+  label: string
+}
+
+export function getTodosEstacionamientosOpciones(): EstacionamientoOpcion[] {
+  const opciones: EstacionamientoOpcion[] = []
+  for (const [depto, estacs] of Object.entries(ESTACIONAMIENTOS_POR_DEPARTAMENTO)) {
+    for (const e of estacs) {
+      const value = `${depto} - Nivel ${e.nivel}, ${e.numero}`
+      opciones.push({ value, label: value })
+    }
+  }
+  return opciones
+}

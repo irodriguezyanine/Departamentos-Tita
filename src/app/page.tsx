@@ -12,6 +12,8 @@ import {
   ShieldCheck,
   Building2,
   Shirt,
+  Bed,
+  Bath,
 } from "lucide-react"
 import Image from "next/image"
 import { getDepartamentoBySlug } from "@/data/departamentos-static"
@@ -19,6 +21,9 @@ import { getDepartamentoBySlug } from "@/data/departamentos-static"
 interface DeptFromApi {
   slug: string
   name: string
+  precio?: number
+  dormitorios?: number
+  banos?: number
   imagenes?: { url: string; orden?: number }[]
 }
 
@@ -57,6 +62,19 @@ export default function HomePage() {
     const staticDept = getDepartamentoBySlug(slug)
     return staticDept?.imagenes?.[0]?.url
   }
+
+  const getDeptData = (slug: string) => {
+    const fromApi = deptsFromApi.find((d) => d.slug === slug)
+    const staticDept = getDepartamentoBySlug(slug)
+    return {
+      precio: fromApi?.precio ?? staticDept?.precio ?? 90000,
+      dormitorios: fromApi?.dormitorios ?? staticDept?.dormitorios ?? 4,
+      banos: fromApi?.banos ?? staticDept?.banos ?? 3,
+    }
+  }
+
+  const formatPrecio = (n: number) =>
+    new Intl.NumberFormat("es-CL", { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n)
 
   return (
     <div>
@@ -272,6 +290,7 @@ export default function HomePage() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {DEPARTAMENTOS.map((dept, i) => {
               const thumbUrl = getThumbUrl(dept.slug)
+              const { precio, dormitorios, banos } = getDeptData(dept.slug)
               return (
               <motion.div
                 key={dept.slug}
@@ -302,7 +321,19 @@ export default function HomePage() {
                   <h3 className="font-display text-xl font-semibold text-slate-800 group-hover:text-tita-verde transition-colors">
                     {dept.name}
                   </h3>
-                  <p className="text-tita-verde font-medium mt-1">Desde $90.000 / noche</p>
+                  <div className="flex items-center justify-between gap-3 mt-1 flex-wrap">
+                    <p className="text-tita-verde font-medium">Desde ${formatPrecio(precio)} / noche</p>
+                    <div className="flex items-center gap-4 text-slate-500 text-sm">
+                      <span className="flex items-center gap-1.5">
+                        <Bed className="w-4 h-4" />
+                        {dormitorios} piezas
+                      </span>
+                      <span className="flex items-center gap-1.5">
+                        <Bath className="w-4 h-4" />
+                        {banos} baños
+                      </span>
+                    </div>
+                  </div>
                 </Link>
               </motion.div>
             )})}

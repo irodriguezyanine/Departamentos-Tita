@@ -6,7 +6,8 @@ import type { CotizacionArriendo } from "@/types/cotizacion"
 import { DATOS_DEPOSITO } from "@/types/cotizacion"
 import { descargarPDFCotizacion, imprimirPDFCotizacion } from "@/lib/cotizacion-pdf"
 import { formatPrecioCLP, formatPrecioConUsd } from "@/lib/precios"
-import { getEstacionamientos, formatEstacionamientos, COSTO_ESTACIONAMIENTO_DIARIO } from "@/data/estacionamientos"
+import { getEstacionamientos, getTodosEstacionamientosOpciones, COSTO_ESTACIONAMIENTO_DIARIO } from "@/data/estacionamientos"
+import { parsePrecioInput } from "@/lib/precios"
 
 const TORRES = ["Galápagos", "Cabo de Hornos", "Isla Grande", "Juan Fernández"]
 const DEPARTAMENTOS = ["4 C", "13 D", "17 C", "16 C", "18 C"]
@@ -20,8 +21,11 @@ interface Props {
 
 export function CotizacionEditor({ cotizacion, onSave, onBack, isNew }: Props) {
   const [usdPerClp, setUsdPerClp] = useState<number | null>(null)
+  const [focusedPrice, setFocusedPrice] = useState<string | null>(null)
   const [form, setForm] = useState<CotizacionArriendo>({
     nombreArrendatario: "",
+    emailArrendatario: "",
+    telefonoArrendatario: "",
     departamento: "",
     torre: "",
     estacionamiento: "",
@@ -49,6 +53,8 @@ export function CotizacionEditor({ cotizacion, onSave, onBack, isNew }: Props) {
     if (cotizacion) {
       setForm({
         nombreArrendatario: cotizacion.nombreArrendatario || "",
+        emailArrendatario: cotizacion.emailArrendatario || "",
+        telefonoArrendatario: cotizacion.telefonoArrendatario || "",
         departamento: cotizacion.departamento || "",
         torre: cotizacion.torre || "",
         estacionamiento: cotizacion.estacionamiento || "",
@@ -74,14 +80,12 @@ export function CotizacionEditor({ cotizacion, onSave, onBack, isNew }: Props) {
     }
   }, [cotizacion])
 
-  useEffect(() => {
-    if (form.departamento) {
-      const estacs = getEstacionamientos(form.departamento)
-      if (estacs.length > 0 && !form.estacionamiento) {
-        setForm((f) => ({ ...f, estacionamiento: formatEstacionamientos(estacs) }))
-      }
-    }
-  }, [form.departamento])
+  const opcionesBase = getTodosEstacionamientosOpciones()
+  const opcionesEstacionamiento =
+    form.estacionamiento &&
+    !opcionesBase.some((o) => o.value === form.estacionamiento)
+      ? [{ value: form.estacionamiento, label: form.estacionamiento }, ...opcionesBase]
+      : opcionesBase
 
   useEffect(() => {
     if (form.checkIn && form.checkOut) {
@@ -89,11 +93,11 @@ export function CotizacionEditor({ cotizacion, onSave, onBack, isNew }: Props) {
       const end = new Date(form.checkOut)
       const diff = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24))
       const noches = Math.max(0, diff)
-      const estacs = getEstacionamientos(form.departamento)
+      const tieneEstacionamiento = !!form.estacionamiento?.trim()
       const estMonto =
         (form.estacionamientoMonto ?? 0) > 0
           ? (form.estacionamientoMonto ?? 0)
-          : estacs.length > 0
+          : tieneEstacionamiento
             ? noches * COSTO_ESTACIONAMIENTO_DIARIO
             : 0
       const subtotalNoches = noches * form.valorNoche
@@ -170,6 +174,26 @@ export function CotizacionEditor({ cotizacion, onSave, onBack, isNew }: Props) {
                 />
               </div>
               <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Email arrendatario</label>
+                <input
+                  type="email"
+                  value={form.emailArrendatario || ""}
+                  onChange={(e) => setForm({ ...form, emailArrendatario: e.target.value })}
+                  className={inputClass}
+                  placeholder="cliente@ejemplo.com"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Teléfono arrendatario</label>
+                <input
+                  type="tel"
+                  value={form.telefonoArrendatario || ""}
+                  onChange={(e) => setForm({ ...form, telefonoArrendatario: e.target.value })}
+                  className={inputClass}
+                  placeholder="+56 9 1234 5678"
+                />
+              </div>
+              <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Departamento</label>
                 <select
                   value={form.departamento}
@@ -196,13 +220,24 @@ export function CotizacionEditor({ cotizacion, onSave, onBack, isNew }: Props) {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">N.º Estacionamiento</label>
-                <input
-                  type="text"
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  N.º Estacionamiento
+                  <span className="block text-xs font-normal text-slate-500 mt-0.5">
+                    Todos los departamentos (a veces se arriendan estacionamientos de otros)
+                  </span>
+                </label>
+                <select
                   value={form.estacionamiento}
                   onChange={(e) => setForm({ ...form, estacionamiento: e.target.value })}
                   className={inputClass}
-                />
+                >
+                  <option value="">Seleccionar</option>
+                  {opcionesEstacionamiento.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Check In</label>
@@ -242,9 +277,12 @@ export function CotizacionEditor({ cotizacion, onSave, onBack, isNew }: Props) {
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Valor x noche</label>
                 <input
-                  type="number"
-                  value={form.valorNoche}
-                  onChange={(e) => setForm({ ...form, valorNoche: parseInt(e.target.value) || 0 })}
+                  type="text"
+                  inputMode="numeric"
+                  value={focusedPrice === "valorNoche" ? String(form.valorNoche) : `$${formatPrice(form.valorNoche)}`}
+                  onFocus={() => setFocusedPrice("valorNoche")}
+                  onBlur={() => setFocusedPrice(null)}
+                  onChange={(e) => setForm({ ...form, valorNoche: parsePrecioInput(e.target.value) })}
                   className={inputClass}
                 />
               </div>
@@ -260,34 +298,43 @@ export function CotizacionEditor({ cotizacion, onSave, onBack, isNew }: Props) {
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Aseo</label>
                 <input
-                  type="number"
-                  value={form.aseo}
-                  onChange={(e) => setForm({ ...form, aseo: parseInt(e.target.value) || 0 })}
+                  type="text"
+                  inputMode="numeric"
+                  value={focusedPrice === "aseo" ? String(form.aseo) : `$${formatPrice(form.aseo)}`}
+                  onFocus={() => setFocusedPrice("aseo")}
+                  onBlur={() => setFocusedPrice(null)}
+                  onChange={(e) => setForm({ ...form, aseo: parsePrecioInput(e.target.value) })}
                   className={inputClass}
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">
                   Estacionamiento
-                  {getEstacionamientos(form.departamento).length > 0 && (
+                  {form.estacionamiento && (
                     <span className="block text-xs font-normal text-slate-500 mt-0.5">
                       ${formatPrecioCLP(COSTO_ESTACIONAMIENTO_DIARIO)}/día por defecto
                     </span>
                   )}
                 </label>
                 <input
-                  type="number"
-                  value={form.estacionamientoMonto}
-                  onChange={(e) => setForm({ ...form, estacionamientoMonto: parseInt(e.target.value) || 0 })}
+                  type="text"
+                  inputMode="numeric"
+                  value={focusedPrice === "estacionamientoMonto" ? String(form.estacionamientoMonto) : `$${formatPrice(form.estacionamientoMonto)}`}
+                  onFocus={() => setFocusedPrice("estacionamientoMonto")}
+                  onBlur={() => setFocusedPrice(null)}
+                  onChange={(e) => setForm({ ...form, estacionamientoMonto: parsePrecioInput(e.target.value) })}
                   className={inputClass}
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Adicional noche 31</label>
                 <input
-                  type="number"
-                  value={form.adicionalNoche31}
-                  onChange={(e) => setForm({ ...form, adicionalNoche31: parseInt(e.target.value) || 0 })}
+                  type="text"
+                  inputMode="numeric"
+                  value={focusedPrice === "adicionalNoche31" ? String(form.adicionalNoche31) : `$${formatPrice(form.adicionalNoche31)}`}
+                  onFocus={() => setFocusedPrice("adicionalNoche31")}
+                  onBlur={() => setFocusedPrice(null)}
+                  onChange={(e) => setForm({ ...form, adicionalNoche31: parsePrecioInput(e.target.value) })}
                   className={inputClass}
                 />
               </div>
@@ -347,9 +394,12 @@ export function CotizacionEditor({ cotizacion, onSave, onBack, isNew }: Props) {
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Abono reserva</label>
                 <input
-                  type="number"
-                  value={form.abonoReserva}
-                  onChange={(e) => setForm({ ...form, abonoReserva: parseInt(e.target.value) || 0 })}
+                  type="text"
+                  inputMode="numeric"
+                  value={focusedPrice === "abonoReserva" ? String(form.abonoReserva) : `$${formatPrice(form.abonoReserva)}`}
+                  onFocus={() => setFocusedPrice("abonoReserva")}
+                  onBlur={() => setFocusedPrice(null)}
+                  onChange={(e) => setForm({ ...form, abonoReserva: parsePrecioInput(e.target.value) })}
                   className={inputClass}
                 />
               </div>

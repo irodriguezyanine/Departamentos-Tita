@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Mail, Phone, User } from "lucide-react"
+import { Mail, Phone, User, Pencil, Check, X } from "lucide-react"
 
 interface Cliente {
   _id: string
@@ -14,9 +14,27 @@ interface Cliente {
   createdAt?: string
 }
 
+const PLACEHOLDER_EMAIL = "sin-email@cotizacion.local"
+
+function displayEmail(email: string) {
+  return email === PLACEHOLDER_EMAIL || !email ? "-" : email
+}
+
 export default function AdminClientesPage() {
   const [clientes, setClientes] = useState<Cliente[]>([])
   const [loading, setLoading] = useState(true)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [editForm, setEditForm] = useState<Partial<Cliente>>({})
+  const [saving, setSaving] = useState(false)
+
+  const fetchClientes = () => {
+    fetch("/api/clientes")
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) setClientes(data)
+      })
+      .catch(() => {})
+  }
 
   useEffect(() => {
     fetch("/api/clientes")
@@ -41,6 +59,53 @@ export default function AdminClientesPage() {
     }
   }
 
+  const startEdit = (c: Cliente) => {
+    setEditingId(c._id)
+    setEditForm({
+      nombre: c.nombre,
+      email: c.email === PLACEHOLDER_EMAIL ? "" : c.email,
+      telefono: c.telefono || "",
+      departamentoInteres: c.departamentoInteres || "",
+    })
+  }
+
+  const cancelEdit = () => {
+    setEditingId(null)
+    setEditForm({})
+  }
+
+  const saveEdit = async () => {
+    if (!editingId) return
+    setSaving(true)
+    try {
+      const res = await fetch(`/api/clientes/${editingId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          nombre: editForm.nombre,
+          email: editForm.email || PLACEHOLDER_EMAIL,
+          telefono: editForm.telefono,
+          departamentoInteres: editForm.departamentoInteres,
+        }),
+      })
+      if (!res.ok) {
+        const err = await res.json()
+        throw new Error(err.error || "Error al guardar")
+      }
+      fetchClientes()
+      setEditingId(null)
+      setEditForm({})
+    } catch (e) {
+      console.error(e)
+      alert(e instanceof Error ? e.message : "Error al guardar")
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const inputClass =
+    "w-full px-2 py-1.5 text-sm rounded border border-slate-200 focus:border-tita-oro focus:ring-0 focus:outline-none"
+
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-8">
@@ -51,13 +116,16 @@ export default function AdminClientesPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="font-display text-2xl font-bold text-slate-800 mb-8">
-        Clientes / Consultas
+      <h1 className="font-display text-2xl font-bold text-slate-800 mb-2">
+        Clientes
       </h1>
+      <p className="text-slate-600 text-sm mb-8">
+        Base de datos central. Los clientes se guardan automáticamente al crear o editar cotizaciones.
+      </p>
 
       <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full min-w-[640px]">
             <thead className="bg-slate-50 border-b border-slate-200">
               <tr>
                 <th className="text-left px-4 py-3 text-sm font-semibold text-slate-700">
@@ -75,41 +143,149 @@ export default function AdminClientesPage() {
                 <th className="text-left px-4 py-3 text-sm font-semibold text-slate-700">
                   Fecha
                 </th>
+                <th className="text-right px-4 py-3 text-sm font-semibold text-slate-700 w-24">
+                  Acciones
+                </th>
               </tr>
             </thead>
             <tbody>
               {clientes.map((c) => (
-                <tr key={c._id} className="border-b border-slate-100 hover:bg-slate-50/50">
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-2">
-                      <User className="w-4 h-4 text-slate-400" />
-                      {c.nombre}
-                    </div>
-                  </td>
-                  <td className="px-4 py-3">
-                    <a
-                      href={`mailto:${c.email}`}
-                      className="flex items-center gap-2 text-tita-primary hover:underline"
-                    >
-                      <Mail className="w-4 h-4" />
-                      {c.email}
-                    </a>
-                  </td>
-                  <td className="px-4 py-3">
-                    <a
-                      href={`tel:${c.telefono}`}
-                      className="flex items-center gap-2 text-slate-600"
-                    >
-                      <Phone className="w-4 h-4" />
-                      {c.telefono}
-                    </a>
-                  </td>
-                  <td className="px-4 py-3 text-slate-600">
-                    {c.departamentoInteres || "-"}
-                  </td>
-                  <td className="px-4 py-3 text-slate-600 text-sm">
-                    {formatDate(c.fecha || c.createdAt)}
-                  </td>
+                <tr
+                  key={c._id}
+                  className={`border-b border-slate-100 hover:bg-slate-50/50 ${
+                    editingId === c._id ? "bg-tita-beige/20" : ""
+                  }`}
+                >
+                  {editingId === c._id ? (
+                    <>
+                      <td className="px-4 py-2">
+                        <input
+                          type="text"
+                          value={editForm.nombre || ""}
+                          onChange={(e) =>
+                            setEditForm((f) => ({ ...f, nombre: e.target.value }))
+                          }
+                          className={inputClass}
+                          placeholder="Nombre"
+                        />
+                      </td>
+                      <td className="px-4 py-2">
+                        <input
+                          type="email"
+                          value={editForm.email || ""}
+                          onChange={(e) =>
+                            setEditForm((f) => ({ ...f, email: e.target.value }))
+                          }
+                          className={inputClass}
+                          placeholder="email@ejemplo.com"
+                        />
+                      </td>
+                      <td className="px-4 py-2">
+                        <input
+                          type="tel"
+                          value={editForm.telefono || ""}
+                          onChange={(e) =>
+                            setEditForm((f) => ({ ...f, telefono: e.target.value }))
+                          }
+                          className={inputClass}
+                          placeholder="+56 9 1234 5678"
+                        />
+                      </td>
+                      <td className="px-4 py-2">
+                        <input
+                          type="text"
+                          value={editForm.departamentoInteres || ""}
+                          onChange={(e) =>
+                            setEditForm((f) => ({
+                              ...f,
+                              departamentoInteres: e.target.value,
+                            }))
+                          }
+                          className={inputClass}
+                          placeholder="4 C Juan Fernández"
+                        />
+                      </td>
+                      <td className="px-4 py-3 text-slate-600 text-sm">
+                        {formatDate(c.fecha || c.createdAt)}
+                      </td>
+                      <td className="px-4 py-2 text-right">
+                        <div className="flex items-center justify-end gap-1">
+                          <button
+                            onClick={saveEdit}
+                            disabled={saving || !editForm.nombre?.trim()}
+                            className="p-2 rounded-lg bg-tita-verde text-white hover:bg-tita-verde-medio disabled:opacity-50 disabled:cursor-not-allowed"
+                            title="Guardar"
+                          >
+                            <Check className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={cancelEdit}
+                            disabled={saving}
+                            className="p-2 rounded-lg bg-slate-200 text-slate-600 hover:bg-slate-300"
+                            title="Cancelar"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </>
+                  ) : (
+                    <>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-2">
+                          <User className="w-4 h-4 text-slate-400 shrink-0" />
+                          {c.nombre}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3">
+                        {displayEmail(c.email) !== "-" ? (
+                          <a
+                            href={`mailto:${c.email}`}
+                            className="flex items-center gap-2 text-tita-primary hover:underline"
+                          >
+                            <Mail className="w-4 h-4 shrink-0" />
+                            {c.email}
+                          </a>
+                        ) : (
+                          <span className="flex items-center gap-2 text-slate-400">
+                            <Mail className="w-4 h-4 shrink-0" />
+                            -
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3">
+                        {c.telefono ? (
+                          <a
+                            href={`tel:${c.telefono}`}
+                            className="flex items-center gap-2 text-slate-600"
+                          >
+                            <Phone className="w-4 h-4 shrink-0" />
+                            {c.telefono}
+                          </a>
+                        ) : (
+                          <span className="flex items-center gap-2 text-slate-400">
+                            <Phone className="w-4 h-4 shrink-0" />
+                            -
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-slate-600">
+                        {c.departamentoInteres || "-"}
+                      </td>
+                      <td className="px-4 py-3 text-slate-600 text-sm">
+                        {formatDate(c.fecha || c.createdAt)}
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <button
+                          onClick={() => startEdit(c)}
+                          className="p-2 rounded-lg hover:bg-slate-200 text-slate-600"
+                          title="Editar"
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </button>
+                      </td>
+                    </>
+                  )}
                 </tr>
               ))}
             </tbody>
@@ -118,7 +294,7 @@ export default function AdminClientesPage() {
 
         {clientes.length === 0 && (
           <div className="p-12 text-center text-slate-500">
-            No hay consultas de clientes aún.
+            No hay clientes aún. Los clientes se guardan automáticamente al crear o editar cotizaciones.
           </div>
         )}
       </div>
