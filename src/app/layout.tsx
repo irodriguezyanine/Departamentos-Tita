@@ -35,12 +35,22 @@ export const metadata: Metadata = {
     url: "https://www.condominiopuertopacifico.cl",
     siteName: "Condominio Puerto Pacífico",
     locale: "es_CL",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Condominio Puerto Pacífico - Departamentos primera línea de playa",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Condominio Puerto Pacífico | Arriendo en Viña del Mar, Dalal Saleme",
     description: "5 departamentos en arriendo primera línea de playa. Entra y reserva.",
+    images: ["/og-image.png"],
   },
+  metadataBase: new URL("https://www.condominiopuertopacifico.cl"),
 }
 
 export default function RootLayout({
