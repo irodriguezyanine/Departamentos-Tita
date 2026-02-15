@@ -36,8 +36,8 @@ export function AdminNav() {
             >
               {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
-            <Link href="/admin" className="font-display font-semibold text-tita-primary">
-              Admin Tita
+            <Link href="/" className="font-display font-semibold text-tita-primary hover:text-tita-verde transition-colors" title="Volver al inicio">
+              Departamentos Tita
             </Link>
           </div>
 

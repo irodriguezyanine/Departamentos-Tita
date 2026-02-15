@@ -26,16 +26,16 @@ export default function HomePage() {
     <div>
       {/* Hero - Estilo Colliers: imagen de fondo con overlay rectangular verde oscuro */}
       <section className="relative min-h-[85vh] flex items-center overflow-hidden">
-        {/* Imagen de fondo - Vista panorámica Puerto Pacífico */}
+        {/* Imagen de fondo - Vista panorámica Puerto Pacífico (cubre toda la sección) */}
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{ backgroundImage: "url('/assets/hero-portada.png')" }}
+          style={{ backgroundImage: "url('/assets/hero-portada.jpeg'), url('/assets/hero-portada.png')" }}
           role="img"
           aria-label="Condominio Puerto Pacífico, Viña del Mar"
         />
-        {/* Overlay rectangular lateral izquierdo (estilo Colliers) - verde oscuro semi-transparente */}
+        {/* Overlay rectangular lateral izquierdo (estilo Colliers) - verde oscuro semi-transparente sobre la imagen */}
         <div
-          className="absolute inset-y-0 left-0 w-full md:w-[65%] lg:w-[55%] bg-tita-verde-oscuro/85"
+          className="absolute inset-y-0 left-0 w-full md:w-[65%] lg:w-[55%] bg-tita-verde-oscuro/80"
           style={{ maxWidth: "720px" }}
         />
         <div className="relative z-10 max-w-4xl mx-auto px-6 md:px-12 lg:px-16 py-16 text-left text-tita-beige">

@@ -29,6 +29,7 @@ export function Header() {
           <Link
             href="/"
             className="text-xl md:text-2xl font-display font-semibold text-tita-beige tracking-tight hover:text-tita-oro-claro transition-colors"
+            title="Volver al inicio"
           >
             Departamentos Tita
           </Link>
