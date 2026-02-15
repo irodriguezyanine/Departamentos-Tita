@@ -4,10 +4,12 @@ import { useState, Suspense } from "react"
 import { signIn } from "next-auth/react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
+import { Eye, EyeOff } from "lucide-react"
 
 function LoginForm() {
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
+  const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
   const router = useRouter()
@@ -62,10 +64,11 @@ function LoginForm() {
               </label>
               <input
                 type="text"
+                name="username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
-                autoComplete="email"
+                autoComplete="username"
                 className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-tita-primary focus:border-tita-primary"
                 placeholder=""
               />
@@ -74,15 +77,39 @@ function LoginForm() {
               <label className="block text-sm font-medium text-slate-700 mb-1">
                 Contraseña
               </label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                autoComplete="current-password"
-                className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-tita-primary focus:border-tita-primary"
-                placeholder="••••••••"
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  autoComplete="current-password"
+                  className="w-full px-4 py-2.5 pr-24 rounded-lg border border-slate-300 focus:ring-2 focus:ring-tita-primary focus:border-tita-primary"
+                  placeholder="••••••••"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1 px-2 py-1.5 text-xs text-slate-500 hover:text-slate-700 rounded"
+                  title={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                >
+                  {showPassword ? (
+                    <>
+                      <EyeOff className="w-4 h-4" />
+                      Ocultar
+                    </>
+                  ) : (
+                    <>
+                      <Eye className="w-4 h-4" />
+                      Mostrar
+                    </>
+                  )}
+                </button>
+              </div>
+              <p className="text-xs text-slate-400 mt-1">
+                Tu navegador puede recordar tus datos para acceder más rápido la próxima vez.
+              </p>
             </div>
             <button
               type="submit"
@@ -119,9 +146,6 @@ function LoginForm() {
               >
                 Crear/restablecer admin
               </a>
-            </p>
-            <p className="text-xs text-slate-400 mt-1">
-              dalal@vtr.net / Ignacio · irodriguezy / 12345
             </p>
           </div>
         </div>
