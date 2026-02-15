@@ -77,7 +77,8 @@ function drawHeader(doc: jsPDF, cot: CotizacionArriendo): number {
   doc.setFontSize(8)
   doc.setFont("helvetica", "normal")
   doc.setTextColor(...BEIGE)
-  doc.text("Condominio Puerto Pacífico · " + UBICACION_SITIO, MARGIN, 22)
+  doc.text("Condominio Puerto Pacífico", MARGIN, 20)
+  doc.text(UBICACION_SITIO, MARGIN, 26)
 
   const clienteX = PAGE_WIDTH - MARGIN
   let clientY = 10
