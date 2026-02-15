@@ -59,7 +59,6 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       _id: result.insertedId.toString(),
-      numero,
       ...doc,
     })
   } catch (error) {
