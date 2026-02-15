@@ -38,12 +38,15 @@ export async function GET() {
       }
     }
 
-    const dbList = fromDb.map((d) => ({
-      _id: (d as { _id?: unknown })._id?.toString(),
-      nivel: (d as EstacionamientoDoc).nivel,
-      numero: (d as EstacionamientoDoc).numero,
-      codigoDepartamento: (d as EstacionamientoDoc).codigoDepartamento ?? "",
-    }))
+    const dbList = fromDb.map((d) => {
+      const doc = d as unknown as EstacionamientoDoc & { _id?: unknown }
+      return {
+        _id: doc._id?.toString(),
+        nivel: doc.nivel ?? "",
+        numero: doc.numero ?? "",
+        codigoDepartamento: doc.codigoDepartamento ?? "",
+      }
+    })
 
     const merged = [...staticList.map((s) => ({ ...s, _id: undefined, source: "static" })), ...dbList.map((d) => ({ ...d, source: "db" }))]
 
