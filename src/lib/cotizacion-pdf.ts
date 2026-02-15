@@ -388,7 +388,7 @@ export async function compartirPDFWhatsApp(cot: CotizacionArriendo): Promise<voi
 
   const puedeCompartir =
     typeof navigator !== "undefined" &&
-    navigator.share &&
+    "share" in navigator &&
     (navigator.canShare ? navigator.canShare({ files: [file] }) : true)
 
   if (puedeCompartir) {
