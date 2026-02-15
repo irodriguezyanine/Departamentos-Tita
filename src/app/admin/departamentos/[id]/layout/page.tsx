@@ -25,6 +25,7 @@ interface LayoutElement {
 interface Departamento {
   _id: string
   name: string
+  slug?: string
   imagenes: { url: string; publicId?: string }[]
   layout?: LayoutElement[]
 }
@@ -112,7 +113,7 @@ export default function LayoutEditorPage() {
     try {
       const formData = new FormData()
       formData.append("file", file)
-      formData.append("folder", dept.slug)
+      formData.append("folder", dept.slug || "departamentos_tita")
       const res = await fetch("/api/upload", { method: "POST", body: formData })
       const data = await res.json()
       if (data.url) {
