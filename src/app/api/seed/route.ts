@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { getDb } from "@/lib/db"
 import { DEPARTAMENTOS_INICIALES } from "@/data/departamentos"
+import { getDepartamentoBySlug } from "@/data/departamentos-static"
 
 const ADMIN_USER = "dalal@vtr.net"
 const ADMIN_PASSWORD = "Ignacio"
@@ -48,11 +49,18 @@ async function seed() {
     const existingDepts = await departamentosCollection.countDocuments()
     if (existingDepts === 0) {
       await departamentosCollection.insertMany(
-        DEPARTAMENTOS_INICIALES.map((d) => ({
-          ...d,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        }))
+        DEPARTAMENTOS_INICIALES.map((d) => {
+          const staticDept = getDepartamentoBySlug(d.slug)
+          const imagenes = staticDept?.imagenes?.length
+            ? staticDept.imagenes.map((img) => ({ url: img.url, orden: img.orden, alt: img.alt }))
+            : []
+          return {
+            ...d,
+            imagenes,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          }
+        })
       )
     } else {
       for (const dept of DEPARTAMENTOS_INICIALES) {

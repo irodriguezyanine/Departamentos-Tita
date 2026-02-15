@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { getDb } from "@/lib/db"
 import { ObjectId } from "mongodb"
+import { getDepartamentoBySlug } from "@/data/departamentos-static"
 
 export async function GET(
   _request: Request,
@@ -25,9 +26,23 @@ export async function GET(
       return NextResponse.json({ error: "Departamento no encontrado" }, { status: 404 })
     }
 
+    let imagenes = dept.imagenes || []
+
+    if (imagenes.length === 0 && dept.slug) {
+      const staticDept = getDepartamentoBySlug(dept.slug)
+      if (staticDept?.imagenes?.length) {
+        imagenes = staticDept.imagenes.map((img) => ({
+          url: img.url,
+          orden: img.orden,
+          alt: img.alt,
+        }))
+      }
+    }
+
     return NextResponse.json({
       ...dept,
       _id: dept._id.toString(),
+      imagenes,
     })
   } catch (error) {
     console.error("Error al obtener departamento:", error)
