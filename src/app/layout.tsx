@@ -19,9 +19,9 @@ const sourceSans = Source_Sans_3({
 })
 
 export const metadata: Metadata = {
-  title: "Condominio Puerto Pacífico | Arriendo en Puerto Pacífico, Viña del Mar",
+  title: "Condominio Puerto Pacífico | Arriendo en Viña del Mar, Dalal Saleme",
   description:
-    "Departamentos en arriendo en el exclusivo Condominio Puerto Pacífico, Viña del Mar. Más de 20 años de servicio excepcional. Piscinas, gimnasio, frente a la playa.",
+    "5 departamentos en arriendo primera línea de playa. Entra y reserva.",
   keywords: [
     "departamentos arriendo",
     "Viña del Mar",
@@ -29,6 +29,18 @@ export const metadata: Metadata = {
     "Las Salinas",
     "arriendo vacacional",
   ],
+  openGraph: {
+    title: "Condominio Puerto Pacífico | Arriendo en Viña del Mar, Dalal Saleme",
+    description: "5 departamentos en arriendo primera línea de playa. Entra y reserva.",
+    url: "https://www.condominiopuertopacifico.cl",
+    siteName: "Condominio Puerto Pacífico",
+    locale: "es_CL",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Condominio Puerto Pacífico | Arriendo en Viña del Mar, Dalal Saleme",
+    description: "5 departamentos en arriendo primera línea de playa. Entra y reserva.",
+  },
 }
 
 export default function RootLayout({
