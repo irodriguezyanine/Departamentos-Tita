@@ -93,7 +93,7 @@ export default function DepartamentoPage() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-slate-50">
         <p className="text-slate-600">Departamento no encontrado</p>
-        <Link href="/" className="text-tita-verde font-medium hover:underline px-4 py-2 rounded-full border-2 border-tita-oro bg-tita-cafe-oscuro text-tita-beige hover:bg-tita-cafe-oscuro-hover transition-colors">
+        <Link href="/" className="text-tita-verde font-medium hover:underline px-4 py-2 rounded-full border-2 border-tita-oro bg-tita-verde-oscuro text-tita-beige hover:bg-tita-verde-medio transition-colors">
           Volver al inicio
         </Link>
       </div>
@@ -290,7 +290,7 @@ export default function DepartamentoPage() {
       </section>
 
       {/* CTA Contacto */}
-      <section className="py-16 md:py-24 bg-tita-cafe-oscuro border-t-2 border-tita-oro">
+      <section className="py-16 md:py-24 bg-tita-verde-oscuro border-t-2 border-tita-oro">
         <div className="max-w-3xl mx-auto px-4 text-center">
           <h2 className="font-display text-2xl md:text-3xl font-bold text-tita-beige mb-4">
             ¿Te interesa {dept.name}?
@@ -300,7 +300,7 @@ export default function DepartamentoPage() {
           </p>
           <a
             href="mailto:dalal@vtr.net"
-            className="inline-block px-10 py-4 bg-tita-cafe-oscuro text-tita-beige font-semibold rounded-full border-2 border-tita-oro hover:bg-tita-cafe-oscuro-hover hover:shadow-oro-glow transition-all"
+            className="inline-block px-10 py-4 bg-tita-verde-oscuro text-tita-beige font-semibold rounded-full border-2 border-tita-oro hover:bg-tita-verde-medio hover:shadow-oro-glow transition-all"
           >
             Contactar
           </a>

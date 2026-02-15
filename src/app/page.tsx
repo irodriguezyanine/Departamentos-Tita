@@ -33,11 +33,8 @@ export default function HomePage() {
           role="img"
           aria-label="Condominio Puerto Pacífico, Viña del Mar"
         />
-        {/* Overlay rectangular lateral izquierdo (estilo Colliers) - verde oscuro semi-transparente sobre la imagen */}
-        <div
-          className="absolute inset-y-0 left-0 w-full md:w-[65%] lg:w-[55%] bg-tita-verde-oscuro/80"
-          style={{ maxWidth: "720px" }}
-        />
+        {/* Overlay verde oscuro cubriendo toda la pantalla sobre la imagen */}
+        <div className="absolute inset-0 bg-tita-verde-oscuro/75" />
         <div className="relative z-10 max-w-4xl mx-auto px-6 md:px-12 lg:px-16 py-16 text-left text-tita-beige">
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -71,13 +68,13 @@ export default function HomePage() {
           >
             <Link
               href="#departamentos"
-              className="px-8 py-4 bg-tita-cafe-oscuro text-tita-beige font-semibold rounded-full border-2 border-tita-oro hover:bg-tita-cafe-oscuro-hover hover:shadow-oro-glow transition-all"
+              className="px-8 py-4 bg-tita-verde-oscuro text-tita-beige font-semibold rounded-full border-2 border-tita-oro hover:bg-tita-verde-medio hover:shadow-oro-glow transition-all"
             >
               Ver departamentos
             </Link>
             <Link
               href="#condominio"
-              className="px-8 py-4 bg-tita-cafe-oscuro text-tita-beige font-semibold rounded-full border-2 border-tita-oro hover:bg-tita-cafe-oscuro-hover hover:shadow-oro-glow transition-all"
+              className="px-8 py-4 bg-tita-verde-oscuro text-tita-beige font-semibold rounded-full border-2 border-tita-oro hover:bg-tita-verde-medio hover:shadow-oro-glow transition-all"
             >
               Conocer el condominio
             </Link>
@@ -285,7 +282,7 @@ export default function HomePage() {
       </section>
 
       {/* CTA */}
-      <section className="py-20 md:py-28 bg-tita-cafe-oscuro border-t-2 border-tita-oro">
+      <section className="py-20 md:py-28 bg-tita-verde-oscuro border-t-2 border-tita-oro">
         <div className="max-w-4xl mx-auto px-4 text-center text-tita-beige">
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
@@ -310,7 +307,7 @@ export default function HomePage() {
           >
             <a
               href="mailto:dalal@vtr.net"
-              className="inline-block px-10 py-4 bg-tita-cafe-oscuro text-tita-beige font-semibold rounded-full border-2 border-tita-oro hover:bg-tita-cafe-oscuro-hover hover:shadow-oro-glow transition-all"
+              className="inline-block px-10 py-4 bg-tita-verde-oscuro text-tita-beige font-semibold rounded-full border-2 border-tita-oro hover:bg-tita-verde-medio hover:shadow-oro-glow transition-all"
             >
               Contactar
             </a>

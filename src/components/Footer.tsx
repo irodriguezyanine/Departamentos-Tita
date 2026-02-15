@@ -3,7 +3,7 @@ import { MapPin, Phone, Mail } from "lucide-react"
 
 export function Footer() {
   return (
-    <footer className="bg-tita-cafe-oscuro border-t-2 border-tita-oro text-tita-beige">
+    <footer className="bg-tita-verde-oscuro border-t-2 border-tita-oro text-tita-beige">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
         <div className="grid md:grid-cols-3 gap-8">
           <div>

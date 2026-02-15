@@ -23,7 +23,7 @@ export function Header() {
   const [open, setOpen] = useState(false)
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-tita-cafe-oscuro backdrop-blur-md border-b-2 border-tita-oro shadow-oro-glow">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-tita-verde-oscuro backdrop-blur-md border-b-2 border-tita-oro shadow-oro-glow">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 md:h-20">
           <Link
@@ -42,7 +42,7 @@ export function Header() {
                 className={clsx(
                   "px-4 py-2 rounded-full text-sm font-medium transition-all border-2",
                   pathname === item.href
-                    ? "text-tita-beige bg-tita-cafe-oscuro-hover border-tita-oro shadow-oro-glow"
+                    ? "text-tita-beige bg-tita-verde-medio border-tita-oro shadow-oro-glow"
                     : "text-tita-beige border-transparent hover:border-tita-oro/70 hover:text-tita-oro-claro"
                 )}
               >
@@ -79,7 +79,7 @@ export function Header() {
 
           <button
             onClick={() => setOpen(!open)}
-            className="md:hidden p-2 rounded-full text-tita-beige hover:bg-tita-cafe-oscuro-hover border-2 border-tita-oro/50"
+            className="md:hidden p-2 rounded-full text-tita-beige hover:bg-tita-verde-medio border-2 border-tita-oro/50"
           >
             {open ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
@@ -95,7 +95,7 @@ export function Header() {
                 className={clsx(
                   "block px-4 py-3 rounded-full text-sm font-medium border-2 mx-2",
                   pathname === item.href
-                    ? "text-tita-beige bg-tita-cafe-oscuro-hover border-tita-oro"
+                    ? "text-tita-beige bg-tita-verde-medio border-tita-oro"
                     : "text-tita-beige border-transparent hover:border-tita-oro/70"
                 )}
               >
