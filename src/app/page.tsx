@@ -13,6 +13,7 @@ import {
   Shirt,
 } from "lucide-react"
 import Image from "next/image"
+import { getDepartamentoBySlug } from "@/data/departamentos-static"
 
 const fadeIn = {
   initial: { opacity: 0, y: 30 },
@@ -23,26 +24,34 @@ const fadeIn = {
 export default function HomePage() {
   return (
     <div>
-      {/* Hero */}
-      <section className="relative min-h-[85vh] flex items-center justify-center overflow-hidden">
-        {/* Imagen de fondo - Puerto Pacífico al atardecer */}
+      {/* Hero - Estilo Colliers: imagen de fondo con overlay rectangular verde oscuro */}
+      <section className="relative min-h-[85vh] flex items-center overflow-hidden">
+        {/* Imagen de fondo - Vista panorámica Puerto Pacífico */}
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{ backgroundImage: "url('/assets/hero-portada.png')" }}
           role="img"
           aria-label="Condominio Puerto Pacífico, Viña del Mar"
         />
-        {/* Overlay verde oscuro (semi-transparente para que se vea la foto) */}
-        <div className="absolute inset-0 bg-gradient-to-br from-tita-verde-oscuro/75 via-tita-verde/70 to-tita-verde-medio/75" />
-        <div className="absolute inset-0 opacity-20">
-          <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.2\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-40" />
-        </div>
-        <div className="relative z-10 max-w-4xl mx-auto px-4 text-center text-white">
+        {/* Overlay rectangular lateral izquierdo (estilo Colliers) - verde oscuro semi-transparente */}
+        <div
+          className="absolute inset-y-0 left-0 w-full md:w-[65%] lg:w-[55%] bg-tita-verde-oscuro/85"
+          style={{ maxWidth: "720px" }}
+        />
+        <div className="relative z-10 max-w-4xl mx-auto px-6 md:px-12 lg:px-16 py-16 text-left text-tita-beige">
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="text-sm uppercase tracking-widest text-tita-beige/80 mb-3"
+          >
+            Puerto Pacífico · Viña del Mar
+          </motion.p>
           <motion.h1
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="font-display text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-4"
+            className="font-display text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-4 text-tita-beige"
           >
             Departamentos Tita
           </motion.h1>
@@ -50,37 +59,38 @@ export default function HomePage() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
-            className="text-xl md:text-2xl text-white/95 mb-2"
+            className="text-lg md:text-xl text-tita-beige/90 mb-8 max-w-xl"
           >
-            Puerto Pacífico · Viña del Mar
-          </motion.p>
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.6 }}
-            className="text-lg text-white/90 mb-10"
-          >
-            Más de 20 años de servicio excepcional
+            Más de 20 años de servicio excepcional en el corazón de Viña del Mar
           </motion.p>
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.9 }}
-            className="flex flex-wrap gap-4 justify-center"
+            className="flex flex-wrap gap-4"
           >
             <Link
               href="#departamentos"
-              className="px-8 py-4 bg-white text-tita-verde font-semibold rounded-full hover:bg-tita-verde-medio/10 transition-colors shadow-lg"
+              className="px-8 py-4 bg-tita-cafe-oscuro text-tita-beige font-semibold rounded-full border-2 border-tita-oro hover:bg-tita-cafe-oscuro-hover hover:shadow-oro-glow transition-all"
             >
               Ver departamentos
             </Link>
             <Link
               href="#condominio"
-              className="px-8 py-4 border-2 border-white text-white font-semibold rounded-full hover:bg-white/10 transition-colors"
+              className="px-8 py-4 bg-tita-cafe-oscuro text-tita-beige font-semibold rounded-full border-2 border-tita-oro hover:bg-tita-cafe-oscuro-hover hover:shadow-oro-glow transition-all"
             >
               Conocer el condominio
             </Link>
           </motion.div>
+          <motion.a
+            href="mailto:dalal@vtr.net"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 1 }}
+            className="inline-block mt-8 text-tita-beige hover:text-tita-oro-claro transition-colors text-sm"
+          >
+            — Contáctanos —
+          </motion.a>
         </div>
         <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white to-transparent" />
       </section>
@@ -122,7 +132,7 @@ export default function HomePage() {
               }}
               transition={{ duration: 0.7 }}
             >
-              <h2 className="font-display text-3xl md:text-4xl font-bold text-tita-primary mb-6">
+              <h2 className="font-display text-3xl md:text-4xl font-bold text-tita-verde mb-6">
                 Nuestra historia
               </h2>
               <p className="text-slate-600 leading-relaxed mb-4">
@@ -148,7 +158,7 @@ export default function HomePage() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="font-display text-3xl md:text-4xl font-bold text-tita-primary mb-4">
+            <h2 className="font-display text-3xl md:text-4xl font-bold text-tita-verde mb-4">
               Condominio Puerto Pacífico
             </h2>
             <p className="text-slate-600 max-w-2xl mx-auto">
@@ -172,9 +182,9 @@ export default function HomePage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.05 }}
-                className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow border border-slate-100"
+                className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all border-2 border-slate-100 hover:border-tita-oro/50"
               >
-                <item.icon className="w-10 h-10 text-tita-primary mb-3" />
+                <item.icon className="w-10 h-10 text-tita-verde mb-3" />
                 <h3 className="font-semibold text-slate-800 mb-1">{item.title}</h3>
                 <p className="text-slate-600 text-sm">{item.desc}</p>
               </motion.div>
@@ -185,7 +195,7 @@ export default function HomePage() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="bg-white rounded-2xl p-8 md:p-12 shadow-lg border border-slate-100"
+            className="bg-white rounded-2xl p-8 md:p-12 shadow-lg border-2 border-slate-100"
           >
             <p className="text-slate-600 leading-relaxed text-lg mb-6">
               Además, el condominio cuenta con <strong>dos mesas de billar</strong>,{" "}
@@ -199,7 +209,7 @@ export default function HomePage() {
               Nuevo</strong> y contemplar los <strong>mágicos atardeceres</strong> que Viña del
               Mar tiene para ofrecer.
             </p>
-            <div className="flex items-center gap-3 text-tita-primary">
+            <div className="flex items-center gap-3 text-tita-verde">
               <MapPin className="w-6 h-6 flex-shrink-0" />
               <p className="font-medium">
                 Ubicación privilegiada · Frente a playa Las Salinas · Viña del Mar
@@ -218,7 +228,7 @@ export default function HomePage() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="font-display text-3xl md:text-4xl font-bold text-tita-primary mb-4">
+            <h2 className="font-display text-3xl md:text-4xl font-bold text-tita-verde mb-4">
               Nuestros departamentos
             </h2>
             <p className="text-slate-600 max-w-2xl mx-auto">
@@ -233,7 +243,10 @@ export default function HomePage() {
               { slug: "17c-torre-isla-grande", name: "17 C Torre Isla Grande" },
               { slug: "16c-torre-juan-fernandez", name: "16 C Torre Juan Fernández" },
               { slug: "18c-torre-juan-fernandez", name: "18 C Torre Juan Fernández" },
-            ].map((dept, i) => (
+            ].map((dept, i) => {
+              const staticDept = getDepartamentoBySlug(dept.slug)
+              const thumbUrl = staticDept?.imagenes?.[0]?.url
+              return (
               <motion.div
                 key={dept.slug}
                 initial={{ opacity: 0, y: 30 }}
@@ -245,25 +258,35 @@ export default function HomePage() {
                   href={`/departamentos/${dept.slug}`}
                   className="block group"
                 >
-                  <div className="aspect-[4/3] rounded-xl overflow-hidden bg-slate-200 mb-4">
-                    <div className="w-full h-full bg-gradient-to-br from-tita-primary/20 to-tita-ocean/20 flex items-center justify-center">
-                      <Building2 className="w-16 h-16 text-tita-primary/50" />
-                    </div>
+                  <div className="aspect-[4/3] rounded-xl overflow-hidden bg-slate-200 mb-4 relative border-2 border-slate-200 group-hover:border-tita-oro transition-colors">
+                    {thumbUrl ? (
+                      <Image
+                        src={thumbUrl}
+                        alt={dept.name}
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-300"
+                        sizes="(max-width: 768px) 100vw, 33vw"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-tita-verde/20 to-tita-verde-medio/20 flex items-center justify-center">
+                        <Building2 className="w-16 h-16 text-tita-verde/50" />
+                      </div>
+                    )}
                   </div>
-                  <h3 className="font-display text-xl font-semibold text-slate-800 group-hover:text-tita-primary transition-colors">
+                  <h3 className="font-display text-xl font-semibold text-slate-800 group-hover:text-tita-verde transition-colors">
                     {dept.name}
                   </h3>
-                  <p className="text-tita-primary font-medium mt-1">Desde $90.000 / noche</p>
+                  <p className="text-tita-verde font-medium mt-1">Desde $90.000 / noche</p>
                 </Link>
               </motion.div>
-            ))}
+            )})}
           </div>
         </div>
       </section>
 
       {/* CTA */}
-      <section className="py-20 md:py-28 bg-tita-primary">
-        <div className="max-w-4xl mx-auto px-4 text-center text-white">
+      <section className="py-20 md:py-28 bg-tita-cafe-oscuro border-t-2 border-tita-oro">
+        <div className="max-w-4xl mx-auto px-4 text-center text-tita-beige">
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -276,7 +299,7 @@ export default function HomePage() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-xl text-white/90 mb-10"
+            className="text-xl text-tita-beige/90 mb-10"
           >
             Contáctanos y reserva tu departamento en Puerto Pacífico
           </motion.p>
@@ -287,7 +310,7 @@ export default function HomePage() {
           >
             <a
               href="mailto:dalal@vtr.net"
-              className="inline-block px-10 py-4 bg-white text-tita-primary font-semibold rounded-full hover:bg-tita-sand transition-colors"
+              className="inline-block px-10 py-4 bg-tita-cafe-oscuro text-tita-beige font-semibold rounded-full border-2 border-tita-oro hover:bg-tita-cafe-oscuro-hover hover:shadow-oro-glow transition-all"
             >
               Contactar
             </a>

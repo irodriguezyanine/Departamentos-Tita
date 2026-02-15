@@ -18,7 +18,16 @@ const config: Config = {
           verde: "#0a2e1b",
           "verde-medio": "#0d3d2a",
           "verde-oscuro": "#062018",
+          oro: "#d4af37",
+          "oro-claro": "#e8c547",
+          beige: "#e8dcc4",
+          "beige-claro": "#f5f0e6",
+          "cafe-oscuro": "#2c1810",
+          "cafe-oscuro-hover": "#3d2314",
         },
+      },
+      boxShadow: {
+        "oro-glow": "0 0 12px rgba(212, 175, 55, 0.4)",
       },
       fontFamily: {
         sans: ["var(--font-sans)", "system-ui", "sans-serif"],

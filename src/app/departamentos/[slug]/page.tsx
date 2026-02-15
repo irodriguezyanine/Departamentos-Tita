@@ -16,21 +16,23 @@ import {
   Home,
   Camera,
 } from "lucide-react"
+import { getDepartamentoBySlug } from "@/data/departamentos-static"
 
 interface Departamento {
-  _id: string
+  _id?: string
   slug: string
   name: string
   torre: string
   precio: number
   descripcion: string
+  descripcionLarga?: string
   dormitorios?: number
   banos?: number
   terraza?: boolean
   logia?: boolean
   orientacion?: string
   notaEspecial?: string
-  imagenes: { url: string; orden: number; width?: number; height?: number }[]
+  imagenes: { url: string; orden: number; width?: number; height?: number; alt?: string }[]
   layout?: unknown[]
 }
 
@@ -46,10 +48,37 @@ export default function DepartamentoPage() {
     fetch(`/api/departamentos/${slug}`)
       .then((res) => res.json())
       .then((data) => {
-        if (!data.error) setDept(data)
+        if (!data.error) {
+          setDept(data)
+        } else {
+          const fallback = getDepartamentoBySlug(slug)
+          if (fallback) {
+            setDept({
+              ...fallback,
+              imagenes: fallback.imagenes.map((img) => ({
+                url: img.url,
+                orden: img.orden,
+                alt: img.alt,
+              })),
+            })
+          }
+        }
         setLoading(false)
       })
-      .catch(() => setLoading(false))
+      .catch(() => {
+        const fallback = getDepartamentoBySlug(slug)
+        if (fallback) {
+          setDept({
+            ...fallback,
+            imagenes: fallback.imagenes.map((img) => ({
+              url: img.url,
+              orden: img.orden,
+              alt: img.alt,
+            })),
+          })
+        }
+        setLoading(false)
+      })
   }, [slug])
 
   if (loading) {
@@ -64,7 +93,7 @@ export default function DepartamentoPage() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-slate-50">
         <p className="text-slate-600">Departamento no encontrado</p>
-        <Link href="/" className="text-tita-verde font-medium hover:underline">
+        <Link href="/" className="text-tita-verde font-medium hover:underline px-4 py-2 rounded-full border-2 border-tita-oro bg-tita-cafe-oscuro text-tita-beige hover:bg-tita-cafe-oscuro-hover transition-colors">
           Volver al inicio
         </Link>
       </div>
@@ -94,7 +123,7 @@ export default function DepartamentoPage() {
           {imagenes[0] ? (
             <Image
               src={imagenes[0].url}
-              alt={dept.name}
+              alt={imagenes[0].alt || dept.name}
               fill
               className="object-cover"
               priority
@@ -149,7 +178,7 @@ export default function DepartamentoPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.05 }}
-                className="flex flex-col items-center p-4 rounded-xl bg-slate-50 border border-slate-100"
+                className="flex flex-col items-center p-4 rounded-xl bg-slate-50 border-2 border-slate-100 hover:border-tita-oro/40 transition-colors"
               >
                 <spec.icon className="w-8 h-8 text-tita-verde mb-2" />
                 <span className="text-xs text-slate-500 uppercase tracking-wide">
@@ -180,11 +209,13 @@ export default function DepartamentoPage() {
             Galería
           </h2>
           <p className="text-slate-600 mb-12 max-w-2xl">
-            Las fotos se gestionan desde el panel de administrador. Cada espacio está listo para que Dalal suba las imágenes de cada departamento.
+            {imagenes.length > 0
+              ? "Recorra cada espacio de este departamento a través de nuestra galería."
+              : "Las fotos se gestionan desde el panel de administrador. Cada espacio está listo para que Dalal suba las imágenes de cada departamento."}
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-            {Array.from({ length: ESPACIOS_FOTOS }).map((_, i) => {
+            {Array.from({ length: Math.max(ESPACIOS_FOTOS, imagenes.length) }).map((_, i) => {
               const displayImg = imagenes[i]
               return (
                 <motion.div
@@ -205,7 +236,7 @@ export default function DepartamentoPage() {
                     {displayImg ? (
                       <Image
                         src={displayImg.url}
-                        alt={`${dept.name} - Foto ${i + 1}`}
+                        alt={displayImg.alt || `${dept.name} - Foto ${i + 1}`}
                         fill
                         className="object-cover"
                         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
@@ -236,30 +267,40 @@ export default function DepartamentoPage() {
             Sobre este departamento
           </h2>
           <div className="prose prose-lg max-w-none text-slate-600">
-            <p className="leading-relaxed">
-              {dept.descripcion ||
-                "Departamento acogedor en el exclusivo Condominio Puerto Pacífico, con todas las comodidades para una estadía inolvidable en Viña del Mar."}
-            </p>
-            <p className="mt-4 leading-relaxed">
-              Ubicado frente a playa Las Salinas, a pasos de Marina Arauco, con piscinas,
-              gimnasio, conserjería 24 horas y todas las amenidades del condominio.
-            </p>
+            {(dept as { descripcionLarga?: string }).descripcionLarga ? (
+              (dept as { descripcionLarga?: string }).descripcionLarga!.split("\n\n").map((p, i) => (
+                <p key={i} className={i > 0 ? "mt-4 leading-relaxed" : "leading-relaxed"}>
+                  {p}
+                </p>
+              ))
+            ) : (
+              <>
+                <p className="leading-relaxed">
+                  {dept.descripcion ||
+                    "Departamento acogedor en el exclusivo Condominio Puerto Pacífico, con todas las comodidades para una estadía inolvidable en Viña del Mar."}
+                </p>
+                <p className="mt-4 leading-relaxed">
+                  Ubicado frente a playa Las Salinas, a pasos de Marina Arauco, con piscinas,
+                  gimnasio, conserjería 24 horas y todas las amenidades del condominio.
+                </p>
+              </>
+            )}
           </div>
         </div>
       </section>
 
       {/* CTA Contacto */}
-      <section className="py-16 md:py-24 bg-tita-verde-oscuro">
+      <section className="py-16 md:py-24 bg-tita-cafe-oscuro border-t-2 border-tita-oro">
         <div className="max-w-3xl mx-auto px-4 text-center">
-          <h2 className="font-display text-2xl md:text-3xl font-bold text-white mb-4">
+          <h2 className="font-display text-2xl md:text-3xl font-bold text-tita-beige mb-4">
             ¿Te interesa {dept.name}?
           </h2>
-          <p className="text-white/90 mb-8">
+          <p className="text-tita-beige/90 mb-8">
             Contáctanos para consultar disponibilidad y reservar tu estadía.
           </p>
           <a
             href="mailto:dalal@vtr.net"
-            className="inline-block px-10 py-4 bg-white text-tita-verde font-semibold rounded-full hover:bg-tita-verde-medio/10 transition-colors shadow-lg"
+            className="inline-block px-10 py-4 bg-tita-cafe-oscuro text-tita-beige font-semibold rounded-full border-2 border-tita-oro hover:bg-tita-cafe-oscuro-hover hover:shadow-oro-glow transition-all"
           >
             Contactar
           </a>
