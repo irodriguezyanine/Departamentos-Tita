@@ -62,22 +62,22 @@ function CarruselGalería({
             minHeight: 0,
           }}
         >
-          {imagenes.map((img, i) => (
-            <button
-              key={i}
-              type="button"
-              onClick={() => setLightboxIndex(i)}
-              className="flex-shrink-0 w-[70vw] sm:w-[320px] aspect-[4/3] rounded-xl overflow-hidden snap-center bg-slate-200 shadow-lg focus:outline-none focus:ring-2 focus:ring-tita-oro"
-            >
-              <Image
-                src={img.url}
-                alt={img.alt || `${nombreDept} - Foto ${i + 1}`}
-                fill
-                className="object-cover"
-                sizes="(max-width: 640px) 70vw, 320px"
-              />
-            </button>
-          ))}
+          {imagenes.map((img, i) =>
+            !img?.url?.trim() ? null : (
+              <button
+                key={img.url + String(i)}
+                type="button"
+                onClick={() => setLightboxIndex(i)}
+                className="relative flex-shrink-0 w-[70vw] sm:w-[320px] aspect-[4/3] rounded-xl overflow-hidden snap-center bg-slate-200 shadow-lg focus:outline-none focus:ring-2 focus:ring-tita-oro"
+              >
+                <img
+                  src={img.url}
+                  alt={img.alt || `${nombreDept} - Foto ${i + 1}`}
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+              </button>
+            )
+          )}
         </div>
       </div>
 

@@ -300,7 +300,7 @@ export function CotizacionEditor({ cotizacion, onSave, onBack, isNew }: Props) {
                 <input
                   type="text"
                   inputMode="numeric"
-                  value={focusedPrice === "aseo" ? String(form.aseo) : `$${formatPrice(form.aseo)}`}
+                  value={focusedPrice === "aseo" ? String(form.aseo ?? 0) : `$${formatPrice(form.aseo ?? 0)}`}
                   onFocus={() => setFocusedPrice("aseo")}
                   onBlur={() => setFocusedPrice(null)}
                   onChange={(e) => setForm({ ...form, aseo: parsePrecioInput(e.target.value) })}
@@ -319,7 +319,7 @@ export function CotizacionEditor({ cotizacion, onSave, onBack, isNew }: Props) {
                 <input
                   type="text"
                   inputMode="numeric"
-                  value={focusedPrice === "estacionamientoMonto" ? String(form.estacionamientoMonto) : `$${formatPrice(form.estacionamientoMonto)}`}
+                  value={focusedPrice === "estacionamientoMonto" ? String(form.estacionamientoMonto ?? 0) : `$${formatPrice(form.estacionamientoMonto ?? 0)}`}
                   onFocus={() => setFocusedPrice("estacionamientoMonto")}
                   onBlur={() => setFocusedPrice(null)}
                   onChange={(e) => setForm({ ...form, estacionamientoMonto: parsePrecioInput(e.target.value) })}
@@ -331,7 +331,7 @@ export function CotizacionEditor({ cotizacion, onSave, onBack, isNew }: Props) {
                 <input
                   type="text"
                   inputMode="numeric"
-                  value={focusedPrice === "adicionalNoche31" ? String(form.adicionalNoche31) : `$${formatPrice(form.adicionalNoche31)}`}
+                  value={focusedPrice === "adicionalNoche31" ? String(form.adicionalNoche31 ?? 0) : `$${formatPrice(form.adicionalNoche31 ?? 0)}`}
                   onFocus={() => setFocusedPrice("adicionalNoche31")}
                   onBlur={() => setFocusedPrice(null)}
                   onChange={(e) => setForm({ ...form, adicionalNoche31: parsePrecioInput(e.target.value) })}
@@ -396,7 +396,7 @@ export function CotizacionEditor({ cotizacion, onSave, onBack, isNew }: Props) {
                 <input
                   type="text"
                   inputMode="numeric"
-                  value={focusedPrice === "abonoReserva" ? String(form.abonoReserva) : `$${formatPrice(form.abonoReserva)}`}
+                  value={focusedPrice === "abonoReserva" ? String(form.abonoReserva ?? 0) : `$${formatPrice(form.abonoReserva ?? 0)}`}
                   onFocus={() => setFocusedPrice("abonoReserva")}
                   onBlur={() => setFocusedPrice(null)}
                   onChange={(e) => setForm({ ...form, abonoReserva: parsePrecioInput(e.target.value) })}

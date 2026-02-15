@@ -249,7 +249,7 @@ export default function EditarDepartamentoPage() {
             Fotos ({dept.imagenes?.length || 0} / {MAX_FOTOS})
           </label>
           <p className="text-xs text-slate-500 mb-2">
-            Puedes seleccionar varias fotos a la vez (ideal para iPhone). Máximo 50 por departamento.
+            Puedes seleccionar varias fotos a la vez (ideal para iPhone). Máximo 50 por departamento. La primera foto es la portada (usa la estrella para cambiarla). Haz clic en Guardar para aplicar los cambios.
           </p>
           <div className="flex flex-wrap gap-4">
             {(dept.imagenes || []).map((img, i) => (

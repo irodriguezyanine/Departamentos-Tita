@@ -45,10 +45,12 @@ export async function GET(
       }
     }
 
+    const sortedImagenes = [...imagenes].sort((a, b) => (a.orden ?? 0) - (b.orden ?? 0))
+
     return NextResponse.json({
       ...dept,
       _id: dept._id.toString(),
-      imagenes,
+      imagenes: sortedImagenes,
       descripcionLarga: descripcionLarga ?? dept.descripcionLarga,
     })
   } catch (error) {
