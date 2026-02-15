@@ -6,7 +6,6 @@ import { getDb } from "./db"
 
 export const authOptions: NextAuthOptions = {
   debug: process.env.NODE_ENV === "development",
-  trustHost: true,
   providers: [
     CredentialsProvider({
       name: "Credentials",
