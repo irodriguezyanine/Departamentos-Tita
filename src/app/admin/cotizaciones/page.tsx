@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import { FileText, Plus, Pencil } from "lucide-react"
 import { formatPrecioConUsd } from "@/lib/precios"
+import { useTableFilters, TableSearchBar, TableFilterHeader } from "@/components/admin/TableFilters"
 
 interface Cotizacion {
   _id: string
@@ -18,10 +19,68 @@ interface Cotizacion {
   createdAt?: string
 }
 
+const COTIZACION_COLUMNS = [
+  { key: "numero", label: "Nº", getValue: (c: Cotizacion) => c.numero || "-", filterable: true },
+  {
+    key: "arrendatario",
+    label: "Arrendatario",
+    getValue: (c: Cotizacion) => [c.nombreArrendatario, c.apellidoArrendatario].filter(Boolean).join(" ") || "-",
+    filterable: true,
+  },
+  {
+    key: "departamento",
+    label: "Departamento",
+    getValue: (c: Cotizacion) => `${c.departamento} ${c.torre}`.trim() || "-",
+    filterable: true,
+  },
+  {
+    key: "fechas",
+    label: "Fechas",
+    getValue: (c: Cotizacion) => {
+      const fmt = (d?: string) =>
+        d ? new Date(d).toLocaleDateString("es-CL", { day: "2-digit", month: "2-digit", year: "numeric" }) : "-"
+      return `${fmt(c.checkIn)} - ${fmt(c.checkOut)}`
+    },
+    filterable: false,
+  },
+  {
+    key: "total",
+    label: "Total",
+    getValue: (c: Cotizacion) => String(c.valorTotal || 0),
+    filterable: false,
+  },
+]
+
+function getCotizacionSearchText(c: Cotizacion): string {
+  const fmt = (d?: string) =>
+    d ? new Date(d).toLocaleDateString("es-CL", { day: "2-digit", month: "2-digit", year: "numeric" }) : ""
+  return [
+    c.numero || "",
+    c.nombreArrendatario || "",
+    c.apellidoArrendatario || "",
+    c.departamento || "",
+    c.torre || "",
+    fmt(c.checkIn),
+    fmt(c.checkOut),
+    String(c.valorTotal || ""),
+  ].join(" ")
+}
+
 export default function AdminCotizacionesPage() {
   const [cotizaciones, setCotizaciones] = useState<Cotizacion[]>([])
   const [loading, setLoading] = useState(true)
   const [usdPerClp, setUsdPerClp] = useState<number | null>(null)
+
+  const {
+    filteredData: cotizacionesFiltradas,
+    search,
+    setSearch,
+    columnFilters,
+    setColumnFilter,
+    uniqueValues,
+    clearFilters,
+    hasActiveFilters,
+  } = useTableFilters(cotizaciones, COTIZACION_COLUMNS, getCotizacionSearchText)
 
   useEffect(() => {
     fetch("/api/tipo-cambio")
@@ -80,8 +139,19 @@ export default function AdminCotizacionesPage() {
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border-2 border-slate-200 overflow-hidden">
+        <TableSearchBar
+          value={search}
+          onChange={setSearch}
+          placeholder="Buscar en todas las columnas..."
+          resultCount={cotizacionesFiltradas.length}
+          totalCount={cotizaciones.length}
+          onClear={clearFilters}
+          hasActiveFilters={hasActiveFilters}
+        />
+        {cotizaciones.length > 0 && !(cotizacionesFiltradas.length === 0 && hasActiveFilters) && (
+        <>
         <div className="md:hidden divide-y divide-slate-100">
-          {cotizaciones.map((c) => (
+          {cotizacionesFiltradas.map((c) => (
             <div key={c._id} className="p-4">
               <div className="flex items-start justify-between gap-3 mb-2">
                 <h3 className="font-semibold text-slate-800">
@@ -108,30 +178,19 @@ export default function AdminCotizacionesPage() {
 
         <div className="hidden md:block overflow-x-auto">
           <table className="w-full min-w-[640px]">
-            <thead className="bg-slate-50 border-b-2 border-slate-200">
-              <tr>
-                <th className="text-left px-4 py-3 text-sm font-semibold text-slate-700">
-                  Nº
-                </th>
-                <th className="text-left px-4 py-3 text-sm font-semibold text-slate-700">
-                  Arrendatario
-                </th>
-                <th className="text-left px-4 py-3 text-sm font-semibold text-slate-700">
-                  Departamento
-                </th>
-                <th className="text-left px-4 py-3 text-sm font-semibold text-slate-700">
-                  Fechas
-                </th>
-                <th className="text-right px-4 py-3 text-sm font-semibold text-slate-700">
-                  Total
-                </th>
-                <th className="text-right px-4 py-3 text-sm font-semibold text-slate-700">
+            <TableFilterHeader
+              columns={COTIZACION_COLUMNS}
+              columnFilters={columnFilters}
+              uniqueValues={uniqueValues}
+              onFilterChange={setColumnFilter}
+              renderExtraHeaders={() => (
+                <th className="text-right px-4 py-2 text-sm font-semibold text-slate-700">
                   Acciones
                 </th>
-              </tr>
-            </thead>
+              )}
+            />
             <tbody>
-              {cotizaciones.map((c) => (
+              {cotizacionesFiltradas.map((c) => (
                 <tr key={c._id} className="border-b border-slate-100 hover:bg-slate-50/50">
                   <td className="px-4 py-3 font-medium text-slate-800">
                     {c.numero || "-"}
@@ -160,8 +219,10 @@ export default function AdminCotizacionesPage() {
             </tbody>
           </table>
         </div>
+        </>
+        )}
 
-        {cotizaciones.length === 0 && (
+        {cotizaciones.length === 0 ? (
           <div className="p-12 text-center">
             <FileText className="w-12 h-12 text-slate-300 mx-auto mb-4" />
             <p className="text-slate-500 mb-4">
@@ -175,7 +236,17 @@ export default function AdminCotizacionesPage() {
               Crear primera cotización
             </Link>
           </div>
-        )}
+        ) : cotizacionesFiltradas.length === 0 && hasActiveFilters ? (
+          <div className="p-12 text-center">
+            <p className="text-slate-500 mb-4">No hay resultados para los filtros aplicados.</p>
+            <button
+              onClick={clearFilters}
+              className="text-tita-verde hover:underline font-medium"
+            >
+              Limpiar filtros
+            </button>
+          </div>
+        ) : null}
       </div>
     </div>
   )

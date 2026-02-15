@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { Mail, Phone, User, Pencil, Check, X, Plus } from "lucide-react"
+import { useTableFilters, TableSearchBar, TableFilterHeader } from "@/components/admin/TableFilters"
 
 interface Cliente {
   _id: string
@@ -35,6 +36,56 @@ function displayEmail(email: string) {
   return email === PLACEHOLDER_EMAIL || !email ? "-" : email
 }
 
+const CLIENTE_COLUMNS = [
+  { key: "nombre", label: "Nombre", getValue: (c: Cliente) => c.nombre || "-", filterable: true },
+  { key: "apellido", label: "Apellido", getValue: (c: Cliente) => c.apellido || "-", filterable: true },
+  {
+    key: "email",
+    label: "Email",
+    getValue: (c: Cliente) => (c.email === PLACEHOLDER_EMAIL || !c.email ? "-" : c.email),
+    filterable: true,
+  },
+  { key: "telefono", label: "Teléfono", getValue: (c: Cliente) => c.telefono || "-", filterable: true },
+  {
+    key: "departamento",
+    label: "Departamento",
+    getValue: (c: Cliente) => c.departamentoInteres || "-",
+    filterable: true,
+  },
+  {
+    key: "estacionamiento",
+    label: "Estacionamiento",
+    getValue: (c: Cliente) => c.estacionamiento || "-",
+    filterable: true,
+  },
+  {
+    key: "fecha",
+    label: "Fecha",
+    getValue: (c: Cliente) => {
+      const d = c.fecha || c.createdAt
+      return d
+        ? new Date(d).toLocaleDateString("es-CL", { day: "2-digit", month: "2-digit", year: "numeric" })
+        : "-"
+    },
+    filterable: true,
+  },
+]
+
+function getClienteSearchText(c: Cliente): string {
+  const fmt = (d?: string) =>
+    d ? new Date(d).toLocaleDateString("es-CL", { day: "2-digit", month: "2-digit", year: "numeric" }) : ""
+  return [
+    c.nombre || "",
+    c.apellido || "",
+    c.email === PLACEHOLDER_EMAIL ? "" : c.email || "",
+    c.telefono || "",
+    c.departamentoInteres || "",
+    c.estacionamiento || "",
+    fmt(c.fecha || c.createdAt),
+    c.mensaje || "",
+  ].join(" ")
+}
+
 export default function AdminClientesPage() {
   const [clientes, setClientes] = useState<Cliente[]>([])
   const [loading, setLoading] = useState(true)
@@ -44,6 +95,17 @@ export default function AdminClientesPage() {
   const [showNewForm, setShowNewForm] = useState(false)
   const [newForm, setNewForm] = useState({ nombre: "", apellido: "", email: "", telefono: "", departamentoInteres: "", estacionamiento: "" })
   const [opcionesEstacionamiento, setOpcionesEstacionamiento] = useState<{ value: string; label: string }[]>([])
+
+  const {
+    filteredData: clientesFiltrados,
+    search,
+    setSearch,
+    columnFilters,
+    setColumnFilter,
+    uniqueValues,
+    clearFilters,
+    hasActiveFilters,
+  } = useTableFilters(clientes, CLIENTE_COLUMNS, getClienteSearchText)
 
   const fetchClientes = () => {
     fetch("/api/clientes")
@@ -294,38 +356,31 @@ export default function AdminClientesPage() {
       )}
 
       <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <TableSearchBar
+          value={search}
+          onChange={setSearch}
+          placeholder="Buscar en todas las columnas..."
+          resultCount={clientesFiltrados.length}
+          totalCount={clientes.length}
+          onClear={clearFilters}
+          hasActiveFilters={hasActiveFilters}
+        />
+        {clientes.length > 0 && !(clientesFiltrados.length === 0 && hasActiveFilters) && (
         <div className="overflow-x-auto">
           <table className="w-full min-w-[800px]">
-            <thead className="bg-slate-50 border-b border-slate-200">
-              <tr>
-                <th className="text-left px-4 py-3 text-sm font-semibold text-slate-700">
-                  Nombre
-                </th>
-                <th className="text-left px-4 py-3 text-sm font-semibold text-slate-700">
-                  Apellido
-                </th>
-                <th className="text-left px-4 py-3 text-sm font-semibold text-slate-700">
-                  Email
-                </th>
-                <th className="text-left px-4 py-3 text-sm font-semibold text-slate-700">
-                  Teléfono
-                </th>
-                <th className="text-left px-4 py-3 text-sm font-semibold text-slate-700">
-                  Departamento
-                </th>
-                <th className="text-left px-4 py-3 text-sm font-semibold text-slate-700">
-                  Estacionamiento
-                </th>
-                <th className="text-left px-4 py-3 text-sm font-semibold text-slate-700">
-                  Fecha
-                </th>
-                <th className="text-right px-4 py-3 text-sm font-semibold text-slate-700 w-24">
+            <TableFilterHeader
+              columns={CLIENTE_COLUMNS}
+              columnFilters={columnFilters}
+              uniqueValues={uniqueValues}
+              onFilterChange={setColumnFilter}
+              renderExtraHeaders={() => (
+                <th className="text-right px-4 py-2 text-sm font-semibold text-slate-700 w-24">
                   Acciones
                 </th>
-              </tr>
-            </thead>
+              )}
+            />
             <tbody>
-              {clientes.map((c) => (
+              {clientesFiltrados.map((c) => (
                 <tr
                   key={c._id}
                   className={`border-b border-slate-100 hover:bg-slate-50/50 ${
@@ -511,12 +566,20 @@ export default function AdminClientesPage() {
             </tbody>
           </table>
         </div>
+        )}
 
-        {clientes.length === 0 && (
+        {clientes.length === 0 ? (
           <div className="p-12 text-center text-slate-500">
             No hay clientes aún. Los clientes se guardan automáticamente al crear o editar cotizaciones.
           </div>
-        )}
+        ) : clientesFiltrados.length === 0 && hasActiveFilters ? (
+          <div className="p-12 text-center">
+            <p className="text-slate-500 mb-4">No hay resultados para los filtros aplicados.</p>
+            <button onClick={clearFilters} className="text-tita-verde hover:underline font-medium">
+              Limpiar filtros
+            </button>
+          </div>
+        ) : null}
       </div>
     </div>
   )

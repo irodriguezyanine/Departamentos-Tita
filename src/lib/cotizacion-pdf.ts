@@ -371,3 +371,47 @@ export function imprimirPDFCotizacion(cot: CotizacionArriendo): void {
     doc.save(nombreArchivoCotizacion(cot))
   }
 }
+
+/**
+ * Comparte el PDF por WhatsApp usando la Web Share API.
+ * Abre el selector nativo de compartir (incluye WhatsApp y lista de contactos).
+ * Si no está disponible, descarga el PDF y abre WhatsApp con mensaje.
+ */
+export async function compartirPDFWhatsApp(cot: CotizacionArriendo): Promise<void> {
+  const doc = generarPDFCotizacion(cot)
+  const blob = doc.output("blob")
+  const fileName = nombreArchivoCotizacion(cot)
+  const file = new File([blob], fileName, { type: "application/pdf" })
+
+  const nombreCliente = [cot.nombreArrendatario, cot.apellidoArrendatario].filter(Boolean).join(" ") || "Cliente"
+  const mensaje = `Cotización Departamentos Tita - ${cot.numero || ""} - ${nombreCliente}`
+
+  const puedeCompartir =
+    typeof navigator !== "undefined" &&
+    navigator.share &&
+    (navigator.canShare ? navigator.canShare({ files: [file] }) : true)
+
+  if (puedeCompartir) {
+    try {
+      await navigator.share({
+        title: "Cotización Departamentos Tita",
+        text: mensaje,
+        files: [file],
+      })
+    } catch (err) {
+      if ((err as Error).name !== "AbortError") {
+        descargarPDFCotizacion(cot)
+        window.open(
+          `https://wa.me/?text=${encodeURIComponent(mensaje + ". El PDF se ha descargado en tu dispositivo.")}`,
+          "_blank"
+        )
+      }
+    }
+  } else {
+    descargarPDFCotizacion(cot)
+    window.open(
+      `https://wa.me/?text=${encodeURIComponent(mensaje + ". El PDF se ha descargado en tu dispositivo. Adjunta el archivo para compartirlo.")}`,
+      "_blank"
+    )
+  }
+}

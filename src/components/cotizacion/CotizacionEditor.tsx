@@ -1,10 +1,10 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Save, ArrowLeft, Printer, FileDown } from "lucide-react"
+import { Save, ArrowLeft, Printer, FileDown, Share2 } from "lucide-react"
 import type { CotizacionArriendo } from "@/types/cotizacion"
 import { DATOS_DEPOSITO } from "@/types/cotizacion"
-import { descargarPDFCotizacion, imprimirPDFCotizacion, UBICACION_SITIO } from "@/lib/cotizacion-pdf"
+import { descargarPDFCotizacion, imprimirPDFCotizacion, compartirPDFWhatsApp, UBICACION_SITIO } from "@/lib/cotizacion-pdf"
 import { formatPrecioCLP, formatPrecioConUsd } from "@/lib/precios"
 import { getEstacionamientos, getTodosEstacionamientosOpciones, COSTO_ESTACIONAMIENTO_DIARIO } from "@/data/estacionamientos"
 import { CODIGOS_PAIS, parseTelefonoConCodigo } from "@/data/codigos-pais"
@@ -31,6 +31,7 @@ export function CotizacionEditor({ cotizacion, onSave, onBack, isNew }: Props) {
   const [opcionesEstacionamientoApi, setOpcionesEstacionamientoApi] = useState<EstacionamientoOpcion[]>([])
   const [codigoPais, setCodigoPais] = useState("+56")
   const [numeroTelefono, setNumeroTelefono] = useState("")
+  const [compartiendo, setCompartiendo] = useState(false)
   const [form, setForm] = useState<CotizacionArriendo>({
     nombreArrendatario: "",
     apellidoArrendatario: "",
@@ -542,6 +543,21 @@ export function CotizacionEditor({ cotizacion, onSave, onBack, isNew }: Props) {
           >
             <Save className="w-4 h-4" />
             Guardar
+          </button>
+          <button
+            onClick={async () => {
+              setCompartiendo(true)
+              try {
+                await compartirPDFWhatsApp(form)
+              } finally {
+                setCompartiendo(false)
+              }
+            }}
+            disabled={compartiendo}
+            className="flex items-center gap-2 px-6 py-3 bg-[#25D366] text-white rounded-lg hover:bg-[#20bd5a] font-medium border-2 border-[#128C7E] disabled:opacity-70 disabled:cursor-not-allowed"
+          >
+            <Share2 className="w-4 h-4" />
+            {compartiendo ? "Compartiendo..." : "Compartir por WhatsApp"}
           </button>
           <button
             onClick={() => descargarPDFCotizacion(form)}
