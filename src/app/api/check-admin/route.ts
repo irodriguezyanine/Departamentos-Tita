@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic"
 
 /**
  * Diagnóstico: verifica si MongoDB está conectado y si el usuario admin existe.
- * Visita: https://departamentostita.vercel.app/api/check-admin
+ * Visita: https://www.condominiopuertopacifico.cl/api/check-admin
  */
 export async function GET() {
   try {

@@ -36,7 +36,7 @@ export function MapWithMarker() {
         }}
       >
         <Popup>
-          <strong>Departamentos Tita</strong>
+          <strong>Condominio Puerto Pacífico</strong>
           <br />
           Av. Jorge Montt 1598, Viña del Mar
         </Popup>

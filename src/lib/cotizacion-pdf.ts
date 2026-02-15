@@ -1,5 +1,5 @@
 /**
- * Generación de PDF profesional para cotizaciones - Departamentos Tita
+ * Generación de PDF profesional para cotizaciones - Condominio Puerto Pacífico
  * Diseño tipo tarjetas con bordes redondeados y columnas alineadas
  */
 
@@ -72,7 +72,7 @@ function drawHeader(doc: jsPDF, cot: CotizacionArriendo): number {
   doc.setTextColor(255, 255, 255)
   doc.setFontSize(18)
   doc.setFont("helvetica", "bold")
-  doc.text("Departamentos Tita", MARGIN, 14)
+  doc.text("Condominio Puerto Pacífico", MARGIN, 14)
 
   doc.setFontSize(8)
   doc.setFont("helvetica", "normal")
@@ -250,7 +250,7 @@ export function generarPDFCotizacion(cot: CotizacionArriendo): jsPDF {
   y = drawCardRow(doc, "Adicional noche 31", `$ ${formatPrecioCLP(cot.adicionalNoche31 ?? 0)}`, y)
   y = drawCardRow(doc, "Subtotal adicionales", `$ ${formatPrecioCLP(cot.subtotalAdicionales || 0)}`, y)
   y = drawCardRow(doc, "Subtotal", `$ ${formatPrecioCLP(cot.subtotal || 0)}`, y)
-  y = drawCardRow(doc, `Comisión (${cot.comisionPorcentaje ?? 10}%)`, `$ ${formatPrecioCLP(cot.comision || 0)}`, y)
+  y = drawCardRow(doc, `Administración (${cot.comisionPorcentaje ?? 10}%)`, `$ ${formatPrecioCLP(cot.comision || 0)}`, y)
   y += 1
   y = drawHighlightBox(doc, "Valor total", `$ ${formatPrecioCLP(cot.valorTotal || 0)}`, y)
   y = costosEnd + CARD_GAP
@@ -335,7 +335,7 @@ export function generarPDFCotizacion(cot: CotizacionArriendo): jsPDF {
     doc.setFontSize(6)
     doc.setTextColor(...SLATE_LIGHT)
     doc.text(
-      `Departamentos Tita · ${UBICACION_SITIO} · www.departamentostita.cl`,
+      `Condominio Puerto Pacífico · ${UBICACION_SITIO} · www.condominiopuertopacifico.cl`,
       PAGE_WIDTH / 2,
       footerY - 1,
       { align: "center" }
@@ -385,7 +385,7 @@ export async function compartirPDFWhatsApp(cot: CotizacionArriendo): Promise<voi
   const file = new File([blob], fileName, { type: "application/pdf" })
 
   const nombreCliente = [cot.nombreArrendatario, cot.apellidoArrendatario].filter(Boolean).join(" ") || "Cliente"
-  const mensaje = `Cotización Departamentos Tita - ${cot.numero || ""} - ${nombreCliente}`
+  const mensaje = `Cotización Condominio Puerto Pacífico - ${cot.numero || ""} - ${nombreCliente}`
 
   const puedeCompartir =
     typeof navigator !== "undefined" &&
@@ -395,7 +395,7 @@ export async function compartirPDFWhatsApp(cot: CotizacionArriendo): Promise<voi
   if (puedeCompartir) {
     try {
       await navigator.share({
-        title: "Cotización Departamentos Tita",
+        title: "Cotización Condominio Puerto Pacífico",
         text: mensaje,
         files: [file],
       })

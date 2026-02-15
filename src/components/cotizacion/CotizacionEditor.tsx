@@ -427,7 +427,7 @@ export function CotizacionEditor({ cotizacion, onSave, onBack, isNew }: Props) {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Comisión (%)</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Administración (%)</label>
                 <input
                   type="number"
                   value={form.comisionPorcentaje}
@@ -436,7 +436,7 @@ export function CotizacionEditor({ cotizacion, onSave, onBack, isNew }: Props) {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Comisión</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Administración</label>
                 <input
                   type="text"
                   value={`$${formatPrice(form.comision)}`}

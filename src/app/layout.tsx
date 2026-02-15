@@ -19,7 +19,7 @@ const sourceSans = Source_Sans_3({
 })
 
 export const metadata: Metadata = {
-  title: "Departamentos Tita | Arriendo en Puerto Pacífico, Viña del Mar",
+  title: "Condominio Puerto Pacífico | Arriendo en Puerto Pacífico, Viña del Mar",
   description:
     "Departamentos en arriendo en el exclusivo Condominio Puerto Pacífico, Viña del Mar. Más de 20 años de servicio excepcional. Piscinas, gimnasio, frente a la playa.",
   keywords: [

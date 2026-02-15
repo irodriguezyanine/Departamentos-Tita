@@ -8,7 +8,7 @@ export function Footer() {
         <div className="grid md:grid-cols-3 gap-8">
           <div>
             <h3 className="text-tita-beige font-display font-semibold text-lg mb-4">
-              Departamentos Tita
+              Condominio Puerto Pacífico
             </h3>
             <p className="text-sm leading-relaxed text-tita-beige/90">
               Más de 20 años ofreciendo un servicio excepcional en el corazón de Viña del Mar.
@@ -55,7 +55,7 @@ export function Footer() {
           </div>
         </div>
         <div className="mt-12 pt-8 border-t border-tita-oro/40 text-center text-sm text-tita-beige/80">
-          <p>© {new Date().getFullYear()} Departamentos Tita. Dalal Saleme & Enrique Yanine.</p>
+          <p>© {new Date().getFullYear()} Condominio Puerto Pacífico. Dalal Saleme & Enrique Yanine.</p>
         </div>
       </div>
     </footer>

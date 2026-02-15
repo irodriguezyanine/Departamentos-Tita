@@ -1,6 +1,6 @@
-# Departamentos Tita
+# Condominio Puerto Pacífico
 
-Sitio web para **Departamentos Tita** — arriendo de departamentos en el Condominio Puerto Pacífico, Viña del Mar. Propiedad de Dalal Saleme y Enrique Yanine, con más de 20 años de servicio excepcional.
+Sitio web para **Condominio Puerto Pacífico** — arriendo de departamentos en el Condominio Puerto Pacífico, Viña del Mar. Propiedad de Dalal Saleme y Enrique Yanine, con más de 20 años de servicio excepcional.
 
 ## Tecnologías
 

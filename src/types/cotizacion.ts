@@ -1,5 +1,5 @@
 /**
- * Cotización de arriendo - Departamentos Tita
+ * Cotización de arriendo - Condominio Puerto Pacífico
  * Basado en formato de cotización de arriendo
  */
 

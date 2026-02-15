@@ -11,7 +11,7 @@ const ADMINS = [
 
 /**
  * Crea o actualiza los usuarios administradores.
- * Visita: https://departamentostita.vercel.app/api/ensure-admin
+ * Visita: https://www.condominiopuertopacifico.cl/api/ensure-admin
  */
 export async function GET() {
   return ensureAdmin()

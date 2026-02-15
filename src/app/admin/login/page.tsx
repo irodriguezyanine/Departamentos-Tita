@@ -42,7 +42,7 @@ function LoginForm() {
         <div className="bg-white rounded-2xl shadow-xl border border-slate-200 p-8">
           <div className="text-center mb-8">
             <h1 className="font-display text-2xl font-bold text-tita-primary">
-              Admin Departamentos Tita
+              Admin Condominio Puerto Pacífico
             </h1>
             <p className="text-slate-600 mt-2 text-sm">
               Inicia sesión para gestionar los departamentos

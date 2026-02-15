@@ -114,7 +114,7 @@ export default function HomePage() {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="font-display text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-4 text-tita-beige"
           >
-            Departamentos Tita
+            Condominio Puerto Pacífico
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 30 }}
@@ -174,7 +174,7 @@ export default function HomePage() {
               <div className="aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl">
                 <Image
                   src="/assets/dalal-enrique.png"
-                  alt="Dalal Saleme y Enrique Yanine - Dueños de Departamentos Tita"
+                  alt="Dalal Saleme y Enrique Yanine - Dueños de Condominio Puerto Pacífico"
                   fill
                   className="object-cover"
                   sizes="(max-width: 768px) 100vw, 50vw"
