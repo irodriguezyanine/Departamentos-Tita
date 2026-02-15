@@ -29,6 +29,9 @@ const RADIUS = 3 // Bordes levemente redondeados
 const VALUE_RIGHT = MARGIN + CONTENT_WIDTH - 8
 const LABEL_LEFT = MARGIN + CARD_PADDING + 3
 
+/** Dirección del condominio */
+export const UBICACION_SITIO = "Av. Jorge Montt 1598, Viña del Mar, Valparaíso"
+
 function formatDate(s: string): string {
   if (!s) return "-"
   const d = new Date(s)
@@ -55,24 +58,64 @@ export function nombreArchivoCotizacion(cot: CotizacionArriendo): string {
   return `${fecha}_${depto}_${cliente}.pdf`
 }
 
-function drawHeader(doc: jsPDF): number {
+function drawHeader(doc: jsPDF, cot: CotizacionArriendo): number {
   doc.setFillColor(...VERDE)
-  doc.rect(0, 0, PAGE_WIDTH, 36, "F")
+  doc.rect(0, 0, PAGE_WIDTH, 42, "F")
 
+  // Izquierda: marca
   doc.setTextColor(255, 255, 255)
-  doc.setFontSize(24)
+  doc.setFontSize(22)
   doc.setFont("helvetica", "bold")
-  doc.text("Departamentos Tita", MARGIN, 20)
+  doc.text("Departamentos Tita", MARGIN, 18)
 
   doc.setFontSize(9)
   doc.setFont("helvetica", "normal")
   doc.setTextColor(...BEIGE)
-  doc.text("Condominio Puerto Pacífico · Viña del Mar", MARGIN, 28)
+  doc.text("Condominio Puerto Pacífico · Viña del Mar", MARGIN, 25)
+  doc.text(UBICACION_SITIO, MARGIN, 31)
+
+  // Derecha: datos del cliente (caja destacada)
+  const clienteBoxW = 88
+  const clienteBoxH = 32
+  const clienteBoxX = PAGE_WIDTH - MARGIN - clienteBoxW
+  doc.setFillColor(255, 255, 255)
+  doc.setDrawColor(...BORDE)
+  doc.setLineWidth(0.3)
+  doc.roundedRect(clienteBoxX, 8, clienteBoxW, clienteBoxH, 2, 2, "FD")
+
+  let clientY = 14
+  doc.setFontSize(8)
+  doc.setFont("helvetica", "bold")
+  doc.setTextColor(...VERDE)
+  doc.text("CLIENTE", clienteBoxX + 4, clientY)
+  clientY += 7
+  doc.setFont("helvetica", "normal")
+  doc.setTextColor(...SLATE)
+  doc.setFontSize(10)
+  const nombreLines = doc.splitTextToSize(cot.nombreArrendatario || "-", clienteBoxW - 8)
+  doc.text(nombreLines, clienteBoxX + 4, clientY)
+  clientY += nombreLines.length * 5 + 2
+  doc.setFontSize(8)
+  if (cot.emailArrendatario && cot.emailArrendatario !== "sin-email@cotizacion.local") {
+    doc.text(cot.emailArrendatario, clienteBoxX + 4, clientY)
+    clientY += 5
+  }
+  if (cot.telefonoArrendatario?.trim()) {
+    doc.text(cot.telefonoArrendatario, clienteBoxX + 4, clientY)
+  }
+
+  // Número de cotización (si existe) - esquina superior derecha, sobre el cliente
+  if (cot.numero) {
+    doc.setFontSize(8)
+    doc.setFont("helvetica", "bold")
+    doc.setTextColor(...BEIGE)
+    doc.text(`Cotización Nº ${cot.numero}`, PAGE_WIDTH - MARGIN, 6, { align: "right" })
+  }
 
   doc.setFillColor(...ORO)
-  doc.rect(0, 36, PAGE_WIDTH, 3, "F")
+  doc.rect(0, 42, PAGE_WIDTH, 3, "F")
 
-  return 46
+  return 52
 }
 
 /**
@@ -164,11 +207,24 @@ function ensureSpace(doc: jsPDF, y: number, needed: number): number {
 
 export function generarPDFCotizacion(cot: CotizacionArriendo): jsPDF {
   const doc = new jsPDF({ unit: "mm", format: "a4" })
-  let y = drawHeader(doc)
+  let y = drawHeader(doc, cot)
 
   y += 6
 
+  // ─── Tarjeta: Ubicación del sitio ───
+  const ubicacionH = 16
+  const { contentY: ubY, endY: ubEnd } = drawCard(doc, "Ubicación del sitio", y, ubicacionH)
+  doc.setFontSize(9)
+  doc.setFont("helvetica", "normal")
+  doc.setTextColor(...SLATE)
+  doc.text(UBICACION_SITIO, LABEL_LEFT, ubY + 6)
+  doc.setFontSize(8)
+  doc.setTextColor(...SLATE_LIGHT)
+  doc.text("Condominio Puerto Pacífico · Frente a playa Las Salinas", LABEL_LEFT, ubY + 12)
+  y = ubEnd + CARD_GAP
+
   // ─── Tarjeta: Datos del arriendo ───
+  y = ensureSpace(doc, y, 80)
   const datosRows = 6
   const { contentY: datosY, endY: datosEnd } = drawCard(
     doc,
@@ -282,16 +338,23 @@ export function generarPDFCotizacion(cot: CotizacionArriendo): jsPDF {
   const pageCount = doc.getNumberOfPages()
   for (let p = 1; p <= pageCount; p++) {
     doc.setPage(p)
-    const footerY = PAGE_HEIGHT - 15
+    const footerY = PAGE_HEIGHT - 12
     doc.setDrawColor(...ORO)
     doc.setLineWidth(0.5)
     doc.line(MARGIN, footerY - 8, PAGE_WIDTH - MARGIN, footerY - 8)
-    doc.setFontSize(8)
+    doc.setFontSize(7)
     doc.setTextColor(...SLATE_LIGHT)
     doc.text(
-      "Departamentos Tita · Condominio Puerto Pacífico · Viña del Mar",
+      `Departamentos Tita · ${UBICACION_SITIO} · www.departamentostita.cl`,
       PAGE_WIDTH / 2,
-      footerY,
+      footerY - 2,
+      { align: "center" }
+    )
+    doc.setFontSize(6)
+    doc.text(
+      `Documento generado el ${formatDate(new Date().toISOString())} · Página ${p} de ${pageCount}`,
+      PAGE_WIDTH / 2,
+      footerY + 3,
       { align: "center" }
     )
   }

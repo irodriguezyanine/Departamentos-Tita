@@ -18,11 +18,15 @@ export async function PUT(
 
     const { id } = await params
     const body = await request.json()
-    const { nombre, email, telefono, mensaje, departamentoInteres } = body
+    const { nombre, apellido, email, telefono, mensaje, departamentoInteres } = body
 
-    if (!nombre?.trim()) {
+    const nombreVal = (nombre || "").trim()
+    const apellidoVal = (apellido || "").trim()
+    const nombreCompleto = [nombreVal, apellidoVal].filter(Boolean).join(" ")
+
+    if (!nombreCompleto) {
       return NextResponse.json(
-        { error: "El nombre es requerido" },
+        { error: "Nombre o apellido es requerido" },
         { status: 400 }
       )
     }
@@ -33,7 +37,8 @@ export async function PUT(
       { _id: new ObjectId(id) },
       {
         $set: {
-          nombre: nombre.trim(),
+          nombre: nombreVal,
+          apellido: apellidoVal,
           email: emailVal || PLACEHOLDER_EMAIL,
           telefono: (telefono || "").trim(),
           mensaje: (mensaje || "").trim(),

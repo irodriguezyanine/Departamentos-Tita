@@ -12,6 +12,7 @@ import {
   Home,
   Menu,
   X,
+  ParkingCircle,
 } from "lucide-react"
 import { useState } from "react"
 import { clsx } from "clsx"
@@ -19,6 +20,7 @@ import { clsx } from "clsx"
 const NAV_ITEMS = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/departamentos", label: "Departamentos", icon: Building2 },
+  { href: "/admin/estacionamientos", label: "Estacionamientos", icon: ParkingCircle },
   { href: "/admin/cotizaciones", label: "Cotizaciones", icon: FileText },
   { href: "/admin/clientes", label: "Clientes", icon: Users },
 ]

@@ -263,7 +263,7 @@ export default function HomePage() {
             <div className="flex items-center gap-3 text-tita-verde">
               <MapPin className="w-6 h-6 flex-shrink-0" />
               <p className="font-medium">
-                Ubicación privilegiada · Frente a playa Las Salinas · Viña del Mar
+                Av. Jorge Montt 1598, Viña del Mar, Valparaíso · Frente a playa Las Salinas
               </p>
             </div>
           </motion.div>
@@ -337,6 +337,57 @@ export default function HomePage() {
                 </Link>
               </motion.div>
             )})}
+          </div>
+        </div>
+      </section>
+
+      {/* Mapa - Cómo llegar */}
+      <section id="ubicacion" className="py-16 md:py-24 bg-slate-50">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-10"
+          >
+            <h2 className="font-display text-3xl md:text-4xl font-bold text-tita-verde mb-4">
+              Cómo llegar
+            </h2>
+            <p className="text-slate-600 max-w-2xl mx-auto mb-2">
+              Condominio Puerto Pacífico
+            </p>
+            <p className="text-tita-verde font-medium flex items-center justify-center gap-2">
+              <MapPin className="w-5 h-5" />
+              Av. Jorge Montt 1598, Viña del Mar, Valparaíso
+            </p>
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="rounded-2xl overflow-hidden shadow-xl border-2 border-slate-200 h-[400px] md:h-[450px]"
+          >
+            <iframe
+              src="https://www.openstreetmap.org/export/embed.html?bbox=-71.555%2C-33.012%2C-71.542%2C-33.002&layer=mapnik&marker=-33.0066%2C-71.5500"
+              width="100%"
+              height="100%"
+              style={{ border: 0 }}
+              loading="lazy"
+              title="Ubicación Condominio Puerto Pacífico - Av. Jorge Montt 1598, Viña del Mar"
+            />
+          </motion.div>
+          <div className="text-center mt-4">
+            <p className="text-slate-500 text-sm">
+              Frente a playa Las Salinas · A pasos de Marina Arauco
+            </p>
+            <a
+              href="https://www.google.com/maps/search/?api=1&query=Av.+Jorge+Montt+1598,+Viña+del+Mar,+Chile"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block mt-3 text-tita-verde hover:text-tita-verde-medio font-medium text-sm"
+            >
+              Abrir en Google Maps →
+            </a>
           </div>
         </div>
       </section>

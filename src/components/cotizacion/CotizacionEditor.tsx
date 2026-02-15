@@ -4,9 +4,14 @@ import { useState, useEffect } from "react"
 import { Save, ArrowLeft, Printer, FileDown } from "lucide-react"
 import type { CotizacionArriendo } from "@/types/cotizacion"
 import { DATOS_DEPOSITO } from "@/types/cotizacion"
-import { descargarPDFCotizacion, imprimirPDFCotizacion } from "@/lib/cotizacion-pdf"
+import { descargarPDFCotizacion, imprimirPDFCotizacion, UBICACION_SITIO } from "@/lib/cotizacion-pdf"
 import { formatPrecioCLP, formatPrecioConUsd } from "@/lib/precios"
 import { getEstacionamientos, getTodosEstacionamientosOpciones, COSTO_ESTACIONAMIENTO_DIARIO } from "@/data/estacionamientos"
+
+interface EstacionamientoOpcion {
+  value: string
+  label: string
+}
 import { parsePrecioInput } from "@/lib/precios"
 
 const TORRES = ["Galápagos", "Cabo de Hornos", "Isla Grande", "Juan Fernández"]
@@ -22,6 +27,7 @@ interface Props {
 export function CotizacionEditor({ cotizacion, onSave, onBack, isNew }: Props) {
   const [usdPerClp, setUsdPerClp] = useState<number | null>(null)
   const [focusedPrice, setFocusedPrice] = useState<string | null>(null)
+  const [opcionesEstacionamientoApi, setOpcionesEstacionamientoApi] = useState<EstacionamientoOpcion[]>([])
   const [form, setForm] = useState<CotizacionArriendo>({
     nombreArrendatario: "",
     emailArrendatario: "",
@@ -80,7 +86,23 @@ export function CotizacionEditor({ cotizacion, onSave, onBack, isNew }: Props) {
     }
   }, [cotizacion])
 
-  const opcionesBase = getTodosEstacionamientosOpciones()
+  useEffect(() => {
+    fetch("/api/admin/estacionamientos")
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          const opts = data.map((e: { nivel: string; numero: string; codigoDepartamento?: string }) => {
+            const depto = e.codigoDepartamento?.trim() || "Sin asignar"
+            const value = `${depto} - Nivel ${e.nivel}, ${e.numero}`
+            return { value, label: value }
+          })
+          setOpcionesEstacionamientoApi(opts)
+        }
+      })
+      .catch(() => {})
+  }, [])
+
+  const opcionesBase = opcionesEstacionamientoApi.length > 0 ? opcionesEstacionamientoApi : getTodosEstacionamientosOpciones()
   const opcionesEstacionamiento =
     form.estacionamiento &&
     !opcionesBase.some((o) => o.value === form.estacionamiento)
@@ -153,9 +175,13 @@ export function CotizacionEditor({ cotizacion, onSave, onBack, isNew }: Props) {
         Volver
       </button>
 
-      <h1 className="font-display text-2xl font-bold text-slate-800 mb-8">
+      <h1 className="font-display text-2xl font-bold text-slate-800 mb-4">
         {isNew ? "Nueva cotización" : `Cotización ${cotizacion?.numero || ""}`}
       </h1>
+
+      <div className="mb-6 px-4 py-2 bg-slate-50 rounded-lg border border-slate-200 text-sm text-slate-600">
+        <span className="font-medium text-tita-verde">Ubicación del sitio:</span> {UBICACION_SITIO}
+      </div>
 
       <div className="bg-white rounded-xl border-2 border-slate-200 overflow-hidden">
         <div className="p-6 space-y-6">

@@ -3,6 +3,8 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { getDb } from "@/lib/db"
 
+const PLACEHOLDER_EMAIL = "sin-email@cotizacion.local"
+
 export async function GET() {
   try {
     const session = await getServerSession(authOptions)
@@ -34,21 +36,31 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json()
-    const { nombre, email, telefono, mensaje, departamentoInteres } = body
+    const session = await getServerSession(authOptions)
+    if (!session) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 })
+    }
 
-    if (!nombre || !email || !telefono) {
+    const body = await request.json()
+    const { nombre, apellido, email, telefono, mensaje, departamentoInteres } = body
+
+    const nombreVal = (nombre || "").trim()
+    const apellidoVal = (apellido || "").trim()
+    const nombreCompleto = [nombreVal, apellidoVal].filter(Boolean).join(" ")
+
+    if (!nombreCompleto) {
       return NextResponse.json(
-        { error: "Nombre, email y teléfono son requeridos" },
+        { error: "Nombre o apellido es requerido" },
         { status: 400 }
       )
     }
 
     const db = await getDb()
     await db.collection("clientes").insertOne({
-      nombre,
-      email,
-      telefono,
+      nombre: nombreVal,
+      apellido: apellidoVal,
+      email: (email || "").trim() || PLACEHOLDER_EMAIL,
+      telefono: (telefono || "").trim(),
       mensaje: mensaje || "",
       departamentoInteres: departamentoInteres || "",
       fecha: new Date().toISOString(),

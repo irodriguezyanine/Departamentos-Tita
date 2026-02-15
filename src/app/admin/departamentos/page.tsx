@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
-import { Pencil, ExternalLink, Layout, Building2, MoreVertical, Loader2 } from "lucide-react"
+import { Pencil, ExternalLink, Layout, Building2, MoreVertical, Loader2, Plus } from "lucide-react"
 import { getEstacionamientos, formatEstacionamientos, COSTO_ESTACIONAMIENTO_DIARIO } from "@/data/estacionamientos"
 import { formatPrecioConUsd, formatPrecioCLP } from "@/lib/precios"
 
@@ -73,6 +73,13 @@ export default function AdminDepartamentosPage() {
         <h1 className="font-display text-2xl font-bold text-slate-800">
           Departamentos
         </h1>
+        <Link
+          href="/admin/departamentos/nuevo"
+          className="flex items-center gap-2 px-4 py-2 bg-tita-primary text-white rounded-lg hover:bg-tita-primary/90 text-sm font-medium"
+        >
+          <Plus className="w-4 h-4" />
+          Nuevo departamento
+        </Link>
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">

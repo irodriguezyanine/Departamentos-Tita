@@ -1,17 +1,22 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Mail, Phone, User, Pencil, Check, X } from "lucide-react"
+import { Mail, Phone, User, Pencil, Check, X, Plus } from "lucide-react"
 
 interface Cliente {
   _id: string
   nombre: string
+  apellido?: string
   email: string
   telefono: string
   mensaje?: string
   departamentoInteres?: string
   fecha?: string
   createdAt?: string
+}
+
+function nombreCompleto(c: Cliente): string {
+  return [c.nombre, c.apellido].filter(Boolean).join(" ") || c.nombre || "-"
 }
 
 const PLACEHOLDER_EMAIL = "sin-email@cotizacion.local"
@@ -26,6 +31,8 @@ export default function AdminClientesPage() {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editForm, setEditForm] = useState<Partial<Cliente>>({})
   const [saving, setSaving] = useState(false)
+  const [showNewForm, setShowNewForm] = useState(false)
+  const [newForm, setNewForm] = useState({ nombre: "", apellido: "", email: "", telefono: "", departamentoInteres: "" })
 
   const fetchClientes = () => {
     fetch("/api/clientes")
@@ -63,10 +70,43 @@ export default function AdminClientesPage() {
     setEditingId(c._id)
     setEditForm({
       nombre: c.nombre,
+      apellido: c.apellido || "",
       email: c.email === PLACEHOLDER_EMAIL ? "" : c.email,
       telefono: c.telefono || "",
       departamentoInteres: c.departamentoInteres || "",
     })
+  }
+
+  const handleCreate = async () => {
+    const nombreCompleto = [newForm.nombre.trim(), newForm.apellido.trim()].filter(Boolean).join(" ")
+    if (!nombreCompleto) {
+      alert("Nombre o apellido es requerido")
+      return
+    }
+    setSaving(true)
+    try {
+      const res = await fetch("/api/clientes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          nombre: newForm.nombre.trim(),
+          apellido: newForm.apellido.trim(),
+          email: newForm.email.trim() || undefined,
+          telefono: newForm.telefono.trim(),
+          departamentoInteres: newForm.departamentoInteres.trim(),
+        }),
+      })
+      const data = await res.json()
+      if (data.error) throw new Error(data.error)
+      fetchClientes()
+      setNewForm({ nombre: "", apellido: "", email: "", telefono: "", departamentoInteres: "" })
+      setShowNewForm(false)
+    } catch (e) {
+      console.error(e)
+      alert(e instanceof Error ? e.message : "Error al crear cliente")
+    } finally {
+      setSaving(false)
+    }
   }
 
   const cancelEdit = () => {
@@ -83,6 +123,7 @@ export default function AdminClientesPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           nombre: editForm.nombre,
+          apellido: editForm.apellido,
           email: editForm.email || PLACEHOLDER_EMAIL,
           telefono: editForm.telefono,
           departamentoInteres: editForm.departamentoInteres,
@@ -116,20 +157,107 @@ export default function AdminClientesPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="font-display text-2xl font-bold text-slate-800 mb-2">
-        Clientes
-      </h1>
-      <p className="text-slate-600 text-sm mb-8">
-        Base de datos central. Los clientes se guardan automáticamente al crear o editar cotizaciones.
-      </p>
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="font-display text-2xl font-bold text-slate-800 mb-2">
+            Clientes
+          </h1>
+          <p className="text-slate-600 text-sm">
+            Base de datos central. Los clientes se guardan automáticamente al crear o editar cotizaciones.
+          </p>
+        </div>
+        <button
+          onClick={() => setShowNewForm(!showNewForm)}
+          className="flex items-center gap-2 px-4 py-2 bg-tita-primary text-white rounded-lg hover:bg-tita-primary/90 text-sm font-medium shrink-0"
+        >
+          <Plus className="w-4 h-4" />
+          Nuevo cliente
+        </button>
+      </div>
+
+      {showNewForm && (
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-8">
+          <h2 className="font-semibold text-slate-800 mb-4">Agregar cliente</h2>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Nombre</label>
+              <input
+                type="text"
+                value={newForm.nombre}
+                onChange={(e) => setNewForm({ ...newForm, nombre: e.target.value })}
+                className={inputClass}
+                placeholder="Juan"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Apellido</label>
+              <input
+                type="text"
+                value={newForm.apellido}
+                onChange={(e) => setNewForm({ ...newForm, apellido: e.target.value })}
+                className={inputClass}
+                placeholder="Pérez"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
+              <input
+                type="email"
+                value={newForm.email}
+                onChange={(e) => setNewForm({ ...newForm, email: e.target.value })}
+                className={inputClass}
+                placeholder="cliente@ejemplo.com"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Teléfono</label>
+              <input
+                type="tel"
+                value={newForm.telefono}
+                onChange={(e) => setNewForm({ ...newForm, telefono: e.target.value })}
+                className={inputClass}
+                placeholder="+56 9 1234 5678"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Departamento interés</label>
+              <input
+                type="text"
+                value={newForm.departamentoInteres}
+                onChange={(e) => setNewForm({ ...newForm, departamentoInteres: e.target.value })}
+                className={inputClass}
+                placeholder="4 C Juan Fernández"
+              />
+            </div>
+          </div>
+          <div className="mt-4 flex gap-2">
+            <button
+              onClick={handleCreate}
+              disabled={saving || (!newForm.nombre.trim() && !newForm.apellido.trim())}
+              className="px-4 py-2 bg-tita-primary text-white rounded-lg hover:bg-tita-primary/90 disabled:opacity-50"
+            >
+              {saving ? "Guardando..." : "Crear cliente"}
+            </button>
+            <button
+              onClick={() => setShowNewForm(false)}
+              className="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300"
+            >
+              Cancelar
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[640px]">
+          <table className="w-full min-w-[720px]">
             <thead className="bg-slate-50 border-b border-slate-200">
               <tr>
                 <th className="text-left px-4 py-3 text-sm font-semibold text-slate-700">
                   Nombre
+                </th>
+                <th className="text-left px-4 py-3 text-sm font-semibold text-slate-700">
+                  Apellido
                 </th>
                 <th className="text-left px-4 py-3 text-sm font-semibold text-slate-700">
                   Email
@@ -167,6 +295,17 @@ export default function AdminClientesPage() {
                           }
                           className={inputClass}
                           placeholder="Nombre"
+                        />
+                      </td>
+                      <td className="px-4 py-2">
+                        <input
+                          type="text"
+                          value={editForm.apellido || ""}
+                          onChange={(e) =>
+                            setEditForm((f) => ({ ...f, apellido: e.target.value }))
+                          }
+                          className={inputClass}
+                          placeholder="Apellido"
                         />
                       </td>
                       <td className="px-4 py-2">
@@ -212,7 +351,7 @@ export default function AdminClientesPage() {
                         <div className="flex items-center justify-end gap-1">
                           <button
                             onClick={saveEdit}
-                            disabled={saving || !editForm.nombre?.trim()}
+                            disabled={saving || (!editForm.nombre?.trim() && !editForm.apellido?.trim())}
                             className="p-2 rounded-lg bg-tita-verde text-white hover:bg-tita-verde-medio disabled:opacity-50 disabled:cursor-not-allowed"
                             title="Guardar"
                           >
@@ -236,6 +375,9 @@ export default function AdminClientesPage() {
                           <User className="w-4 h-4 text-slate-400 shrink-0" />
                           {c.nombre}
                         </div>
+                      </td>
+                      <td className="px-4 py-3 text-slate-600">
+                        {c.apellido || "—"}
                       </td>
                       <td className="px-4 py-3">
                         {displayEmail(c.email) !== "-" ? (
