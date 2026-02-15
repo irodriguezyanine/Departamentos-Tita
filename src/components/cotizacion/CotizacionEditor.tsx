@@ -1,9 +1,10 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Save, ArrowLeft, Printer } from "lucide-react"
+import { Save, ArrowLeft, Printer, FileDown } from "lucide-react"
 import type { CotizacionArriendo } from "@/types/cotizacion"
 import { DATOS_DEPOSITO } from "@/types/cotizacion"
+import { descargarPDFCotizacion, imprimirPDFCotizacion } from "@/lib/cotizacion-pdf"
 
 const TORRES = ["Galápagos", "Cabo de Hornos", "Isla Grande", "Juan Fernández"]
 const DEPARTAMENTOS = ["4 C", "13 D", "17 C", "16 C", "18 C"]
@@ -390,11 +391,18 @@ export function CotizacionEditor({ cotizacion, onSave, onBack, isNew }: Props) {
             Guardar
           </button>
           <button
-            onClick={() => window.print()}
-            className="flex items-center gap-2 px-6 py-3 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 print:hidden"
+            onClick={() => descargarPDFCotizacion(form)}
+            className="flex items-center gap-2 px-6 py-3 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300"
+          >
+            <FileDown className="w-4 h-4" />
+            Descargar PDF
+          </button>
+          <button
+            onClick={() => imprimirPDFCotizacion(form)}
+            className="flex items-center gap-2 px-6 py-3 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300"
           >
             <Printer className="w-4 h-4" />
-            Imprimir
+            Imprimir PDF
           </button>
           <button
             onClick={onBack}
