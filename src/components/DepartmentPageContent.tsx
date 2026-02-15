@@ -54,7 +54,7 @@ function CarruselGalería({
           Desliza hacia la izquierda o derecha para ver todas las fotos. En móvil, toca una foto para hacer zoom.
         </p>
         <div
-          className="overflow-x-scroll overflow-y-hidden snap-x snap-mandatory scrollbar-hide flex flex-nowrap gap-3 pb-4 -mx-4 px-4 overscroll-x-contain"
+          className="overflow-x-auto overflow-y-hidden snap-x snap-mandatory scrollbar-hide flex flex-nowrap gap-3 pb-4 -mx-4 px-4 overscroll-x-contain w-full"
           style={{
             WebkitOverflowScrolling: "touch",
             touchAction: "pan-x",
@@ -64,18 +64,21 @@ function CarruselGalería({
         >
           {imagenes.map((img, i) =>
             !img?.url?.trim() ? null : (
-              <button
+              <div
                 key={img.url + String(i)}
-                type="button"
+                role="button"
+                tabIndex={0}
                 onClick={() => setLightboxIndex(i)}
-                className="relative flex-shrink-0 w-[70vw] sm:w-[320px] aspect-[4/3] rounded-xl overflow-hidden snap-center bg-slate-200 shadow-lg focus:outline-none focus:ring-2 focus:ring-tita-oro"
+                onKeyDown={(e) => e.key === "Enter" && setLightboxIndex(i)}
+                className="relative flex-shrink-0 w-[70vw] sm:w-[320px] aspect-[4/3] rounded-xl overflow-hidden snap-center bg-slate-200 shadow-lg focus:outline-none focus:ring-2 focus:ring-tita-oro cursor-pointer select-none touch-pan-x"
               >
                 <img
                   src={img.url}
                   alt={img.alt || `${nombreDept} - Foto ${i + 1}`}
-                  className="absolute inset-0 w-full h-full object-cover"
+                  className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+                  draggable={false}
                 />
-              </button>
+              </div>
             )
           )}
         </div>
