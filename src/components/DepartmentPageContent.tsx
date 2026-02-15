@@ -1,9 +1,10 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { motion, AnimatePresence } from "framer-motion"
+import { formatPrecioConUsd } from "@/lib/precios"
 import {
   ArrowLeft,
   MapPin,
@@ -161,12 +162,20 @@ export function DepartmentPageContent({
   backHref = "/#departamentos",
   backLabel = "Volver a departamentos",
 }: Props) {
+  const [usdPerClp, setUsdPerClp] = useState<number | null>(null)
   const imagenes = dept.imagenes?.length
     ? [...dept.imagenes].sort((a, b) => (a.orden ?? 0) - (b.orden ?? 0))
     : []
 
+  useEffect(() => {
+    fetch("/api/tipo-cambio")
+      .then((res) => res.json())
+      .then((data) => setUsdPerClp(data?.usdPerClp ?? null))
+      .catch(() => setUsdPerClp(null))
+  }, [])
+
   const formatPrice = (n: number) =>
-    new Intl.NumberFormat("es-CL").format(n) + " / noche"
+    formatPrecioConUsd(n, usdPerClp) + " / noche"
 
   const specs = [
     { key: "dormitorios" as const, icon: Bed, label: "Dormitorios", value: dept.dormitorios ?? 4 },

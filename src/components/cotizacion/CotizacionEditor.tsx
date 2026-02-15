@@ -5,6 +5,8 @@ import { Save, ArrowLeft, Printer, FileDown } from "lucide-react"
 import type { CotizacionArriendo } from "@/types/cotizacion"
 import { DATOS_DEPOSITO } from "@/types/cotizacion"
 import { descargarPDFCotizacion, imprimirPDFCotizacion } from "@/lib/cotizacion-pdf"
+import { formatPrecioCLP, formatPrecioConUsd } from "@/lib/precios"
+import { getEstacionamientos, formatEstacionamientos, COSTO_ESTACIONAMIENTO_DIARIO } from "@/data/estacionamientos"
 
 const TORRES = ["Galápagos", "Cabo de Hornos", "Isla Grande", "Juan Fernández"]
 const DEPARTAMENTOS = ["4 C", "13 D", "17 C", "16 C", "18 C"]
@@ -17,6 +19,7 @@ interface Props {
 }
 
 export function CotizacionEditor({ cotizacion, onSave, onBack, isNew }: Props) {
+  const [usdPerClp, setUsdPerClp] = useState<number | null>(null)
   const [form, setForm] = useState<CotizacionArriendo>({
     nombreArrendatario: "",
     departamento: "",
@@ -72,13 +75,29 @@ export function CotizacionEditor({ cotizacion, onSave, onBack, isNew }: Props) {
   }, [cotizacion])
 
   useEffect(() => {
+    if (form.departamento) {
+      const estacs = getEstacionamientos(form.departamento)
+      if (estacs.length > 0 && !form.estacionamiento) {
+        setForm((f) => ({ ...f, estacionamiento: formatEstacionamientos(estacs) }))
+      }
+    }
+  }, [form.departamento])
+
+  useEffect(() => {
     if (form.checkIn && form.checkOut) {
       const start = new Date(form.checkIn)
       const end = new Date(form.checkOut)
       const diff = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24))
       const noches = Math.max(0, diff)
+      const estacs = getEstacionamientos(form.departamento)
+      const estMonto =
+        (form.estacionamientoMonto ?? 0) > 0
+          ? (form.estacionamientoMonto ?? 0)
+          : estacs.length > 0
+            ? noches * COSTO_ESTACIONAMIENTO_DIARIO
+            : 0
       const subtotalNoches = noches * form.valorNoche
-      const adicionales = (form.aseo ?? 0) + (form.estacionamientoMonto ?? 0) + (form.adicionalNoche31 ?? 0)
+      const adicionales = (form.aseo ?? 0) + estMonto + (form.adicionalNoche31 ?? 0)
       const subtotal = subtotalNoches + adicionales
       const comision = Math.round(subtotal * (form.comisionPorcentaje / 100))
       const valorTotal = subtotal + comision
@@ -87,8 +106,9 @@ export function CotizacionEditor({ cotizacion, onSave, onBack, isNew }: Props) {
       setForm((f) => ({
         ...f,
         totalNoches: noches,
-        subtotalNoches,
+        estacionamientoMonto: estMonto,
         subtotalAdicionales: adicionales,
+        subtotalNoches,
         subtotal,
         comision,
         valorTotal,
@@ -98,6 +118,7 @@ export function CotizacionEditor({ cotizacion, onSave, onBack, isNew }: Props) {
   }, [
     form.checkIn,
     form.checkOut,
+    form.departamento,
     form.valorNoche,
     form.aseo,
     form.estacionamientoMonto,
@@ -106,8 +127,14 @@ export function CotizacionEditor({ cotizacion, onSave, onBack, isNew }: Props) {
     form.abonoReserva,
   ])
 
-  const formatPrice = (n: number) =>
-    new Intl.NumberFormat("es-CL").format(n || 0)
+  useEffect(() => {
+    fetch("/api/tipo-cambio")
+      .then((res) => res.json())
+      .then((data) => setUsdPerClp(data?.usdPerClp ?? null))
+      .catch(() => setUsdPerClp(null))
+  }, [])
+
+  const formatPrice = (n: number) => formatPrecioCLP(n)
 
   const inputClass =
     "w-full px-3 py-2 rounded-lg border-2 border-slate-200 focus:border-tita-oro focus:ring-0 focus:outline-none"
@@ -240,7 +267,14 @@ export function CotizacionEditor({ cotizacion, onSave, onBack, isNew }: Props) {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Estacionamiento</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Estacionamiento
+                  {getEstacionamientos(form.departamento).length > 0 && (
+                    <span className="block text-xs font-normal text-slate-500 mt-0.5">
+                      ${formatPrecioCLP(COSTO_ESTACIONAMIENTO_DIARIO)}/día por defecto
+                    </span>
+                  )}
+                </label>
                 <input
                   type="number"
                   value={form.estacionamientoMonto}
@@ -297,7 +331,7 @@ export function CotizacionEditor({ cotizacion, onSave, onBack, isNew }: Props) {
                 <label className="block text-sm font-medium text-slate-700 mb-1">Valor total</label>
                 <input
                   type="text"
-                  value={`$${formatPrice(form.valorTotal)}`}
+                  value={formatPrecioConUsd(form.valorTotal, usdPerClp)}
                   readOnly
                   className={`${inputClass} bg-tita-verde/10 font-bold text-tita-verde`}
                 />
@@ -332,7 +366,7 @@ export function CotizacionEditor({ cotizacion, onSave, onBack, isNew }: Props) {
                 <label className="block text-sm font-medium text-slate-700 mb-1">Saldo</label>
                 <input
                   type="text"
-                  value={`$${formatPrice(form.saldo)}`}
+                  value={formatPrecioConUsd(form.saldo, usdPerClp)}
                   readOnly
                   className={`${inputClass} bg-slate-50 font-semibold`}
                 />

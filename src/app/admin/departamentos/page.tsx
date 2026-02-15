@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { Pencil, ExternalLink, Layout, Building2, MoreVertical, Loader2 } from "lucide-react"
+import { getEstacionamientos, formatEstacionamientos, COSTO_ESTACIONAMIENTO_DIARIO } from "@/data/estacionamientos"
+import { formatPrecioConUsd, formatPrecioCLP } from "@/lib/precios"
 
 interface Departamento {
   _id: string
@@ -19,6 +21,14 @@ export default function AdminDepartamentosPage() {
   const [loading, setLoading] = useState(true)
   const [seeding, setSeeding] = useState(false)
   const [openMenu, setOpenMenu] = useState<string | null>(null)
+  const [usdPerClp, setUsdPerClp] = useState<number | null>(null)
+
+  useEffect(() => {
+    fetch("/api/tipo-cambio")
+      .then((res) => res.json())
+      .then((data) => setUsdPerClp(data?.usdPerClp ?? null))
+      .catch(() => setUsdPerClp(null))
+  }, [])
 
   const fetchDepartamentos = () => {
     fetch("/api/admin/departamentos")
@@ -46,8 +56,8 @@ export default function AdminDepartamentosPage() {
     setSeeding(false)
   }
 
-  const formatPrice = (n: number) =>
-    new Intl.NumberFormat("es-CL").format(n)
+  const formatPrecio = (n: number) =>
+    formatPrecioConUsd(n, usdPerClp)
 
   if (loading) {
     return (
@@ -85,9 +95,15 @@ export default function AdminDepartamentosPage() {
                   {d.disponible ? "Disponible" : "No disponible"}
                 </span>
               </div>
-              <div className="flex items-center justify-between text-sm text-slate-600 mb-4">
-                <span>${formatPrice(d.precio)} / noche</span>
+              <div className="flex flex-col gap-1 text-sm text-slate-600 mb-4">
+                <span>{formatPrecio(d.precio)} / noche</span>
                 <span>{d.imagenes?.length || 0} fotos</span>
+                <span className="text-slate-500">
+                  Estac.: {formatEstacionamientos(getEstacionamientos(d.name))}
+                  {getEstacionamientos(d.name).length > 0 && (
+                    <> · ${formatPrecioCLP(COSTO_ESTACIONAMIENTO_DIARIO)}/día</>
+                  )}
+                </span>
               </div>
               <div className="flex gap-2">
                 <Link
@@ -141,7 +157,7 @@ export default function AdminDepartamentosPage() {
 
         {/* Vista desktop: tabla */}
         <div className="hidden md:block overflow-x-auto scrollbar-hide">
-          <table className="w-full min-w-[640px]">
+          <table className="w-full min-w-[720px]">
             <thead className="bg-slate-50 border-b border-slate-200">
               <tr>
                 <th className="text-left px-4 py-3 text-sm font-semibold text-slate-700">
@@ -152,6 +168,9 @@ export default function AdminDepartamentosPage() {
                 </th>
                 <th className="text-left px-4 py-3 text-sm font-semibold text-slate-700">
                   Precio
+                </th>
+                <th className="text-left px-4 py-3 text-sm font-semibold text-slate-700">
+                  Estacionamientos
                 </th>
                 <th className="text-left px-4 py-3 text-sm font-semibold text-slate-700">
                   Fotos
@@ -169,8 +188,16 @@ export default function AdminDepartamentosPage() {
                 <tr key={d._id} className="border-b border-slate-100 hover:bg-slate-50/50">
                   <td className="px-4 py-3 font-medium text-slate-800">{d.name}</td>
                   <td className="px-4 py-3 text-slate-600">{d.torre}</td>
-                  <td className="px-4 py-3 text-slate-600">
-                    ${formatPrice(d.precio)} / noche
+                  <td className="px-4 py-3 text-slate-600 text-sm">
+                    {formatPrecio(d.precio)} / noche
+                  </td>
+                  <td className="px-4 py-3 text-slate-600 text-sm">
+                    {formatEstacionamientos(getEstacionamientos(d.name))}
+                    {getEstacionamientos(d.name).length > 0 && (
+                      <span className="block text-xs text-slate-500 mt-0.5">
+                        ${formatPrecioCLP(COSTO_ESTACIONAMIENTO_DIARIO)}/día
+                      </span>
+                    )}
                   </td>
                   <td className="px-4 py-3">
                     <span className="text-slate-600">

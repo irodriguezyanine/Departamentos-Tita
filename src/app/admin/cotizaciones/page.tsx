@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { FileText, Plus, Pencil } from "lucide-react"
+import { formatPrecioConUsd } from "@/lib/precios"
 
 interface Cotizacion {
   _id: string
@@ -19,6 +20,14 @@ interface Cotizacion {
 export default function AdminCotizacionesPage() {
   const [cotizaciones, setCotizaciones] = useState<Cotizacion[]>([])
   const [loading, setLoading] = useState(true)
+  const [usdPerClp, setUsdPerClp] = useState<number | null>(null)
+
+  useEffect(() => {
+    fetch("/api/tipo-cambio")
+      .then((res) => res.json())
+      .then((data) => setUsdPerClp(data?.usdPerClp ?? null))
+      .catch(() => setUsdPerClp(null))
+  }, [])
 
   useEffect(() => {
     fetch("/api/cotizaciones")
@@ -43,8 +52,8 @@ export default function AdminCotizacionesPage() {
     }
   }
 
-  const formatPrice = (n: number) =>
-    new Intl.NumberFormat("es-CL").format(n || 0)
+  const formatPrecio = (n: number) =>
+    formatPrecioConUsd(n, usdPerClp)
 
   if (loading) {
     return (
@@ -78,7 +87,7 @@ export default function AdminCotizacionesPage() {
                   {c.numero || c._id.slice(-6)}
                 </h3>
                 <span className="text-tita-verde font-semibold">
-                  ${formatPrice(c.valorTotal)}
+                  {formatPrecio(c.valorTotal)}
                 </span>
               </div>
               <p className="text-sm text-slate-600 mb-1">{c.nombreArrendatario}</p>
@@ -134,7 +143,7 @@ export default function AdminCotizacionesPage() {
                     {formatDate(c.checkIn)} - {formatDate(c.checkOut)}
                   </td>
                   <td className="px-4 py-3 text-right font-semibold text-tita-verde">
-                    ${formatPrice(c.valorTotal)}
+                    {formatPrecio(c.valorTotal)}
                   </td>
                   <td className="px-4 py-3 text-right">
                     <Link
