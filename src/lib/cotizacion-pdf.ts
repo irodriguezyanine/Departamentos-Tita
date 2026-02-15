@@ -62,7 +62,12 @@ function drawHeader(doc: jsPDF, cot: CotizacionArriendo): number {
   doc.setFillColor(...VERDE)
   doc.rect(0, 0, PAGE_WIDTH, 42, "F")
 
-  // Izquierda: marca
+  // Línea sutil que separa empresa (izq) de cliente (der)
+  doc.setDrawColor(...BEIGE)
+  doc.setLineWidth(0.2)
+  doc.line(105, 8, 105, 38)
+
+  // Izquierda: marca y dirección
   doc.setTextColor(255, 255, 255)
   doc.setFontSize(22)
   doc.setFont("helvetica", "bold")
@@ -74,42 +79,31 @@ function drawHeader(doc: jsPDF, cot: CotizacionArriendo): number {
   doc.text("Condominio Puerto Pacífico · Viña del Mar", MARGIN, 25)
   doc.text(UBICACION_SITIO, MARGIN, 31)
 
-  // Derecha: datos del cliente (caja destacada)
-  const clienteBoxW = 88
-  const clienteBoxH = 32
-  const clienteBoxX = PAGE_WIDTH - MARGIN - clienteBoxW
-  doc.setFillColor(255, 255, 255)
-  doc.setDrawColor(...BORDE)
-  doc.setLineWidth(0.3)
-  doc.roundedRect(clienteBoxX, 8, clienteBoxW, clienteBoxH, 2, 2, "FD")
-
-  let clientY = 14
-  doc.setFontSize(8)
-  doc.setFont("helvetica", "bold")
-  doc.setTextColor(...VERDE)
-  doc.text("CLIENTE", clienteBoxX + 4, clientY)
-  clientY += 7
-  doc.setFont("helvetica", "normal")
-  doc.setTextColor(...SLATE)
-  doc.setFontSize(10)
-  const nombreLines = doc.splitTextToSize(cot.nombreArrendatario || "-", clienteBoxW - 8)
-  doc.text(nombreLines, clienteBoxX + 4, clientY)
-  clientY += nombreLines.length * 5 + 2
-  doc.setFontSize(8)
-  if (cot.emailArrendatario && cot.emailArrendatario !== "sin-email@cotizacion.local") {
-    doc.text(cot.emailArrendatario, clienteBoxX + 4, clientY)
-    clientY += 5
-  }
-  if (cot.telefonoArrendatario?.trim()) {
-    doc.text(cot.telefonoArrendatario, clienteBoxX + 4, clientY)
-  }
-
-  // Número de cotización (si existe) - esquina superior derecha, sobre el cliente
+  // Derecha: datos del cliente (mismo color que la dirección, alineado a la derecha)
+  const clienteX = PAGE_WIDTH - MARGIN
+  let clientY = 12
   if (cot.numero) {
     doc.setFontSize(8)
     doc.setFont("helvetica", "bold")
     doc.setTextColor(...BEIGE)
-    doc.text(`Cotización Nº ${cot.numero}`, PAGE_WIDTH - MARGIN, 6, { align: "right" })
+    doc.text(`Cotización Nº ${cot.numero}`, clienteX, clientY, { align: "right" })
+    clientY += 6
+  }
+  doc.setFontSize(8)
+  doc.text("Cliente", clienteX, clientY, { align: "right" })
+  clientY += 6
+  doc.setFont("helvetica", "normal")
+  doc.setFontSize(10)
+  const nombreLines = doc.splitTextToSize(cot.nombreArrendatario || "-", 80)
+  doc.text(nombreLines, clienteX, clientY, { align: "right" })
+  clientY += nombreLines.length * 5 + 2
+  doc.setFontSize(9)
+  if (cot.emailArrendatario && cot.emailArrendatario !== "sin-email@cotizacion.local") {
+    doc.text(cot.emailArrendatario, clienteX, clientY, { align: "right" })
+    clientY += 5
+  }
+  if (cot.telefonoArrendatario?.trim()) {
+    doc.text(cot.telefonoArrendatario, clienteX, clientY, { align: "right" })
   }
 
   doc.setFillColor(...ORO)

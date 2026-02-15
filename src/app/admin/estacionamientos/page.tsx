@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Plus, ParkingCircle } from "lucide-react"
+import { Plus, ParkingCircle, Pencil, Trash2, Check, X } from "lucide-react"
 import { COSTO_ESTACIONAMIENTO_DIARIO } from "@/data/estacionamientos"
 import { formatPrecioCLP } from "@/lib/precios"
 
@@ -21,6 +21,8 @@ export default function AdminEstacionamientosPage() {
   const [saving, setSaving] = useState(false)
   const [showForm, setShowForm] = useState(false)
   const [form, setForm] = useState({ nivel: "", numero: "", codigoDepartamento: "" })
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [editForm, setEditForm] = useState({ nivel: "", numero: "", codigoDepartamento: "" })
 
   const fetchItems = () => {
     fetch("/api/admin/estacionamientos")
@@ -60,6 +62,69 @@ export default function AdminEstacionamientosPage() {
     } catch (e) {
       console.error(e)
       alert("Error al crear estacionamiento")
+    }
+    setSaving(false)
+  }
+
+  const startEdit = (e: EstacionamientoItem) => {
+    if (!e._id || e.source !== "db") return
+    setEditingId(e._id)
+    setEditForm({
+      nivel: e.nivel,
+      numero: e.numero,
+      codigoDepartamento: e.codigoDepartamento || "",
+    })
+  }
+
+  const cancelEdit = () => {
+    setEditingId(null)
+    setEditForm({ nivel: "", numero: "", codigoDepartamento: "" })
+  }
+
+  const handleUpdate = async () => {
+    if (!editingId || !editForm.nivel.trim() || !editForm.numero.trim()) return
+    setSaving(true)
+    try {
+      const res = await fetch(`/api/admin/estacionamientos/${editingId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          nivel: editForm.nivel.trim(),
+          numero: editForm.numero.trim(),
+          codigoDepartamento: editForm.codigoDepartamento?.trim() || "",
+        }),
+      })
+      const data = await res.json()
+      if (data.success) {
+        fetchItems()
+        cancelEdit()
+      } else {
+        alert(data.error || "Error al actualizar")
+      }
+    } catch (e) {
+      console.error(e)
+      alert("Error al actualizar estacionamiento")
+    }
+    setSaving(false)
+  }
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("¿Eliminar este estacionamiento?")) return
+    setSaving(true)
+    try {
+      const res = await fetch(`/api/admin/estacionamientos/${id}`, {
+        method: "DELETE",
+      })
+      const data = await res.json()
+      if (data.success) {
+        fetchItems()
+        if (editingId === id) cancelEdit()
+      } else {
+        alert(data.error || "Error al eliminar")
+      }
+    } catch (e) {
+      console.error(e)
+      alert("Error al eliminar estacionamiento")
     }
     setSaving(false)
   }
@@ -152,7 +217,7 @@ export default function AdminEstacionamientosPage() {
 
       <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[480px]">
+          <table className="w-full min-w-[560px]">
             <thead className="bg-slate-50 border-b border-slate-200">
               <tr>
                 <th className="text-left px-4 py-3 text-sm font-semibold text-slate-700">
@@ -167,17 +232,103 @@ export default function AdminEstacionamientosPage() {
                 <th className="text-left px-4 py-3 text-sm font-semibold text-slate-700">
                   Origen
                 </th>
+                <th className="text-right px-4 py-3 text-sm font-semibold text-slate-700 w-24">
+                  Acciones
+                </th>
               </tr>
             </thead>
             <tbody>
               {dbItems.map((e, i) => (
-                <tr key={e._id || `db-${i}`} className="border-b border-slate-100 hover:bg-slate-50/50">
-                  <td className="px-4 py-3 text-slate-800">{e.nivel}</td>
-                  <td className="px-4 py-3 text-slate-800">{e.numero}</td>
-                  <td className="px-4 py-3 text-slate-600">{e.codigoDepartamento || "—"}</td>
-                  <td className="px-4 py-3">
-                    <span className="text-xs px-2 py-1 rounded bg-blue-100 text-blue-700">Base de datos</span>
-                  </td>
+                <tr
+                  key={e._id || `db-${i}`}
+                  className={`border-b border-slate-100 hover:bg-slate-50/50 ${
+                    editingId === e._id ? "bg-tita-beige/20" : ""
+                  }`}
+                >
+                  {editingId === e._id ? (
+                    <>
+                      <td className="px-4 py-2">
+                        <input
+                          type="text"
+                          value={editForm.nivel}
+                          onChange={(ev) => setEditForm((f) => ({ ...f, nivel: ev.target.value }))}
+                          className="w-full px-2 py-1.5 text-sm rounded border border-slate-200 focus:border-tita-oro focus:ring-0 focus:outline-none"
+                          placeholder="Nivel"
+                        />
+                      </td>
+                      <td className="px-4 py-2">
+                        <input
+                          type="text"
+                          value={editForm.numero}
+                          onChange={(ev) => setEditForm((f) => ({ ...f, numero: ev.target.value }))}
+                          className="w-full px-2 py-1.5 text-sm rounded border border-slate-200 focus:border-tita-oro focus:ring-0 focus:outline-none"
+                          placeholder="Número"
+                        />
+                      </td>
+                      <td className="px-4 py-2">
+                        <select
+                          value={editForm.codigoDepartamento}
+                          onChange={(ev) => setEditForm((f) => ({ ...f, codigoDepartamento: ev.target.value }))}
+                          className="w-full px-2 py-1.5 text-sm rounded border border-slate-200 focus:border-tita-oro focus:ring-0 focus:outline-none"
+                        >
+                          <option value="">Sin asignar</option>
+                          {DEPARTAMENTOS_CODIGOS.map((c) => (
+                            <option key={c} value={c}>{c}</option>
+                          ))}
+                        </select>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className="text-xs px-2 py-1 rounded bg-blue-100 text-blue-700">Base de datos</span>
+                      </td>
+                      <td className="px-4 py-2 text-right">
+                        <div className="flex items-center justify-end gap-1">
+                          <button
+                            onClick={handleUpdate}
+                            disabled={saving || !editForm.nivel.trim() || !editForm.numero.trim()}
+                            className="p-2 rounded-lg bg-tita-verde text-white hover:bg-tita-verde-medio disabled:opacity-50 disabled:cursor-not-allowed"
+                            title="Guardar"
+                          >
+                            <Check className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={cancelEdit}
+                            disabled={saving}
+                            className="p-2 rounded-lg bg-slate-200 text-slate-600 hover:bg-slate-300"
+                            title="Cancelar"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </>
+                  ) : (
+                    <>
+                      <td className="px-4 py-3 text-slate-800">{e.nivel}</td>
+                      <td className="px-4 py-3 text-slate-800">{e.numero}</td>
+                      <td className="px-4 py-3 text-slate-600">{e.codigoDepartamento || "—"}</td>
+                      <td className="px-4 py-3">
+                        <span className="text-xs px-2 py-1 rounded bg-blue-100 text-blue-700">Base de datos</span>
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <div className="flex items-center justify-end gap-1">
+                          <button
+                            onClick={() => startEdit(e)}
+                            className="p-2 rounded-lg hover:bg-slate-200 text-slate-600"
+                            title="Editar"
+                          >
+                            <Pencil className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => e._id && handleDelete(e._id)}
+                            className="p-2 rounded-lg hover:bg-red-50 text-red-600"
+                            title="Eliminar"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </>
+                  )}
                 </tr>
               ))}
               {staticItems.map((e, i) => (
@@ -188,6 +339,7 @@ export default function AdminEstacionamientosPage() {
                   <td className="px-4 py-3">
                     <span className="text-xs px-2 py-1 rounded bg-slate-100 text-slate-600">Estático</span>
                   </td>
+                  <td className="px-4 py-3" />
                 </tr>
               ))}
             </tbody>

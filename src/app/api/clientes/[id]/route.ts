@@ -18,7 +18,7 @@ export async function PUT(
 
     const { id } = await params
     const body = await request.json()
-    const { nombre, apellido, email, telefono, mensaje, departamentoInteres } = body
+    const { nombre, apellido, email, telefono, mensaje, departamentoInteres, estacionamiento } = body
 
     const nombreVal = (nombre || "").trim()
     const apellidoVal = (apellido || "").trim()
@@ -43,6 +43,7 @@ export async function PUT(
           telefono: (telefono || "").trim(),
           mensaje: (mensaje || "").trim(),
           departamentoInteres: (departamentoInteres || "").trim(),
+          estacionamiento: (estacionamiento || "").trim(),
           updatedAt: new Date(),
         },
       }

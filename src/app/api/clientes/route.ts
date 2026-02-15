@@ -42,7 +42,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json()
-    const { nombre, apellido, email, telefono, mensaje, departamentoInteres } = body
+    const { nombre, apellido, email, telefono, mensaje, departamentoInteres, estacionamiento } = body
 
     const nombreVal = (nombre || "").trim()
     const apellidoVal = (apellido || "").trim()
@@ -63,6 +63,7 @@ export async function POST(request: Request) {
       telefono: (telefono || "").trim(),
       mensaje: mensaje || "",
       departamentoInteres: departamentoInteres || "",
+      estacionamiento: estacionamiento || "",
       fecha: new Date().toISOString(),
       createdAt: new Date(),
     })

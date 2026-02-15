@@ -11,9 +11,19 @@ interface Cliente {
   telefono: string
   mensaje?: string
   departamentoInteres?: string
+  estacionamiento?: string
   fecha?: string
   createdAt?: string
 }
+
+const DEPARTAMENTOS_OPCIONES = [
+  { value: "", label: "Seleccionar" },
+  { value: "4 C Torre Galápagos", label: "4 C Torre Galápagos" },
+  { value: "13 D Torre Cabo de Hornos", label: "13 D Torre Cabo de Hornos" },
+  { value: "17 C Torre Isla Grande", label: "17 C Torre Isla Grande" },
+  { value: "16 C Torre Juan Fernández", label: "16 C Torre Juan Fernández" },
+  { value: "18 C Torre Juan Fernández", label: "18 C Torre Juan Fernández" },
+]
 
 function nombreCompleto(c: Cliente): string {
   return [c.nombre, c.apellido].filter(Boolean).join(" ") || c.nombre || "-"
@@ -32,7 +42,8 @@ export default function AdminClientesPage() {
   const [editForm, setEditForm] = useState<Partial<Cliente>>({})
   const [saving, setSaving] = useState(false)
   const [showNewForm, setShowNewForm] = useState(false)
-  const [newForm, setNewForm] = useState({ nombre: "", apellido: "", email: "", telefono: "", departamentoInteres: "" })
+  const [newForm, setNewForm] = useState({ nombre: "", apellido: "", email: "", telefono: "", departamentoInteres: "", estacionamiento: "" })
+  const [opcionesEstacionamiento, setOpcionesEstacionamiento] = useState<{ value: string; label: string }[]>([])
 
   const fetchClientes = () => {
     fetch("/api/clientes")
@@ -51,6 +62,22 @@ export default function AdminClientesPage() {
         setLoading(false)
       })
       .catch(() => setLoading(false))
+  }, [])
+
+  useEffect(() => {
+    fetch("/api/admin/estacionamientos")
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          const opts = data.map((e: { nivel: string; numero: string; codigoDepartamento?: string }) => {
+            const depto = e.codigoDepartamento?.trim() || "Sin asignar"
+            const value = `${depto} - Nivel ${e.nivel}, ${e.numero}`
+            return { value, label: value }
+          })
+          setOpcionesEstacionamiento(opts)
+        }
+      })
+      .catch(() => {})
   }, [])
 
   const formatDate = (d?: string) => {
@@ -74,6 +101,7 @@ export default function AdminClientesPage() {
       email: c.email === PLACEHOLDER_EMAIL ? "" : c.email,
       telefono: c.telefono || "",
       departamentoInteres: c.departamentoInteres || "",
+      estacionamiento: c.estacionamiento || "",
     })
   }
 
@@ -94,12 +122,13 @@ export default function AdminClientesPage() {
           email: newForm.email.trim() || undefined,
           telefono: newForm.telefono.trim(),
           departamentoInteres: newForm.departamentoInteres.trim(),
+          estacionamiento: newForm.estacionamiento.trim(),
         }),
       })
       const data = await res.json()
       if (data.error) throw new Error(data.error)
       fetchClientes()
-      setNewForm({ nombre: "", apellido: "", email: "", telefono: "", departamentoInteres: "" })
+      setNewForm({ nombre: "", apellido: "", email: "", telefono: "", departamentoInteres: "", estacionamiento: "" })
       setShowNewForm(false)
     } catch (e) {
       console.error(e)
@@ -127,6 +156,7 @@ export default function AdminClientesPage() {
           email: editForm.email || PLACEHOLDER_EMAIL,
           telefono: editForm.telefono,
           departamentoInteres: editForm.departamentoInteres,
+          estacionamiento: editForm.estacionamiento,
         }),
       })
       if (!res.ok) {
@@ -178,7 +208,7 @@ export default function AdminClientesPage() {
       {showNewForm && (
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-8">
           <h2 className="font-semibold text-slate-800 mb-4">Agregar cliente</h2>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Nombre</label>
               <input
@@ -220,14 +250,29 @@ export default function AdminClientesPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Departamento interés</label>
-              <input
-                type="text"
+              <label className="block text-sm font-medium text-slate-700 mb-1">Departamento</label>
+              <select
                 value={newForm.departamentoInteres}
                 onChange={(e) => setNewForm({ ...newForm, departamentoInteres: e.target.value })}
                 className={inputClass}
-                placeholder="4 C Juan Fernández"
-              />
+              >
+                {DEPARTAMENTOS_OPCIONES.map((opt) => (
+                  <option key={opt.value || "empty"} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Estacionamiento</label>
+              <select
+                value={newForm.estacionamiento}
+                onChange={(e) => setNewForm({ ...newForm, estacionamiento: e.target.value })}
+                className={inputClass}
+              >
+                <option value="">Seleccionar</option>
+                {opcionesEstacionamiento.map((opt) => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
             </div>
           </div>
           <div className="mt-4 flex gap-2">
@@ -250,7 +295,7 @@ export default function AdminClientesPage() {
 
       <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[720px]">
+          <table className="w-full min-w-[800px]">
             <thead className="bg-slate-50 border-b border-slate-200">
               <tr>
                 <th className="text-left px-4 py-3 text-sm font-semibold text-slate-700">
@@ -267,6 +312,9 @@ export default function AdminClientesPage() {
                 </th>
                 <th className="text-left px-4 py-3 text-sm font-semibold text-slate-700">
                   Departamento
+                </th>
+                <th className="text-left px-4 py-3 text-sm font-semibold text-slate-700">
+                  Estacionamiento
                 </th>
                 <th className="text-left px-4 py-3 text-sm font-semibold text-slate-700">
                   Fecha
@@ -331,8 +379,7 @@ export default function AdminClientesPage() {
                         />
                       </td>
                       <td className="px-4 py-2">
-                        <input
-                          type="text"
+                        <select
                           value={editForm.departamentoInteres || ""}
                           onChange={(e) =>
                             setEditForm((f) => ({
@@ -341,8 +388,36 @@ export default function AdminClientesPage() {
                             }))
                           }
                           className={inputClass}
-                          placeholder="4 C Juan Fernández"
-                        />
+                        >
+                          {DEPARTAMENTOS_OPCIONES.map((opt) => (
+                            <option key={opt.value || "empty"} value={opt.value}>{opt.label}</option>
+                          ))}
+                          {editForm.departamentoInteres &&
+                            !DEPARTAMENTOS_OPCIONES.some((o) => o.value === editForm.departamentoInteres) && (
+                              <option value={editForm.departamentoInteres}>{editForm.departamentoInteres}</option>
+                            )}
+                        </select>
+                      </td>
+                      <td className="px-4 py-2">
+                        <select
+                          value={editForm.estacionamiento || ""}
+                          onChange={(e) =>
+                            setEditForm((f) => ({
+                              ...f,
+                              estacionamiento: e.target.value,
+                            }))
+                          }
+                          className={inputClass}
+                        >
+                          <option value="">Seleccionar</option>
+                          {opcionesEstacionamiento.map((opt) => (
+                            <option key={opt.value} value={opt.value}>{opt.label}</option>
+                          ))}
+                          {editForm.estacionamiento &&
+                            !opcionesEstacionamiento.some((o) => o.value === editForm.estacionamiento) && (
+                              <option value={editForm.estacionamiento}>{editForm.estacionamiento}</option>
+                            )}
+                        </select>
                       </td>
                       <td className="px-4 py-3 text-slate-600 text-sm">
                         {formatDate(c.fecha || c.createdAt)}
@@ -412,7 +487,10 @@ export default function AdminClientesPage() {
                         )}
                       </td>
                       <td className="px-4 py-3 text-slate-600">
-                        {c.departamentoInteres || "-"}
+                        {c.departamentoInteres || "—"}
+                      </td>
+                      <td className="px-4 py-3 text-slate-600 text-sm">
+                        {c.estacionamiento || "—"}
                       </td>
                       <td className="px-4 py-3 text-slate-600 text-sm">
                         {formatDate(c.fecha || c.createdAt)}
