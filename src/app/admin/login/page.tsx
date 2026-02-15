@@ -58,10 +58,10 @@ function LoginForm() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">
-                Correo electrónico
+                Usuario o correo
               </label>
               <input
-                type="email"
+                type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
@@ -121,7 +121,7 @@ function LoginForm() {
               </a>
             </p>
             <p className="text-xs text-slate-400 mt-1">
-              Usuario: dalal@vtr.net · Contraseña: Ignacio (I mayúscula)
+              dalal@vtr.net / Ignacio · irodriguezy / 12345
             </p>
           </div>
         </div>

@@ -4,13 +4,14 @@ import { getDb } from "@/lib/db"
 
 export const dynamic = "force-dynamic"
 
-const ADMIN_USER = "dalal@vtr.net"
-const ADMIN_PASSWORD = "Ignacio"
-const ADMIN_DISPLAY_NAME = "Dalal Saleme"
+const ADMINS = [
+  { username: "dalal@vtr.net", password: "Ignacio", displayName: "Dalal Saleme" },
+  { username: "irodriguezy", password: "12345", displayName: "Ignacio Rodríguez" },
+]
 
 /**
- * Crea o actualiza el usuario administrador.
- * Visita: https://tudominio.vercel.app/api/ensure-admin
+ * Crea o actualiza los usuarios administradores.
+ * Visita: https://departamentostita.vercel.app/api/ensure-admin
  */
 export async function GET() {
   return ensureAdmin()
@@ -24,34 +25,38 @@ async function ensureAdmin() {
   try {
     const db = await getDb()
     const usersCollection = db.collection("users")
+    const results: string[] = []
 
-    const hashedPassword = await bcrypt.hash(ADMIN_PASSWORD, 12)
-    const existingAdmin = await usersCollection.findOne({ username: ADMIN_USER })
+    for (const admin of ADMINS) {
+      const hashedPassword = await bcrypt.hash(admin.password, 12)
+      const existing = await usersCollection.findOne({ username: admin.username })
 
-    if (!existingAdmin) {
-      await usersCollection.insertOne({
-        username: ADMIN_USER,
-        password: hashedPassword,
-        displayName: ADMIN_DISPLAY_NAME,
-        role: "admin",
-        createdAt: new Date(),
-      })
-      return NextResponse.json({
-        success: true,
-        action: "created",
-        message: "Usuario administrador creado. Ya puedes iniciar sesión con dalal@vtr.net / Ignacio",
-      })
+      if (!existing) {
+        await usersCollection.insertOne({
+          username: admin.username,
+          password: hashedPassword,
+          displayName: admin.displayName,
+          role: "admin",
+          createdAt: new Date(),
+        })
+        results.push(`Creado: ${admin.username}`)
+      } else {
+        await usersCollection.updateOne(
+          { username: admin.username },
+          { $set: { password: hashedPassword, displayName: admin.displayName } }
+        )
+        results.push(`Actualizado: ${admin.username}`)
+      }
     }
-
-    await usersCollection.updateOne(
-      { username: ADMIN_USER },
-      { $set: { password: hashedPassword, displayName: ADMIN_DISPLAY_NAME } }
-    )
 
     return NextResponse.json({
       success: true,
-      action: "updated",
-      message: "Contraseña del administrador actualizada. Intenta iniciar sesión de nuevo.",
+      message: "Administradores listos. Puedes iniciar sesión con:",
+      usuarios: [
+        "dalal@vtr.net / Ignacio",
+        "irodriguezy / 12345",
+      ],
+      detalles: results,
     })
   } catch (error) {
     console.error("Error ensure-admin:", error)
@@ -59,7 +64,7 @@ async function ensureAdmin() {
     return NextResponse.json(
       {
         success: false,
-        error: "No se pudo crear/actualizar el admin",
+        error: "No se pudo crear/actualizar los admins",
         detail: msg,
         hint: "Verifica MONGODB_URI en Vercel y que MongoDB Atlas permita conexiones (Network Access → 0.0.0.0/0)",
       },
