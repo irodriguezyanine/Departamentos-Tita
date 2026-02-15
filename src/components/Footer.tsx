@@ -36,6 +36,15 @@ export function Footer() {
             </h3>
             <div className="space-y-2 text-sm">
               <a
+                href="https://wa.me/56984022927?text=Hola%2C%20me%20interesa%20conocer%20m%C3%A1s%20sobre%20los%20departamentos%20en%20arriendo."
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-tita-beige/90 hover:text-tita-oro transition-colors"
+              >
+                <Phone className="w-4 h-4" />
+                +56 9 8402 2927
+              </a>
+              <a
                 href="mailto:dalal@vtr.net"
                 className="flex items-center gap-2 text-tita-beige/90 hover:text-tita-oro transition-colors"
               >

@@ -103,13 +103,25 @@ function LoginForm() {
             <p className="text-xs text-slate-400">
               ¿No puedes entrar?{" "}
               <a
+                href="/api/check-admin"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-tita-primary hover:underline"
+              >
+                Ver diagnóstico
+              </a>
+              {" · "}
+              <a
                 href="/api/ensure-admin"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-tita-primary hover:underline"
               >
-                Crear/restablecer usuario admin
+                Crear/restablecer admin
               </a>
+            </p>
+            <p className="text-xs text-slate-400 mt-1">
+              Usuario: dalal@vtr.net · Contraseña: Ignacio (I mayúscula)
             </p>
           </div>
         </div>
