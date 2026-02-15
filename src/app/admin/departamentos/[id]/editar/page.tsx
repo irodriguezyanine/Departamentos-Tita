@@ -67,27 +67,35 @@ export default function EditarDepartamentoPage() {
     setSaving(false)
   }
 
+  const MAX_FOTOS = 50
+
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file || !dept) return
+    const files = e.target.files
+    if (!files?.length || !dept) return
+    const current = dept.imagenes?.length || 0
+    if (current >= MAX_FOTOS) return
+
+    const toUpload = Array.from(files).slice(0, MAX_FOTOS - current)
     setUploading(true)
     try {
-      const formData = new FormData()
-      formData.append("file", file)
-      formData.append("folder", dept.slug)
-      const res = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      })
-      const data = await res.json()
-      if (data.url) {
-        setDept({
-          ...dept,
-          imagenes: [
-            ...(dept.imagenes || []),
-            { url: data.url, publicId: data.publicId, orden: (dept.imagenes?.length || 0) },
-          ],
+      let newImagenes = [...(dept.imagenes || [])]
+      for (let i = 0; i < toUpload.length; i++) {
+        const file = toUpload[i]
+        const formData = new FormData()
+        formData.append("file", file)
+        formData.append("folder", dept.slug)
+        const res = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
         })
+        const data = await res.json()
+        if (data.url) {
+          newImagenes = [
+            ...newImagenes,
+            { url: data.url, publicId: data.publicId, orden: newImagenes.length },
+          ]
+          setDept({ ...dept, imagenes: newImagenes })
+        }
       }
     } catch (e) {
       console.error(e)
@@ -229,7 +237,12 @@ export default function EditarDepartamentoPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-2">Fotos</label>
+          <label className="block text-sm font-medium text-slate-700 mb-2">
+            Fotos ({dept.imagenes?.length || 0} / {MAX_FOTOS})
+          </label>
+          <p className="text-xs text-slate-500 mb-2">
+            Puedes seleccionar varias fotos a la vez (ideal para iPhone). Máximo 50 por departamento.
+          </p>
           <div className="flex flex-wrap gap-4">
             {(dept.imagenes || []).map((img, i) => (
               <div key={i} className="relative group">
@@ -250,12 +263,19 @@ export default function EditarDepartamentoPage() {
                 </button>
               </div>
             ))}
-            <label className="w-32 h-32 rounded-lg border-2 border-dashed border-slate-300 flex items-center justify-center cursor-pointer hover:border-tita-primary hover:bg-tita-primary/5 transition-colors">
+            <label
+              className={`w-32 h-32 rounded-lg border-2 border-dashed flex items-center justify-center transition-colors ${
+                (dept.imagenes?.length || 0) >= MAX_FOTOS
+                  ? "border-slate-200 bg-slate-50 cursor-not-allowed opacity-60"
+                  : "border-slate-300 cursor-pointer hover:border-tita-primary hover:bg-tita-primary/5"
+              }`}
+            >
               <input
                 type="file"
                 accept="image/*"
+                multiple
                 onChange={handleUpload}
-                disabled={uploading}
+                disabled={uploading || (dept.imagenes?.length || 0) >= MAX_FOTOS}
                 className="hidden"
               />
               {uploading ? (

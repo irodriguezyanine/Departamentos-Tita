@@ -289,6 +289,38 @@ export default function DepartamentoPage() {
         </div>
       </section>
 
+      {/* Carrusel de fotos - al final de la página */}
+      {imagenes.length > 0 && (
+        <section className="py-16 md:py-24 bg-slate-100">
+          <div className="max-w-6xl mx-auto px-4">
+            <h2 className="font-display text-2xl font-bold text-slate-800 mb-4">
+              Galería completa
+            </h2>
+            <p className="text-slate-600 mb-8 max-w-2xl">
+              Desliza para ver todas las fotos de {dept.name}. Compatible con gestos táctiles en móvil.
+            </p>
+            <div className="relative -mx-4 md:mx-0">
+              <div className="overflow-x-auto snap-x snap-mandatory scroll-smooth scrollbar-hide flex gap-4 pb-4 px-4 md:px-0">
+                {imagenes.map((img, i) => (
+                  <div
+                    key={i}
+                    className="relative flex-shrink-0 w-[85vw] md:w-[600px] aspect-[4/3] rounded-xl overflow-hidden snap-center bg-slate-200 shadow-lg"
+                  >
+                    <Image
+                      src={img.url}
+                      alt={img.alt || `${dept.name} - Foto ${i + 1}`}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 768px) 85vw, 600px"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* CTA Contacto */}
       <section className="py-16 md:py-24 bg-tita-verde-oscuro border-t-2 border-tita-oro">
         <div className="max-w-3xl mx-auto px-4 text-center">

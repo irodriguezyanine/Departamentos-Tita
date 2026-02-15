@@ -25,7 +25,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "No se envió ningún archivo" }, { status: 400 })
     }
 
-    const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/gif", "video/mp4", "video/webm"]
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/heic", "video/mp4", "video/webm"]
     if (!allowedTypes.includes(file.type)) {
       return NextResponse.json(
         { error: "Tipo de archivo no permitido. Usa JPG, PNG, WebP, GIF o MP4." },
