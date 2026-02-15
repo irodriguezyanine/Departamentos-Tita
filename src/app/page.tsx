@@ -28,8 +28,8 @@ export default function HomePage() {
       <section className="relative min-h-[85vh] flex items-center overflow-hidden">
         {/* Imagen de fondo - Vista panorámica Puerto Pacífico (cubre toda la sección) */}
         <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{ backgroundImage: "url('/assets/hero-portada.jpeg'), url('/assets/hero-portada.png')" }}
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat bg-tita-verde-oscuro"
+          style={{ backgroundImage: "url('/assets/hero-portada.png')" }}
           role="img"
           aria-label="Condominio Puerto Pacífico, Viña del Mar"
         />
