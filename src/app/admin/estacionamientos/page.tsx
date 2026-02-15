@@ -217,7 +217,7 @@ export default function AdminEstacionamientosPage() {
 
       <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[560px]">
+          <table className="w-full min-w-[480px]">
             <thead className="bg-slate-50 border-b border-slate-200">
               <tr>
                 <th className="text-left px-4 py-3 text-sm font-semibold text-slate-700">
@@ -228,9 +228,6 @@ export default function AdminEstacionamientosPage() {
                 </th>
                 <th className="text-left px-4 py-3 text-sm font-semibold text-slate-700">
                   Departamento
-                </th>
-                <th className="text-left px-4 py-3 text-sm font-semibold text-slate-700">
-                  Origen
                 </th>
                 <th className="text-right px-4 py-3 text-sm font-semibold text-slate-700 w-24">
                   Acciones
@@ -277,9 +274,6 @@ export default function AdminEstacionamientosPage() {
                           ))}
                         </select>
                       </td>
-                      <td className="px-4 py-3">
-                        <span className="text-xs px-2 py-1 rounded bg-blue-100 text-blue-700">Base de datos</span>
-                      </td>
                       <td className="px-4 py-2 text-right">
                         <div className="flex items-center justify-end gap-1">
                           <button
@@ -306,9 +300,6 @@ export default function AdminEstacionamientosPage() {
                       <td className="px-4 py-3 text-slate-800">{e.nivel}</td>
                       <td className="px-4 py-3 text-slate-800">{e.numero}</td>
                       <td className="px-4 py-3 text-slate-600">{e.codigoDepartamento || "—"}</td>
-                      <td className="px-4 py-3">
-                        <span className="text-xs px-2 py-1 rounded bg-blue-100 text-blue-700">Base de datos</span>
-                      </td>
                       <td className="px-4 py-3 text-right">
                         <div className="flex items-center justify-end gap-1">
                           <button
@@ -336,9 +327,6 @@ export default function AdminEstacionamientosPage() {
                   <td className="px-4 py-3 text-slate-800">{e.nivel}</td>
                   <td className="px-4 py-3 text-slate-800">{e.numero}</td>
                   <td className="px-4 py-3 text-slate-600">{e.codigoDepartamento || "—"}</td>
-                  <td className="px-4 py-3">
-                    <span className="text-xs px-2 py-1 rounded bg-slate-100 text-slate-600">Estático</span>
-                  </td>
                   <td className="px-4 py-3" />
                 </tr>
               ))}

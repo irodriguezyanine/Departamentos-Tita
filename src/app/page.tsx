@@ -1,5 +1,6 @@
 "use client"
 
+import dynamic from "next/dynamic"
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { motion } from "framer-motion"
@@ -17,6 +18,15 @@ import {
 } from "lucide-react"
 import Image from "next/image"
 import { getDepartamentoBySlug } from "@/data/departamentos-static"
+
+const MapWithMarker = dynamic(() => import("@/components/MapWithMarker").then((m) => m.MapWithMarker), {
+  ssr: false,
+  loading: () => (
+    <div className="h-full w-full flex items-center justify-center bg-slate-100 text-slate-500">
+      Cargando mapa...
+    </div>
+  ),
+})
 
 interface DeptFromApi {
   slug: string
@@ -367,14 +377,7 @@ export default function HomePage() {
             viewport={{ once: true }}
             className="rounded-2xl overflow-hidden shadow-xl border-2 border-slate-200 h-[400px] md:h-[450px]"
           >
-            <iframe
-              src="https://www.openstreetmap.org/export/embed.html?bbox=-71.555%2C-33.012%2C-71.542%2C-33.002&layer=mapnik&marker=-33.0066%2C-71.5500"
-              width="100%"
-              height="100%"
-              style={{ border: 0 }}
-              loading="lazy"
-              title="Ubicación Condominio Puerto Pacífico - Av. Jorge Montt 1598, Viña del Mar"
-            />
+            <MapWithMarker />
           </motion.div>
           <div className="text-center mt-4">
             <p className="text-slate-500 text-sm">

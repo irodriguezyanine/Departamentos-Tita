@@ -60,6 +60,7 @@ export async function POST(request: Request) {
 
     await upsertClienteDesdeCotizacion({
       nombreArrendatario: rest.nombreArrendatario as string,
+      apellidoArrendatario: rest.apellidoArrendatario as string | undefined,
       emailArrendatario: rest.emailArrendatario as string | undefined,
       telefonoArrendatario: rest.telefonoArrendatario as string | undefined,
       departamento: rest.departamento as string | undefined,

@@ -66,6 +66,7 @@ export async function PUT(
 
     await upsertClienteDesdeCotizacion({
       nombreArrendatario: (body.nombreArrendatario as string) || "",
+      apellidoArrendatario: body.apellidoArrendatario as string | undefined,
       emailArrendatario: body.emailArrendatario as string | undefined,
       telefonoArrendatario: body.telefonoArrendatario as string | undefined,
       departamento: body.departamento as string | undefined,

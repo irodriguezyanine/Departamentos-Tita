@@ -6,6 +6,7 @@ import { getDb } from "./db"
 
 interface DatosClienteCotizacion {
   nombreArrendatario: string
+  apellidoArrendatario?: string
   emailArrendatario?: string
   telefonoArrendatario?: string
   departamento?: string
@@ -25,10 +26,14 @@ function splitNombreApellido(full: string): { nombre: string; apellido: string }
 export async function upsertClienteDesdeCotizacion(
   datos: DatosClienteCotizacion
 ): Promise<void> {
-  const fullName = datos.nombreArrendatario?.trim()
+  const nombreVal = datos.nombreArrendatario?.trim()
+  const apellidoVal = (datos.apellidoArrendatario || "").trim()
+  const fullName = [nombreVal, apellidoVal].filter(Boolean).join(" ")
   if (!fullName) return
 
-  const { nombre, apellido } = splitNombreApellido(fullName)
+  const { nombre, apellido } = apellidoVal
+    ? { nombre: nombreVal || "", apellido: apellidoVal }
+    : splitNombreApellido(fullName)
   const email = (datos.emailArrendatario || "").trim()
   const telefono = (datos.telefonoArrendatario || "").trim()
   const departamento = [datos.departamento, datos.torre].filter(Boolean).join(" ") || ""

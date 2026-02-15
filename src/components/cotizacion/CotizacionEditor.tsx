@@ -7,6 +7,7 @@ import { DATOS_DEPOSITO } from "@/types/cotizacion"
 import { descargarPDFCotizacion, imprimirPDFCotizacion, UBICACION_SITIO } from "@/lib/cotizacion-pdf"
 import { formatPrecioCLP, formatPrecioConUsd } from "@/lib/precios"
 import { getEstacionamientos, getTodosEstacionamientosOpciones, COSTO_ESTACIONAMIENTO_DIARIO } from "@/data/estacionamientos"
+import { CODIGOS_PAIS, parseTelefonoConCodigo } from "@/data/codigos-pais"
 
 interface EstacionamientoOpcion {
   value: string
@@ -28,8 +29,11 @@ export function CotizacionEditor({ cotizacion, onSave, onBack, isNew }: Props) {
   const [usdPerClp, setUsdPerClp] = useState<number | null>(null)
   const [focusedPrice, setFocusedPrice] = useState<string | null>(null)
   const [opcionesEstacionamientoApi, setOpcionesEstacionamientoApi] = useState<EstacionamientoOpcion[]>([])
+  const [codigoPais, setCodigoPais] = useState("+56")
+  const [numeroTelefono, setNumeroTelefono] = useState("")
   const [form, setForm] = useState<CotizacionArriendo>({
     nombreArrendatario: "",
+    apellidoArrendatario: "",
     emailArrendatario: "",
     telefonoArrendatario: "",
     departamento: "",
@@ -57,8 +61,12 @@ export function CotizacionEditor({ cotizacion, onSave, onBack, isNew }: Props) {
 
   useEffect(() => {
     if (cotizacion) {
+      const { codigo, numero } = parseTelefonoConCodigo(cotizacion.telefonoArrendatario || "")
+      setCodigoPais(codigo)
+      setNumeroTelefono(numero)
       setForm({
         nombreArrendatario: cotizacion.nombreArrendatario || "",
+        apellidoArrendatario: cotizacion.apellidoArrendatario || "",
         emailArrendatario: cotizacion.emailArrendatario || "",
         telefonoArrendatario: cotizacion.telefonoArrendatario || "",
         departamento: cotizacion.departamento || "",
@@ -83,6 +91,9 @@ export function CotizacionEditor({ cotizacion, onSave, onBack, isNew }: Props) {
         fechaPagoSaldo: cotizacion.fechaPagoSaldo || "",
         observaciones: cotizacion.observaciones || "",
       })
+    } else {
+      setCodigoPais("+56")
+      setNumeroTelefono("")
     }
   }, [cotizacion])
 
@@ -197,6 +208,17 @@ export function CotizacionEditor({ cotizacion, onSave, onBack, isNew }: Props) {
                   value={form.nombreArrendatario}
                   onChange={(e) => setForm({ ...form, nombreArrendatario: e.target.value })}
                   className={inputClass}
+                  placeholder="Nombre"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Apellido arrendatario</label>
+                <input
+                  type="text"
+                  value={form.apellidoArrendatario || ""}
+                  onChange={(e) => setForm({ ...form, apellidoArrendatario: e.target.value })}
+                  className={inputClass}
+                  placeholder="Apellido"
                 />
               </div>
               <div>
@@ -211,13 +233,33 @@ export function CotizacionEditor({ cotizacion, onSave, onBack, isNew }: Props) {
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Teléfono arrendatario</label>
-                <input
-                  type="tel"
-                  value={form.telefonoArrendatario || ""}
-                  onChange={(e) => setForm({ ...form, telefonoArrendatario: e.target.value })}
-                  className={inputClass}
-                  placeholder="+56 9 1234 5678"
-                />
+                <div className="flex gap-2">
+                  <select
+                    value={codigoPais}
+                    onChange={(e) => {
+                      setCodigoPais(e.target.value)
+                      setForm({ ...form, telefonoArrendatario: e.target.value + numeroTelefono.replace(/\D/g, "") })
+                    }}
+                    className={`${inputClass} w-32 shrink-0`}
+                  >
+                    {CODIGOS_PAIS.map((p) => (
+                      <option key={`${p.codigo}-${p.pais}`} value={p.codigo}>
+                        {p.codigo} {p.pais}
+                      </option>
+                    ))}
+                  </select>
+                  <input
+                    type="tel"
+                    value={numeroTelefono}
+                    onChange={(e) => {
+                      const num = e.target.value.replace(/\D/g, "")
+                      setNumeroTelefono(e.target.value)
+                      setForm({ ...form, telefonoArrendatario: codigoPais + num })
+                    }}
+                    className={`${inputClass} flex-1`}
+                    placeholder="9 1234 5678"
+                  />
+                </div>
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Departamento</label>

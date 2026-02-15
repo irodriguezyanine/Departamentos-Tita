@@ -9,6 +9,7 @@ interface Cotizacion {
   _id: string
   numero?: string
   nombreArrendatario: string
+  apellidoArrendatario?: string
   departamento: string
   torre: string
   checkIn: string
@@ -90,7 +91,7 @@ export default function AdminCotizacionesPage() {
                   {formatPrecio(c.valorTotal)}
                 </span>
               </div>
-              <p className="text-sm text-slate-600 mb-1">{c.nombreArrendatario}</p>
+              <p className="text-sm text-slate-600 mb-1">{[c.nombreArrendatario, c.apellidoArrendatario].filter(Boolean).join(" ") || "-"}</p>
               <p className="text-sm text-slate-500 mb-3">
                 {c.departamento} {c.torre} · {formatDate(c.checkIn)} - {formatDate(c.checkOut)}
               </p>
@@ -135,7 +136,7 @@ export default function AdminCotizacionesPage() {
                   <td className="px-4 py-3 font-medium text-slate-800">
                     {c.numero || "-"}
                   </td>
-                  <td className="px-4 py-3 text-slate-600">{c.nombreArrendatario}</td>
+                  <td className="px-4 py-3 text-slate-600">{[c.nombreArrendatario, c.apellidoArrendatario].filter(Boolean).join(" ") || "-"}</td>
                   <td className="px-4 py-3 text-slate-600">
                     {c.departamento} {c.torre}
                   </td>

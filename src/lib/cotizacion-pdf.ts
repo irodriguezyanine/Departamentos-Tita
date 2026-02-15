@@ -52,7 +52,8 @@ export function nombreArchivoCotizacion(cot: CotizacionArriendo): string {
   const dd = String(hoy.getDate()).padStart(2, "0")
   const fecha = `${yy}${mm}${dd}`
   const depto = (cot.departamento || "sin-depto").replace(/\s/g, "")
-  const cliente = (cot.nombreArrendatario || "sin-nombre")
+  const nombreCompleto = [cot.nombreArrendatario, cot.apellidoArrendatario].filter(Boolean).join(" ") || "sin-nombre"
+  const cliente = nombreCompleto
     .trim()
     .replace(/\s+/g, "_")
   return `${fecha}_${depto}_${cliente}.pdf`
@@ -94,7 +95,7 @@ function drawHeader(doc: jsPDF, cot: CotizacionArriendo): number {
   clientY += 6
   doc.setFont("helvetica", "normal")
   doc.setFontSize(10)
-  const nombreLines = doc.splitTextToSize(cot.nombreArrendatario || "-", 80)
+  const nombreLines = doc.splitTextToSize([cot.nombreArrendatario, cot.apellidoArrendatario].filter(Boolean).join(" ") || "-", 80)
   doc.text(nombreLines, clienteX, clientY, { align: "right" })
   clientY += nombreLines.length * 5 + 2
   doc.setFontSize(9)
@@ -227,7 +228,7 @@ export function generarPDFCotizacion(cot: CotizacionArriendo): jsPDF {
     datosRows * 6 + 4
   )
   y = datosY
-  y = drawCardRow(doc, "Arrendatario", cot.nombreArrendatario || "-", y)
+  y = drawCardRow(doc, "Arrendatario", [cot.nombreArrendatario, cot.apellidoArrendatario].filter(Boolean).join(" ") || "-", y)
   y = drawCardRow(doc, "Departamento", cot.departamento || "-", y)
   y = drawCardRow(doc, "Torre", cot.torre || "-", y)
   y = drawCardRow(doc, "Estacionamiento", cot.estacionamiento || "-", y)
