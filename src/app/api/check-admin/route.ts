@@ -23,17 +23,23 @@ export async function GET() {
     }
 
     const db = await getDb()
-    const user = await db.collection("users").findOne({ username: "dalal@vtr.net" })
+    const usersCollection = db.collection("users")
+    const dalal = await usersCollection.findOne({ username: "dalal@vtr.net" })
+    const ignacio = await usersCollection.findOne({ username: "irodriguezy" })
 
     return NextResponse.json({
       ok: true,
       mongo: "Conectado",
-      adminExiste: !!user,
+      usuarios: {
+        "dalal@vtr.net": !!dalal,
+        irodriguezy: !!ignacio,
+      },
       nextAuth: hasNextAuthSecret ? "OK" : "Falta NEXTAUTH_SECRET",
       nextAuthUrl,
-      pasos: !user
-        ? "Visita /api/ensure-admin para crear el usuario admin, luego intenta iniciar sesión con dalal@vtr.net / Ignacio"
-        : "El usuario admin existe. Si no puedes entrar, visita /api/ensure-admin para restablecer la contraseña.",
+      pasos:
+        !dalal && !ignacio
+          ? "Visita /api/ensure-admin para crear los usuarios admin"
+          : "Usuarios listos. Si no entras: visita /api/ensure-admin para restablecer contraseñas.",
     })
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error)
