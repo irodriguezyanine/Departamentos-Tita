@@ -231,16 +231,16 @@ export function CotizacionEditor({ cotizacion, onSave, onBack, isNew }: Props) {
                   placeholder="cliente@ejemplo.com"
                 />
               </div>
-              <div>
+              <div className="sm:col-span-2">
                 <label className="block text-sm font-medium text-slate-700 mb-1">Teléfono arrendatario</label>
-                <div className="flex gap-2">
+                <div className="flex gap-2 min-w-0">
                   <select
                     value={codigoPais}
                     onChange={(e) => {
                       setCodigoPais(e.target.value)
                       setForm({ ...form, telefonoArrendatario: e.target.value + numeroTelefono.replace(/\D/g, "") })
                     }}
-                    className={`${inputClass} w-32 shrink-0`}
+                    className={`${inputClass} w-36 shrink-0`}
                   >
                     {CODIGOS_PAIS.map((p) => (
                       <option key={`${p.codigo}-${p.pais}`} value={p.codigo}>
@@ -256,7 +256,7 @@ export function CotizacionEditor({ cotizacion, onSave, onBack, isNew }: Props) {
                       setNumeroTelefono(e.target.value)
                       setForm({ ...form, telefonoArrendatario: codigoPais + num })
                     }}
-                    className={`${inputClass} flex-1`}
+                    className={`${inputClass} flex-1 min-w-0`}
                     placeholder="9 1234 5678"
                   />
                 </div>
