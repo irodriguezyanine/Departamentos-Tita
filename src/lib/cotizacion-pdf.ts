@@ -105,9 +105,6 @@ function drawHeader(doc: jsPDF, cot: CotizacionArriendo): number {
     doc.text(cot.telefonoArrendatario, clienteX, clientY, { align: "right" })
   }
 
-  doc.setFillColor(...ORO)
-  doc.rect(0, headerH, PAGE_WIDTH, 2, "F")
-
   return 42
 }
 

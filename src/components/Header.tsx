@@ -3,13 +3,12 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { signOut } from "next-auth/react"
-import { Menu, X, Home, Building2, LogIn, LogOut } from "lucide-react"
+import { Menu, X, Building2, LogIn, LogOut } from "lucide-react"
 import { useState } from "react"
 import { useSession } from "next-auth/react"
 import { clsx } from "clsx"
 
 const NAV_ITEMS = [
-  { href: "/", label: "Inicio" },
   { href: "/departamentos/4c-torre-galapagos", label: "4 C Galápagos" },
   { href: "/departamentos/13d-torre-cabo-hornos", label: "13 D Cabo de Hornos" },
   { href: "/departamentos/17c-torre-isla-grande", label: "17 C Isla Grande" },
