@@ -2,7 +2,14 @@ import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { cloudinary } from "@/lib/cloudinary"
+import { writeFile, mkdir } from "fs/promises"
+import path from "path"
 
+/**
+ * Las fotos se suben al destino según el departamento:
+ * - Cloudinary: departamentos_tita/{slug} (ej: 4c-torre-galapagos, 13d-torre-cabo-hornos)
+ * - Local (fallback): public/assets/departamentos/{slug}/
+ */
 export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions)
@@ -26,35 +33,42 @@ export async function POST(request: Request) {
       )
     }
 
-    if (
-      !process.env.CLOUDINARY_CLOUD_NAME ||
-      !process.env.CLOUDINARY_API_KEY ||
-      !process.env.CLOUDINARY_API_SECRET
-    ) {
-      return NextResponse.json(
-        { error: "Cloudinary no está configurado. Revisa las variables de entorno." },
-        { status: 500 }
-      )
-    }
-
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
-    const base64 = `data:${file.type};base64,${buffer.toString("base64")}`
 
-    const isVideo = file.type.startsWith("video/")
-    const result = await cloudinary.uploader.upload(base64, {
-      folder: `departamentos_tita/${folder}`,
-      resource_type: isVideo ? "video" : "image",
-    })
+    // Intentar Cloudinary primero si está configurado
+    if (
+      process.env.CLOUDINARY_CLOUD_NAME &&
+      process.env.CLOUDINARY_API_KEY &&
+      process.env.CLOUDINARY_API_SECRET
+    ) {
+      const base64 = `data:${file.type};base64,${buffer.toString("base64")}`
+      const isVideo = file.type.startsWith("video/")
+      const result = await cloudinary.uploader.upload(base64, {
+        folder: `departamentos_tita/${folder}`,
+        resource_type: isVideo ? "video" : "image",
+      })
+      return NextResponse.json({
+        url: result.secure_url,
+        publicId: result.public_id,
+      })
+    }
 
-    return NextResponse.json({
-      url: result.secure_url,
-      publicId: result.public_id,
-    })
+    // Fallback: guardar en public/assets/departamentos/{slug}/ (mismo destino que las fotos estáticas)
+    const ext = path.extname(file.name) || (file.type.includes("png") ? ".png" : ".jpg")
+    const filename = `foto-${Date.now()}${ext}`
+    const dir = path.join(process.cwd(), "public", "assets", "departamentos", folder)
+    const filepath = path.join(dir, filename)
+
+    await mkdir(dir, { recursive: true })
+    await writeFile(filepath, buffer)
+
+    const url = `/assets/departamentos/${folder}/${filename}`
+    return NextResponse.json({ url, publicId: undefined })
   } catch (error) {
     console.error("Error al subir archivo:", error)
     return NextResponse.json(
-      { error: "Error al subir el archivo. Verifica la configuración de Cloudinary." },
+      { error: "Error al subir el archivo. Verifica la configuración de Cloudinary o el sistema de archivos." },
       { status: 500 }
     )
   }
