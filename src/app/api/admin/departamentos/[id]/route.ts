@@ -27,15 +27,21 @@ export async function GET(
     }
 
     let imagenes = dept.imagenes || []
+    let descripcionLarga = dept.descripcionLarga
 
-    if (imagenes.length === 0 && dept.slug) {
+    if (dept.slug) {
       const staticDept = getDepartamentoBySlug(dept.slug)
-      if (staticDept?.imagenes?.length) {
-        imagenes = staticDept.imagenes.map((img) => ({
-          url: img.url,
-          orden: img.orden,
-          alt: img.alt,
-        }))
+      if (staticDept) {
+        if (imagenes.length === 0 && staticDept.imagenes?.length) {
+          imagenes = staticDept.imagenes.map((img) => ({
+            url: img.url,
+            orden: img.orden,
+            alt: img.alt,
+          }))
+        }
+        if (!descripcionLarga && staticDept.descripcionLarga) {
+          descripcionLarga = staticDept.descripcionLarga
+        }
       }
     }
 
@@ -43,6 +49,7 @@ export async function GET(
       ...dept,
       _id: dept._id.toString(),
       imagenes,
+      descripcionLarga: descripcionLarga ?? dept.descripcionLarga,
     })
   } catch (error) {
     console.error("Error al obtener departamento:", error)

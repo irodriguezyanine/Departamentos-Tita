@@ -8,9 +8,9 @@ export default function AdminLayout({
   children: React.ReactNode
 }) {
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 print:bg-white">
       <AdminNav />
-      <div className="pt-16">{children}</div>
+      <div className="pt-16 print:pt-0">{children}</div>
     </div>
   )
 }

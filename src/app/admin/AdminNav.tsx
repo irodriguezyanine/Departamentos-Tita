@@ -7,6 +7,7 @@ import {
   LayoutDashboard,
   Building2,
   Users,
+  FileText,
   LogOut,
   Home,
   Menu,
@@ -18,6 +19,7 @@ import { clsx } from "clsx"
 const NAV_ITEMS = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/departamentos", label: "Departamentos", icon: Building2 },
+  { href: "/admin/cotizaciones", label: "Cotizaciones", icon: FileText },
   { href: "/admin/clientes", label: "Clientes", icon: Users },
 ]
 
@@ -26,7 +28,7 @@ export function AdminNav() {
   const [open, setOpen] = useState(false)
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-slate-200">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-slate-200 print:hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center gap-4">

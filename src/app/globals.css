@@ -62,3 +62,13 @@ body {
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
+
+/* Carrusel: scroll horizontal fluido en móvil */
+.overscroll-x-contain {
+  overscroll-behavior-x: contain;
+}
+.touch-pinch-zoom {
+  touch-action: pinch-zoom;
+  -webkit-user-select: none;
+  user-select: none;
+}

@@ -66,103 +66,181 @@ export default function AdminDepartamentosPage() {
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-        <table className="w-full">
-          <thead className="bg-slate-50 border-b border-slate-200">
-            <tr>
-              <th className="text-left px-4 py-3 text-sm font-semibold text-slate-700">
-                Departamento
-              </th>
-              <th className="text-left px-4 py-3 text-sm font-semibold text-slate-700">
-                Torre
-              </th>
-              <th className="text-left px-4 py-3 text-sm font-semibold text-slate-700">
-                Precio
-              </th>
-              <th className="text-left px-4 py-3 text-sm font-semibold text-slate-700">
-                Fotos
-              </th>
-              <th className="text-left px-4 py-3 text-sm font-semibold text-slate-700">
-                Estado
-              </th>
-              <th className="text-right px-4 py-3 text-sm font-semibold text-slate-700">
-                Acciones
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {departamentos.map((d) => (
-              <tr key={d._id} className="border-b border-slate-100 hover:bg-slate-50/50">
-                <td className="px-4 py-3 font-medium text-slate-800">{d.name}</td>
-                <td className="px-4 py-3 text-slate-600">{d.torre}</td>
-                <td className="px-4 py-3 text-slate-600">
-                  ${formatPrice(d.precio)} / noche
-                </td>
-                <td className="px-4 py-3">
-                  <span className="text-slate-600">
-                    {d.imagenes?.length || 0} fotos
-                  </span>
-                </td>
-                <td className="px-4 py-3">
-                  <span
-                    className={`inline-block px-2 py-1 rounded text-xs font-medium ${
-                      d.disponible ? "bg-green-100 text-green-700" : "bg-slate-100 text-slate-600"
-                    }`}
+        {departamentos.length > 0 && (
+          <>
+        {/* Vista móvil: tarjetas */}
+        <div className="md:hidden divide-y divide-slate-100">
+          {departamentos.map((d) => (
+            <div key={d._id} className="p-4">
+              <div className="flex items-start justify-between gap-3 mb-3">
+                <div>
+                  <h3 className="font-semibold text-slate-800">{d.name}</h3>
+                  <p className="text-sm text-slate-500">{d.torre}</p>
+                </div>
+                <span
+                  className={`shrink-0 px-2 py-1 rounded text-xs font-medium ${
+                    d.disponible ? "bg-green-100 text-green-700" : "bg-slate-100 text-slate-600"
+                  }`}
+                >
+                  {d.disponible ? "Disponible" : "No disponible"}
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-sm text-slate-600 mb-4">
+                <span>${formatPrice(d.precio)} / noche</span>
+                <span>{d.imagenes?.length || 0} fotos</span>
+              </div>
+              <div className="flex gap-2">
+                <Link
+                  href={`/admin/departamentos/${d._id}/editar`}
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-tita-primary text-white rounded-lg text-sm font-medium"
+                >
+                  <Pencil className="w-4 h-4" />
+                  Editar
+                </Link>
+                <div className="relative">
+                  <button
+                    onClick={() => setOpenMenu(openMenu === d._id ? null : d._id)}
+                    className="p-2.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50"
+                    title="Más opciones"
                   >
-                    {d.disponible ? "Disponible" : "No disponible"}
-                  </span>
-                </td>
-                <td className="px-4 py-3 text-right">
-                  <div className="relative flex items-center justify-end gap-2">
-                    <Link
-                      href={`/admin/departamentos/${d._id}/editar`}
-                      className="flex items-center gap-2 px-3 py-2 bg-tita-primary text-white rounded-lg hover:bg-tita-primary/90 text-sm font-medium"
-                    >
-                      <Pencil className="w-4 h-4" />
-                      Editar
-                    </Link>
-                    <div className="relative">
-                      <button
-                        onClick={() => setOpenMenu(openMenu === d._id ? null : d._id)}
-                        className="p-2 rounded-lg hover:bg-slate-200 text-slate-600"
-                        title="Más opciones"
-                      >
-                        <MoreVertical className="w-4 h-4" />
-                      </button>
-                      {openMenu === d._id && (
-                        <>
-                          <div
-                            className="fixed inset-0 z-10"
-                            onClick={() => setOpenMenu(null)}
-                          />
-                          <div className="absolute right-0 top-full mt-1 py-1 bg-white rounded-lg shadow-lg border border-slate-200 z-20 min-w-[180px]">
-                            <Link
-                              href={`/admin/departamentos/${d._id}/layout`}
-                              className="flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
-                              onClick={() => setOpenMenu(null)}
-                            >
-                              <Layout className="w-4 h-4" />
-                              Editor de layout
-                            </Link>
-                            <Link
-                              href={`/departamentos/${d.slug}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
-                              onClick={() => setOpenMenu(null)}
-                            >
-                              <ExternalLink className="w-4 h-4" />
-                              Ver página pública
-                            </Link>
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                </td>
+                    <MoreVertical className="w-4 h-4" />
+                  </button>
+                  {openMenu === d._id && (
+                    <>
+                      <div
+                        className="fixed inset-0 z-10"
+                        onClick={() => setOpenMenu(null)}
+                      />
+                      <div className="absolute right-0 top-full mt-1 py-1 bg-white rounded-lg shadow-lg border border-slate-200 z-20 min-w-[180px]">
+                        <Link
+                          href={`/admin/departamentos/${d._id}/layout`}
+                          className="flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
+                          onClick={() => setOpenMenu(null)}
+                        >
+                          <Layout className="w-4 h-4" />
+                          Editor de layout
+                        </Link>
+                        <Link
+                          href={`/departamentos/${d.slug}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
+                          onClick={() => setOpenMenu(null)}
+                        >
+                          <ExternalLink className="w-4 h-4" />
+                          Ver página pública
+                        </Link>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Vista desktop: tabla */}
+        <div className="hidden md:block overflow-x-auto scrollbar-hide">
+          <table className="w-full min-w-[640px]">
+            <thead className="bg-slate-50 border-b border-slate-200">
+              <tr>
+                <th className="text-left px-4 py-3 text-sm font-semibold text-slate-700">
+                  Departamento
+                </th>
+                <th className="text-left px-4 py-3 text-sm font-semibold text-slate-700">
+                  Torre
+                </th>
+                <th className="text-left px-4 py-3 text-sm font-semibold text-slate-700">
+                  Precio
+                </th>
+                <th className="text-left px-4 py-3 text-sm font-semibold text-slate-700">
+                  Fotos
+                </th>
+                <th className="text-left px-4 py-3 text-sm font-semibold text-slate-700">
+                  Estado
+                </th>
+                <th className="text-right px-4 py-3 text-sm font-semibold text-slate-700">
+                  Acciones
+                </th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {departamentos.map((d) => (
+                <tr key={d._id} className="border-b border-slate-100 hover:bg-slate-50/50">
+                  <td className="px-4 py-3 font-medium text-slate-800">{d.name}</td>
+                  <td className="px-4 py-3 text-slate-600">{d.torre}</td>
+                  <td className="px-4 py-3 text-slate-600">
+                    ${formatPrice(d.precio)} / noche
+                  </td>
+                  <td className="px-4 py-3">
+                    <span className="text-slate-600">
+                      {d.imagenes?.length || 0} fotos
+                    </span>
+                  </td>
+                  <td className="px-4 py-3">
+                    <span
+                      className={`inline-block px-2 py-1 rounded text-xs font-medium ${
+                        d.disponible ? "bg-green-100 text-green-700" : "bg-slate-100 text-slate-600"
+                      }`}
+                    >
+                      {d.disponible ? "Disponible" : "No disponible"}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <div className="relative flex items-center justify-end gap-2">
+                      <Link
+                        href={`/admin/departamentos/${d._id}/editar`}
+                        className="flex items-center gap-2 px-3 py-2 bg-tita-primary text-white rounded-lg hover:bg-tita-primary/90 text-sm font-medium"
+                      >
+                        <Pencil className="w-4 h-4" />
+                        Editar
+                      </Link>
+                      <div className="relative">
+                        <button
+                          onClick={() => setOpenMenu(openMenu === d._id ? null : d._id)}
+                          className="p-2 rounded-lg hover:bg-slate-200 text-slate-600"
+                          title="Más opciones"
+                        >
+                          <MoreVertical className="w-4 h-4" />
+                        </button>
+                        {openMenu === d._id && (
+                          <>
+                            <div
+                              className="fixed inset-0 z-10"
+                              onClick={() => setOpenMenu(null)}
+                            />
+                            <div className="absolute right-0 top-full mt-1 py-1 bg-white rounded-lg shadow-lg border border-slate-200 z-20 min-w-[180px]">
+                              <Link
+                                href={`/admin/departamentos/${d._id}/layout`}
+                                className="flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
+                                onClick={() => setOpenMenu(null)}
+                              >
+                                <Layout className="w-4 h-4" />
+                                Editor de layout
+                              </Link>
+                              <Link
+                                href={`/departamentos/${d.slug}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
+                                onClick={() => setOpenMenu(null)}
+                              >
+                                <ExternalLink className="w-4 h-4" />
+                                Ver página pública
+                              </Link>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+          </>
+        )}
 
         {departamentos.length === 0 && (
           <div className="p-12 text-center">

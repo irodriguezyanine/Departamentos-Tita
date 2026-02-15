@@ -1,16 +1,18 @@
 import Link from "next/link"
-import { Building2, Users } from "lucide-react"
+import { Building2, Users, FileText } from "lucide-react"
 import { getDb } from "@/lib/db"
 import { DepartamentosEditorMenu } from "@/components/admin/DepartamentosEditorMenu"
 
 export default async function AdminDashboardPage() {
   let departamentosCount = 0
   let clientesCount = 0
+  let cotizacionesCount = 0
   try {
     const db = await getDb()
-    ;[departamentosCount, clientesCount] = await Promise.all([
+    ;[departamentosCount, clientesCount, cotizacionesCount] = await Promise.all([
       db.collection("departamentos").countDocuments(),
       db.collection("clientes").countDocuments(),
+      db.collection("cotizaciones").countDocuments(),
     ])
   } catch {
     // DB might not be ready
@@ -23,6 +25,13 @@ export default async function AdminDashboardPage() {
       href: "/admin/departamentos",
       icon: Building2,
       color: "tita-primary",
+    },
+    {
+      title: "Cotizaciones",
+      value: cotizacionesCount,
+      href: "/admin/cotizaciones",
+      icon: FileText,
+      color: "tita-verde",
     },
     {
       title: "Clientes / Consultas",

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { getDb } from "@/lib/db"
-import { ObjectId } from "mongodb"
+import { getDepartamentoBySlug } from "@/data/departamentos-static"
 
 export const dynamic = "force-dynamic"
 
@@ -20,10 +20,24 @@ export async function GET() {
       .sort({ name: 1 })
       .toArray()
 
-    const serialized = departamentos.map((d) => ({
-      ...d,
-      _id: d._id.toString(),
-    }))
+    const serialized = departamentos.map((d) => {
+      let imagenes = d.imagenes || []
+      if (imagenes.length === 0 && d.slug) {
+        const staticDept = getDepartamentoBySlug(d.slug)
+        if (staticDept?.imagenes?.length) {
+          imagenes = staticDept.imagenes.map((img) => ({
+            url: img.url,
+            orden: img.orden,
+            alt: img.alt,
+          }))
+        }
+      }
+      return {
+        ...d,
+        _id: d._id.toString(),
+        imagenes,
+      }
+    })
 
     return NextResponse.json(serialized)
   } catch (error) {

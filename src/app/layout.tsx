@@ -40,10 +40,14 @@ export default function RootLayout({
     <html lang="es" className={`${playfair.variable} ${sourceSans.variable}`}>
       <body className="font-sans antialiased">
         <SessionProvider>
-          <Header />
-          <main className="min-h-screen pt-16 md:pt-20">{children}</main>
-          <Footer />
-          <WhatsAppButton />
+          <div className="print:hidden">
+            <Header />
+          </div>
+          <main className="min-h-screen pt-16 md:pt-20 print:pt-0">{children}</main>
+          <div className="print:hidden">
+            <Footer />
+            <WhatsAppButton />
+          </div>
         </SessionProvider>
       </body>
     </html>
