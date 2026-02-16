@@ -1,7 +1,7 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { ImageIcon, Share2, Loader2, Save } from "lucide-react"
+import { useEffect, useState, useRef } from "react"
+import { ImageIcon, Share2, Loader2, Save, ChevronDown, ChevronUp, Upload } from "lucide-react"
 
 interface NuestraHistoria {
   imagenUrl: string
@@ -31,12 +31,29 @@ const DEFAULT_OG: OgSettings = {
   ogDescription: "5 departamentos en arriendo primera línea de playa. Entra y reserva.",
 }
 
+function buildImageSrc(url: string): string {
+  if (!url) return ""
+  if (url.startsWith("http")) return url
+  if (typeof window !== "undefined") {
+    const base = window.location.origin
+    const path = url.startsWith("/") ? url : `/${url}`
+    return base + encodeURI(path)
+  }
+  return url
+}
+
 export function NuestraHistoriaEditor() {
   const [nuestraHistoria, setNuestraHistoria] = useState<NuestraHistoria>(DEFAULT_NUESTRA_HISTORIA)
   const [og, setOg] = useState<OgSettings>(DEFAULT_OG)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [openNuestraHistoria, setOpenNuestraHistoria] = useState(false)
+  const [openOg, setOpenOg] = useState(false)
+  const [uploadingNuestraHistoria, setUploadingNuestraHistoria] = useState(false)
+  const [uploadingOg, setUploadingOg] = useState(false)
+  const fileInputNuestraHistoria = useRef<HTMLInputElement>(null)
+  const fileInputOg = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     fetch("/api/settings")
@@ -88,6 +105,42 @@ export function NuestraHistoriaEditor() {
     setSaving(false)
   }
 
+  const handleUploadNuestraHistoria = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploadingNuestraHistoria(true)
+    try {
+      const formData = new FormData()
+      formData.append("file", file)
+      formData.append("folder", "nuestra_historia")
+      const res = await fetch("/api/upload", { method: "POST", body: formData })
+      const data = await res.json()
+      if (data.url) setNuestraHistoria((prev) => ({ ...prev, imagenUrl: data.url }))
+    } catch (err) {
+      console.error(err)
+    }
+    setUploadingNuestraHistoria(false)
+    e.target.value = ""
+  }
+
+  const handleUploadOg = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploadingOg(true)
+    try {
+      const formData = new FormData()
+      formData.append("file", file)
+      formData.append("folder", "og_image")
+      const res = await fetch("/api/upload", { method: "POST", body: formData })
+      const data = await res.json()
+      if (data.url) setOg((prev) => ({ ...prev, ogImage: data.url }))
+    } catch (err) {
+      console.error(err)
+    }
+    setUploadingOg(false)
+    e.target.value = ""
+  }
+
   if (loading) {
     return (
       <div className="flex items-center gap-2 text-slate-500 py-4">
@@ -98,51 +151,82 @@ export function NuestraHistoriaEditor() {
   }
 
   return (
-    <div className="mt-12 space-y-10">
-      {/* Editar Nuestra historia */}
-      <div>
-        <h2 className="font-display text-xl font-semibold text-slate-800 mb-4">
-          Editar &quot;Nuestra historia&quot;
-        </h2>
-        <p className="text-slate-600 text-sm mb-6">
-          Foto y texto de la sección &quot;Nuestra historia&quot; en la página principal. Puedes usar
-          una URL externa (ej. Cloudinary) para la imagen.
-        </p>
+    <div className="mt-12 space-y-4">
+      {/* Editar Nuestra historia - colapsable */}
+      <div className="border border-slate-200 rounded-xl overflow-hidden bg-white">
+        <button
+          type="button"
+          onClick={() => setOpenNuestraHistoria(!openNuestraHistoria)}
+          className="w-full flex items-center justify-between px-6 py-4 text-left hover:bg-slate-50 transition-colors"
+        >
+          <h2 className="font-display text-xl font-semibold text-slate-800">
+            Editar &quot;Nuestra historia&quot;
+          </h2>
+          {openNuestraHistoria ? (
+            <ChevronUp className="w-5 h-5 text-slate-500" />
+          ) : (
+            <ChevronDown className="w-5 h-5 text-slate-500" />
+          )}
+        </button>
+        {openNuestraHistoria && (
+          <div className="px-6 pb-6 pt-0 border-t border-slate-100">
+            <p className="text-slate-600 text-sm mb-6 mt-4">
+              Foto y texto de la sección &quot;Nuestra historia&quot; en la página principal. Sube una
+              foto con Cloudinary o pega una URL.
+            </p>
 
-        <div className="grid md:grid-cols-2 gap-8">
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">Foto (URL)</label>
-            <div className="aspect-[3/4] rounded-xl overflow-hidden bg-slate-100 border-2 border-slate-200 mb-3 max-w-xs">
-              {nuestraHistoria.imagenUrl ? (
-                <img
-                  src={
-                    nuestraHistoria.imagenUrl.startsWith("http")
-                      ? nuestraHistoria.imagenUrl
-                      : `${typeof window !== "undefined" ? window.location.origin : ""}${nuestraHistoria.imagenUrl.startsWith("/") ? nuestraHistoria.imagenUrl : `/${nuestraHistoria.imagenUrl}`}`
-                  }
-                  alt="Vista previa"
-                  className="w-full h-full object-cover object-top"
-                  onError={(e) => {
-                    ;(e.target as HTMLImageElement).src =
-                      "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Crect fill='%23e2e8f0' width='200' height='200'/%3E%3Ctext fill='%2394a3b8' x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-size='14'%3EImagen no disponible%3C/text%3E%3C/svg%3E"
-                  }}
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-slate-400">
-                  <ImageIcon className="w-12 h-12" />
+            <div className="grid md:grid-cols-2 gap-8">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Foto</label>
+                <div className="aspect-[3/4] rounded-xl overflow-hidden bg-slate-100 border-2 border-slate-200 mb-3 max-w-xs">
+                  {nuestraHistoria.imagenUrl ? (
+                    <img
+                      src={buildImageSrc(nuestraHistoria.imagenUrl)}
+                      alt="Vista previa"
+                      className="w-full h-full object-cover object-top"
+                      onError={(e) => {
+                        ;(e.target as HTMLImageElement).src =
+                          "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Crect fill='%23e2e8f0' width='200' height='200'/%3E%3Ctext fill='%2394a3b8' x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-size='14'%3EImagen no disponible%3C/text%3E%3C/svg%3E"
+                      }}
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-slate-400">
+                      <ImageIcon className="w-12 h-12" />
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-            <input
-              type="url"
-              value={nuestraHistoria.imagenUrl}
-              onChange={(e) =>
-                setNuestraHistoria((prev) => ({ ...prev, imagenUrl: e.target.value }))
-              }
-              placeholder="https://... o /assets/..."
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-tita-primary focus:border-tita-primary"
-            />
-          </div>
+                <div className="flex gap-2 mb-2">
+                  <input
+                    ref={fileInputNuestraHistoria}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/gif"
+                    onChange={handleUploadNuestraHistoria}
+                    className="hidden"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => fileInputNuestraHistoria.current?.click()}
+                    disabled={uploadingNuestraHistoria}
+                    className="flex items-center gap-2 px-4 py-2 bg-tita-primary text-white rounded-lg hover:bg-tita-primary/90 disabled:opacity-50 text-sm"
+                  >
+                    {uploadingNuestraHistoria ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Upload className="w-4 h-4" />
+                    )}
+                    {uploadingNuestraHistoria ? "Subiendo..." : "Subir con Cloudinary"}
+                  </button>
+                </div>
+                <input
+                  type="url"
+                  value={nuestraHistoria.imagenUrl}
+                  onChange={(e) =>
+                    setNuestraHistoria((prev) => ({ ...prev, imagenUrl: e.target.value }))
+                  }
+                  placeholder="https://... o /assets/..."
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-tita-primary focus:border-tita-primary"
+                />
+              </div>
 
           <div className="space-y-4">
             <div>
@@ -190,57 +274,90 @@ export function NuestraHistoriaEditor() {
           {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
           Guardar Nuestra historia
         </button>
+          </div>
+        )}
       </div>
 
-      {/* Link para compartir (WhatsApp, etc.) */}
-      <div>
-        <h2 className="font-display text-xl font-semibold text-slate-800 mb-4 flex items-center gap-2">
-          <Share2 className="w-5 h-5" />
-          Foto y texto del link para compartir (WhatsApp, redes)
-        </h2>
-        <p className="text-slate-600 text-sm mb-6">
-          Imagen y texto que aparecen cuando alguien comparte el enlace. Usa una URL externa para
-          la imagen (ej. Cloudinary).
-        </p>
+      {/* Link para compartir - colapsable */}
+      <div className="border border-slate-200 rounded-xl overflow-hidden bg-white">
+        <button
+          type="button"
+          onClick={() => setOpenOg(!openOg)}
+          className="w-full flex items-center justify-between px-6 py-4 text-left hover:bg-slate-50 transition-colors"
+        >
+          <h2 className="font-display text-xl font-semibold text-slate-800 flex items-center gap-2">
+            <Share2 className="w-5 h-5" />
+            Foto y texto del link para compartir (WhatsApp, redes)
+          </h2>
+          {openOg ? (
+            <ChevronUp className="w-5 h-5 text-slate-500" />
+          ) : (
+            <ChevronDown className="w-5 h-5 text-slate-500" />
+          )}
+        </button>
+        {openOg && (
+          <div className="px-6 pb-6 pt-0 border-t border-slate-100">
+            <p className="text-slate-600 text-sm mb-6 mt-4">
+              Imagen y texto que aparecen cuando alguien comparte el enlace. Sube una foto con
+              Cloudinary o pega una URL.
+            </p>
 
-        <div className="space-y-4 max-w-2xl">
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
-              Imagen del preview (URL)
-            </label>
-            <div className="flex gap-4 items-start">
-              <div className="w-24 h-24 rounded-lg overflow-hidden bg-slate-100 border border-slate-200 flex-shrink-0">
-                {og.ogImage ? (
-                  <img
-                    src={
-                      og.ogImage.startsWith("http")
-                        ? og.ogImage
-                        : og.ogImage.startsWith("/")
-                          ? `${typeof window !== "undefined" ? window.location.origin : ""}${og.ogImage}`
-                          : og.ogImage
-                    }
-                    alt="OG preview"
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      ;(e.target as HTMLImageElement).src =
-                        "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Crect fill='%23e2e8f0' width='96' height='96'/%3E%3C/svg%3E"
-                    }}
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-slate-400">
-                    <ImageIcon className="w-8 h-8" />
+            <div className="space-y-4 max-w-2xl">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Imagen del preview
+                </label>
+                <div className="flex gap-4 items-start">
+                  <div className="w-24 h-24 rounded-lg overflow-hidden bg-slate-100 border border-slate-200 flex-shrink-0">
+                    {og.ogImage ? (
+                      <img
+                        src={buildImageSrc(og.ogImage)}
+                        alt="OG preview"
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          ;(e.target as HTMLImageElement).src =
+                            "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Crect fill='%23e2e8f0' width='96' height='96'/%3E%3C/svg%3E"
+                        }}
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-slate-400">
+                        <ImageIcon className="w-8 h-8" />
+                      </div>
+                    )}
                   </div>
-                )}
+                  <div className="flex-1 space-y-2">
+                    <div className="flex gap-2">
+                      <input
+                        ref={fileInputOg}
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp,image/gif"
+                        onChange={handleUploadOg}
+                        className="hidden"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => fileInputOg.current?.click()}
+                        disabled={uploadingOg}
+                        className="flex items-center gap-2 px-4 py-2 bg-tita-verde text-white rounded-lg hover:bg-tita-verde/90 disabled:opacity-50 text-sm"
+                      >
+                        {uploadingOg ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <Upload className="w-4 h-4" />
+                        )}
+                        {uploadingOg ? "Subiendo..." : "Subir con Cloudinary"}
+                      </button>
+                    </div>
+                    <input
+                      type="url"
+                      value={og.ogImage}
+                      onChange={(e) => setOg((prev) => ({ ...prev, ogImage: e.target.value }))}
+                      placeholder="https://... o /og-image.png"
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-tita-primary focus:border-tita-primary"
+                    />
+                  </div>
+                </div>
               </div>
-              <input
-                type="url"
-                value={og.ogImage}
-                onChange={(e) => setOg((prev) => ({ ...prev, ogImage: e.target.value }))}
-                placeholder="https://... o /og-image.png"
-                className="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-tita-primary focus:border-tita-primary"
-              />
-            </div>
-          </div>
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">Título</label>
             <input
@@ -270,6 +387,8 @@ export function NuestraHistoriaEditor() {
           {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
           Guardar link para compartir
         </button>
+          </div>
+        )}
       </div>
 
       {saved && (
