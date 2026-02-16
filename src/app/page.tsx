@@ -318,14 +318,41 @@ export default function HomePage() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.05 }}
-                  whileHover={{ scale: 1.02, y: -2 }}
-                  whileTap={{ scale: 0.98 }}
+                  animate={{
+                    boxShadow: [
+                      "0 2px 8px -2px rgb(0 0 0 / 0.06)",
+                      "0 6px 16px -4px rgb(0 0 0 / 0.1)",
+                      "0 2px 8px -2px rgb(0 0 0 / 0.06)",
+                    ],
+                  }}
+                  transition={{
+                    delay: i * 0.05,
+                    duration: 0.5,
+                    boxShadow: { duration: 2.5, repeat: Infinity, repeatType: "reverse" },
+                  }}
+                  whileHover={{
+                    scale: 1.04,
+                    y: -6,
+                    boxShadow: "0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)",
+                    borderColor: "rgba(180, 140, 70, 0.6)",
+                    transition: { duration: 0.2 },
+                  }}
+                  whileTap={{ scale: 0.98, transition: { duration: 0.1 } }}
                   onClick={() => setModalAmenidad({ id: item.id, titulo, descripcion: desc, fotos })}
-                  className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all border-2 border-slate-100 hover:border-tita-oro/50 cursor-pointer select-none"
+                  className="bg-white p-6 rounded-xl border-2 border-slate-100 cursor-pointer select-none group"
                 >
-                  <item.icon className="w-10 h-10 text-tita-verde mb-3" />
-                  <h3 className="font-semibold text-slate-800 mb-1">{titulo}</h3>
+                  <motion.span
+                    className="inline-block"
+                    whileHover={{ scale: 1.1, rotate: 2 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                  >
+                    <item.icon className="w-10 h-10 text-tita-verde mb-3" />
+                  </motion.span>
+                  <h3 className="font-semibold text-slate-800 mb-1 group-hover:text-tita-verde transition-colors">{titulo}</h3>
                   <p className="text-slate-600 text-sm">{desc}</p>
+                  <p className="text-tita-oro/80 text-xs mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    Haz clic para ver galería →
+                  </p>
                 </motion.div>
               )
             })}
