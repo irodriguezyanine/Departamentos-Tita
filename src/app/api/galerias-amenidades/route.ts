@@ -19,8 +19,8 @@ export type AmenidadId = (typeof AMENIDADES)[number]["id"]
 export async function GET() {
   try {
     const db = await getDb()
-    const docs = await db.collection("galerias_amenidades").find({}).toArray()
-    const map = new Map(docs.map((d: { _id: string }) => [d._id, d]))
+    const docs = (await db.collection("galerias_amenidades").find({}).toArray()) as { _id: string; titulo?: string; descripcion?: string; fotos?: { url: string }[] }[]
+    const map = new Map(docs.map((d) => [d._id, d]))
     const result = AMENIDADES.map((a) => {
       const doc = map.get(a.id) as { titulo?: string; descripcion?: string; fotos?: { url: string }[] } | undefined
       return {
