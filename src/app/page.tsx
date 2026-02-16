@@ -181,7 +181,7 @@ export default function HomePage() {
               transition={{ duration: 0.7 }}
               className="relative"
             >
-              <div className="aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl">
+              <div className="aspect-[3/4] rounded-2xl overflow-hidden shadow-2xl max-w-sm mx-auto md:mx-0">
                 <Image
                   src="/assets/TITA Foto perfil.jpeg"
                   alt="Dalal Saleme y Enrique Yanine - Dueños de Condominio Puerto Pacífico"
