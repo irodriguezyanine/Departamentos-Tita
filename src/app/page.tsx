@@ -16,6 +16,7 @@ import {
   Bed,
   Bath,
 } from "lucide-react"
+import { AmenityGalleryModal } from "@/components/AmenityGalleryModal"
 import Image from "next/image"
 import { getDepartamentoBySlug } from "@/data/departamentos-static"
 
@@ -52,6 +53,15 @@ export default function HomePage() {
     texto1: string
     texto2: string
   } | null>(null)
+  const [galerias, setGalerias] = useState<
+    { id: string; titulo: string; descripcion: string; fotos: { url: string }[] }[]
+  >([])
+  const [modalAmenidad, setModalAmenidad] = useState<{
+    id: string
+    titulo: string
+    descripcion: string
+    fotos: { url: string }[]
+  } | null>(null)
 
   useEffect(() => {
     fetch("/api/departamentos")
@@ -68,6 +78,15 @@ export default function HomePage() {
       .then((data) => {
         if (typeof data.mostrarPrecio === "boolean") setMostrarPrecio(data.mostrarPrecio)
         if (data.nuestraHistoria) setNuestraHistoria(data.nuestraHistoria)
+      })
+      .catch(() => {})
+  }, [])
+
+  useEffect(() => {
+    fetch("/api/galerias-amenidades")
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) setGalerias(data)
       })
       .catch(() => {})
   }, [])
@@ -278,28 +297,49 @@ export default function HomePage() {
           </motion.div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
-            {[
-              { icon: Droplets, title: "4 Piscinas", desc: "Dos para adultos y dos para niños" },
-              { icon: Dumbbell, title: "Gimnasio", desc: "Equipado para tu rutina" },
-              { icon: Car, title: "Estacionamiento", desc: "Para visitas y residentes" },
-              { icon: ShieldCheck, title: "Conserjería 24 hrs", desc: "Seguridad y atención permanente" },
-              { icon: Waves, title: "Sala de usos múltiples", desc: "Espacios compartidos" },
-              { icon: Shirt, title: "Lavandería", desc: "Comodidad total" },
-            ].map((item, i) => (
-              <motion.div
-                key={item.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.05 }}
-                className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all border-2 border-slate-100 hover:border-tita-oro/50"
-              >
-                <item.icon className="w-10 h-10 text-tita-verde mb-3" />
-                <h3 className="font-semibold text-slate-800 mb-1">{item.title}</h3>
-                <p className="text-slate-600 text-sm">{item.desc}</p>
-              </motion.div>
-            ))}
+            {(
+              [
+                { id: "piscinas", icon: Droplets, defaultTitle: "4 Piscinas", defaultDesc: "Dos para adultos y dos para niños" },
+                { id: "gimnasio", icon: Dumbbell, defaultTitle: "Gimnasio", defaultDesc: "Equipado para tu rutina" },
+                { id: "estacionamiento", icon: Car, defaultTitle: "Estacionamiento", defaultDesc: "Para visitas y residentes" },
+                { id: "conserjeria", icon: ShieldCheck, defaultTitle: "Conserjería 24 hrs", defaultDesc: "Seguridad y atención permanente" },
+                { id: "sala_usos_multiples", icon: Waves, defaultTitle: "Sala de usos múltiples", defaultDesc: "Espacios compartidos" },
+                { id: "lavanderia", icon: Shirt, defaultTitle: "Lavandería", defaultDesc: "Comodidad total" },
+              ] as const
+            ).map((item, i) => {
+              const galeria = galerias.find((g) => g.id === item.id)
+              const titulo = galeria?.titulo || item.defaultTitle
+              const desc = galeria?.descripcion || item.defaultDesc
+              const fotos = galeria?.fotos ?? []
+              return (
+                <motion.div
+                  key={item.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.05 }}
+                  whileHover={{ scale: 1.02, y: -2 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => setModalAmenidad({ id: item.id, titulo, descripcion: desc, fotos })}
+                  className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all border-2 border-slate-100 hover:border-tita-oro/50 cursor-pointer select-none"
+                >
+                  <item.icon className="w-10 h-10 text-tita-verde mb-3" />
+                  <h3 className="font-semibold text-slate-800 mb-1">{titulo}</h3>
+                  <p className="text-slate-600 text-sm">{desc}</p>
+                </motion.div>
+              )
+            })}
           </div>
+
+          {modalAmenidad && (
+            <AmenityGalleryModal
+              isOpen={!!modalAmenidad}
+              onClose={() => setModalAmenidad(null)}
+              titulo={modalAmenidad.titulo}
+              descripcion={modalAmenidad.descripcion}
+              fotos={modalAmenidad.fotos}
+            />
+          )}
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}

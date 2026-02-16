@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from "react"
 import { ImageIcon, Share2, Loader2, Save, ChevronDown, ChevronUp, Upload } from "lucide-react"
+import { GaleriasAmenidadesEditor } from "./GaleriasAmenidadesEditor"
 
 interface NuestraHistoria {
   imagenUrl: string
@@ -277,6 +278,8 @@ export function NuestraHistoriaEditor() {
           </div>
         )}
       </div>
+
+      <GaleriasAmenidadesEditor />
 
       {/* Link para compartir - colapsable */}
       <div className="border border-slate-200 rounded-xl overflow-hidden bg-white">
