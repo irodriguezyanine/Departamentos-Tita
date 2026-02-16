@@ -2,6 +2,7 @@ import Link from "next/link"
 import { Building2, Users, FileText } from "lucide-react"
 import { getDb } from "@/lib/db"
 import { DepartamentosEditorMenu } from "@/components/admin/DepartamentosEditorMenu"
+import { NuestraHistoriaEditor } from "@/components/admin/NuestraHistoriaEditor"
 
 export default async function AdminDashboardPage() {
   let departamentosCount = 0
@@ -69,6 +70,8 @@ export default async function AdminDashboardPage() {
       </div>
 
       <DepartamentosEditorMenu />
+
+      <NuestraHistoriaEditor />
 
       <div className="mt-12 p-6 bg-amber-50 border border-amber-200 rounded-xl">
         <p className="text-sm text-amber-800">

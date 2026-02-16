@@ -46,6 +46,12 @@ const fadeIn = {
 export default function HomePage() {
   const [deptsFromApi, setDeptsFromApi] = useState<DeptFromApi[]>([])
   const [mostrarPrecio, setMostrarPrecio] = useState(true)
+  const [nuestraHistoria, setNuestraHistoria] = useState<{
+    imagenUrl: string
+    titulo: string
+    texto1: string
+    texto2: string
+  } | null>(null)
 
   useEffect(() => {
     fetch("/api/departamentos")
@@ -61,6 +67,7 @@ export default function HomePage() {
       .then((res) => res.json())
       .then((data) => {
         if (typeof data.mostrarPrecio === "boolean") setMostrarPrecio(data.mostrarPrecio)
+        if (data.nuestraHistoria) setNuestraHistoria(data.nuestraHistoria)
       })
       .catch(() => {})
   }, [])
@@ -182,14 +189,33 @@ export default function HomePage() {
               className="relative"
             >
               <div className="aspect-[3/4] rounded-2xl overflow-hidden shadow-2xl max-w-sm mx-auto md:mx-0">
-                <Image
-                  src="/assets/TITA Foto perfil.jpeg"
-                  alt="Dalal Saleme y Enrique Yanine - Dueños de Condominio Puerto Pacífico"
-                  fill
-                  className="object-cover object-top"
-                  sizes="(max-width: 768px) 100vw, 50vw"
-                  priority
-                />
+                {nuestraHistoria?.imagenUrl ? (
+                  nuestraHistoria.imagenUrl.startsWith("http") ? (
+                    <img
+                      src={nuestraHistoria.imagenUrl}
+                      alt="Dalal Saleme y Enrique Yanine - Dueños de Condominio Puerto Pacífico"
+                      className="w-full h-full object-cover object-top"
+                    />
+                  ) : (
+                    <Image
+                      src={nuestraHistoria.imagenUrl}
+                      alt="Dalal Saleme y Enrique Yanine - Dueños de Condominio Puerto Pacífico"
+                      fill
+                      className="object-cover object-top"
+                      sizes="(max-width: 768px) 100vw, 50vw"
+                      priority
+                    />
+                  )
+                ) : (
+                  <Image
+                    src="/assets/TITA Foto perfil.jpeg"
+                    alt="Dalal Saleme y Enrique Yanine - Dueños de Condominio Puerto Pacífico"
+                    fill
+                    className="object-cover object-top"
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                    priority
+                  />
+                )}
               </div>
               <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-tita-accent/20 rounded-2xl -z-10" />
             </motion.div>
@@ -204,16 +230,29 @@ export default function HomePage() {
               transition={{ duration: 0.7 }}
             >
               <h2 className="font-display text-3xl md:text-4xl font-bold text-tita-verde mb-6">
-                Nuestra historia
+                {nuestraHistoria?.titulo ?? "Nuestra historia"}
               </h2>
               <p className="text-slate-600 leading-relaxed mb-4">
-                Con más de <strong>20 años de experiencia</strong>, Dalal Saleme y Enrique Yanine
-                ofrecen un <strong>servicio excepcional</strong> en el corazón de Viña del Mar.
+                {(nuestraHistoria?.texto1 ?? "Con más de **20 años de experiencia**, Dalal Saleme y Enrique Yanine ofrecen un **servicio excepcional** en el corazón de Viña del Mar.")
+                  .split(/(\*\*.+?\*\*)/g)
+                  .map((part, i) =>
+                    part.startsWith("**") && part.endsWith("**") ? (
+                      <strong key={i}>{part.slice(2, -2)}</strong>
+                    ) : (
+                      <span key={i}>{part}</span>
+                    )
+                  )}
               </p>
               <p className="text-slate-600 leading-relaxed">
-                Cada departamento es cuidado con dedicación para que tu estadía sea inolvidable.
-                Conocemos cada rincón del condominio y estamos comprometidos con tu comodidad y
-                satisfacción.
+                {(nuestraHistoria?.texto2 ?? "Cada departamento es cuidado con dedicación para que tu estadía sea inolvidable. Conocemos cada rincón del condominio y estamos comprometidos con tu comodidad y satisfacción.")
+                  .split(/(\*\*.+?\*\*)/g)
+                  .map((part, i) =>
+                    part.startsWith("**") && part.endsWith("**") ? (
+                      <strong key={i}>{part.slice(2, -2)}</strong>
+                    ) : (
+                      <span key={i}>{part}</span>
+                    )
+                  )}
               </p>
             </motion.div>
           </div>
