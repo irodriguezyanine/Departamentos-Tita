@@ -317,7 +317,6 @@ export default function HomePage() {
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ delay: i * 0.05 }}
                   animate={{
                     boxShadow: [
                       "0 2px 8px -2px rgb(0 0 0 / 0.06)",
