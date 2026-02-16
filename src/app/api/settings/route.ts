@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
+import type { Filter } from "mongodb"
 import { authOptions } from "@/lib/auth"
 import { getDb } from "@/lib/db"
 
@@ -10,7 +11,7 @@ const DEFAULT_SETTINGS = { mostrarPrecio: true }
 export async function GET() {
   try {
     const db = await getDb()
-    const doc = await db.collection("settings").findOne({ _id: "site" })
+    const doc = await db.collection("settings").findOne({ _id: "site" } as Filter<{ _id: string }>)
     const settings = doc
       ? { mostrarPrecio: doc.mostrarPrecio ?? true }
       : DEFAULT_SETTINGS
@@ -33,7 +34,7 @@ export async function PUT(request: Request) {
 
     const db = await getDb()
     await db.collection("settings").updateOne(
-      { _id: "site" },
+      { _id: "site" } as Filter<{ _id: string }>,
       { $set: { mostrarPrecio, updatedAt: new Date() } },
       { upsert: true }
     )
