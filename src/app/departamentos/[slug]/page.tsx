@@ -11,6 +11,16 @@ export default function DepartamentoPage() {
   const slug = params.slug as string
   const [dept, setDept] = useState<DeptForPage | null>(null)
   const [loading, setLoading] = useState(true)
+  const [mostrarPrecio, setMostrarPrecio] = useState(true)
+
+  useEffect(() => {
+    fetch("/api/settings")
+      .then((res) => res.json())
+      .then((data) => {
+        if (typeof data.mostrarPrecio === "boolean") setMostrarPrecio(data.mostrarPrecio)
+      })
+      .catch(() => {})
+  }, [])
 
   useEffect(() => {
     fetch(`/api/departamentos/${slug}`)
@@ -112,6 +122,7 @@ export default function DepartamentoPage() {
       dept={dept}
       backHref="/#departamentos"
       backLabel="Volver a departamentos"
+      mostrarPrecio={mostrarPrecio}
     />
   )
 }

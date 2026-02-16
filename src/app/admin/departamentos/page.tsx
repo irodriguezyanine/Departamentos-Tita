@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
-import { Pencil, ExternalLink, Layout, Building2, MoreVertical, Loader2, Plus } from "lucide-react"
+import { Pencil, ExternalLink, Layout, Building2, MoreVertical, Loader2, Plus, Eye, EyeOff } from "lucide-react"
 import { getEstacionamientos, formatEstacionamientos, COSTO_ESTACIONAMIENTO_DIARIO } from "@/data/estacionamientos"
 import { formatPrecioConUsd, formatPrecioCLP } from "@/lib/precios"
 
@@ -22,6 +22,28 @@ export default function AdminDepartamentosPage() {
   const [seeding, setSeeding] = useState(false)
   const [openMenu, setOpenMenu] = useState<string | null>(null)
   const [usdPerClp, setUsdPerClp] = useState<number | null>(null)
+  const [mostrarPrecio, setMostrarPrecio] = useState(true)
+
+  useEffect(() => {
+    fetch("/api/settings")
+      .then((res) => res.json())
+      .then((data) => setMostrarPrecio(data.mostrarPrecio ?? true))
+      .catch(() => {})
+  }, [])
+
+  const toggleMostrarPrecio = async () => {
+    const nuevo = !mostrarPrecio
+    try {
+      const res = await fetch("/api/settings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mostrarPrecio: nuevo }),
+      })
+      if (res.ok) setMostrarPrecio(nuevo)
+    } catch (e) {
+      console.error(e)
+    }
+  }
 
   useEffect(() => {
     fetch("/api/tipo-cambio")
@@ -174,7 +196,19 @@ export default function AdminDepartamentosPage() {
                   Torre
                 </th>
                 <th className="text-left px-4 py-3 text-sm font-semibold text-slate-700">
-                  Precio
+                  <div className="flex items-center gap-2">
+                    Precio
+                    <button
+                      onClick={toggleMostrarPrecio}
+                      className={`flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs font-normal transition-colors ${
+                        mostrarPrecio ? "bg-green-100 text-green-700 hover:bg-green-200" : "bg-slate-200 text-slate-600 hover:bg-slate-300"
+                      }`}
+                      title={mostrarPrecio ? "Ocultar precio en home y páginas públicas" : "Mostrar precio en home y páginas públicas"}
+                    >
+                      {mostrarPrecio ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+                      {mostrarPrecio ? "Visible" : "Oculto"}
+                    </button>
+                  </div>
                 </th>
                 <th className="text-left px-4 py-3 text-sm font-semibold text-slate-700">
                   Estacionamientos

@@ -45,12 +45,22 @@ const fadeIn = {
 
 export default function HomePage() {
   const [deptsFromApi, setDeptsFromApi] = useState<DeptFromApi[]>([])
+  const [mostrarPrecio, setMostrarPrecio] = useState(true)
 
   useEffect(() => {
     fetch("/api/departamentos")
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) setDeptsFromApi(data)
+      })
+      .catch(() => {})
+  }, [])
+
+  useEffect(() => {
+    fetch("/api/settings")
+      .then((res) => res.json())
+      .then((data) => {
+        if (typeof data.mostrarPrecio === "boolean") setMostrarPrecio(data.mostrarPrecio)
       })
       .catch(() => {})
   }, [])
@@ -173,7 +183,7 @@ export default function HomePage() {
             >
               <div className="aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl">
                 <Image
-                  src="/assets/dalal-enrique.png"
+                  src="/assets/TITA Foto perfil.jpeg"
                   alt="Dalal Saleme y Enrique Yanine - Dueños de Condominio Puerto Pacífico"
                   fill
                   className="object-cover"
@@ -293,7 +303,7 @@ export default function HomePage() {
               Nuestros departamentos
             </h2>
             <p className="text-slate-600 max-w-2xl mx-auto">
-              Cada uno con su propia personalidad. Desde $90.000 la noche.
+              {mostrarPrecio ? "Cada uno con su propia personalidad. Desde $90.000 la noche." : "Cada uno con su propia personalidad."}
             </p>
           </motion.div>
 
@@ -332,7 +342,9 @@ export default function HomePage() {
                     {dept.name}
                   </h3>
                   <div className="flex items-center justify-between gap-3 mt-1 flex-wrap">
-                    <p className="text-tita-verde font-medium">Desde ${formatPrecio(precio)} / noche</p>
+                    {mostrarPrecio && (
+                      <p className="text-tita-verde font-medium">Desde ${formatPrecio(precio)} / noche</p>
+                    )}
                     <div className="flex items-center gap-4 text-slate-500 text-sm">
                       <span className="flex items-center gap-1.5">
                         <Bed className="w-4 h-4" />

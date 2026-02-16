@@ -156,6 +156,7 @@ interface Props {
   onChange?: (updates: Partial<DeptForPage>) => void
   backHref?: string
   backLabel?: string
+  mostrarPrecio?: boolean
 }
 
 export function DepartmentPageContent({
@@ -164,6 +165,7 @@ export function DepartmentPageContent({
   onChange,
   backHref = "/#departamentos",
   backLabel = "Volver a departamentos",
+  mostrarPrecio = true,
 }: Props) {
   const [usdPerClp, setUsdPerClp] = useState<number | null>(null)
   const imagenes = dept.imagenes?.length
@@ -324,17 +326,19 @@ export function DepartmentPageContent({
             <p className="text-white/90 mt-2 text-lg">{dept.torre}</p>
           )}
           <div className="flex flex-wrap items-center gap-6 mt-6">
-            <span className="flex items-center gap-2 text-white font-semibold text-lg">
-              <DollarSign className="w-5 h-5" />
-              {editable && onChange ? (
-                <>
-                  <EditableNumber value={dept.precio} field="precio" className="bg-transparent text-white w-28" />
-                  <span> / noche</span>
-                </>
-              ) : (
-                formatPrice(dept.precio)
-              )}
-            </span>
+            {(mostrarPrecio || editable) && (
+              <span className="flex items-center gap-2 text-white font-semibold text-lg">
+                <DollarSign className="w-5 h-5" />
+                {editable && onChange ? (
+                  <>
+                    <EditableNumber value={dept.precio} field="precio" className="bg-transparent text-white w-28" />
+                    <span> / noche</span>
+                  </>
+                ) : (
+                  formatPrice(dept.precio)
+                )}
+              </span>
+            )}
             <span className="flex items-center gap-2 text-white/90">
               <MapPin className="w-4 h-4" />
               Puerto Pacífico, Viña del Mar
