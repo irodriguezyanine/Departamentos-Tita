@@ -186,7 +186,7 @@ export default function HomePage() {
                   src="/assets/TITA Foto perfil.jpeg"
                   alt="Dalal Saleme y Enrique Yanine - Dueños de Condominio Puerto Pacífico"
                   fill
-                  className="object-cover"
+                  className="object-cover object-top"
                   sizes="(max-width: 768px) 100vw, 50vw"
                   priority
                 />
