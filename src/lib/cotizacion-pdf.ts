@@ -8,6 +8,8 @@ import type { CotizacionArriendo } from "@/types/cotizacion"
 import { DATOS_DEPOSITO } from "@/types/cotizacion"
 import { formatPrecioCLP } from "@/lib/precios"
 
+export type DatosDepositoParaPDF = typeof DATOS_DEPOSITO
+
 // Colores de la marca
 const VERDE = [10, 46, 27] as [number, number, number] // #0a2e1b
 const ORO = [212, 175, 55] as [number, number, number] // #d4af37
@@ -196,7 +198,11 @@ function ensureSpace(doc: jsPDF, y: number, needed: number): number {
   return y
 }
 
-export function generarPDFCotizacion(cot: CotizacionArriendo): jsPDF {
+export function generarPDFCotizacion(
+  cot: CotizacionArriendo,
+  datosDeposito?: DatosDepositoParaPDF
+): jsPDF {
+  const dep = datosDeposito ?? DATOS_DEPOSITO
   const doc = new jsPDF({ unit: "mm", format: "a4" })
   let y = drawHeader(doc, cot)
 
@@ -292,10 +298,10 @@ export function generarPDFCotizacion(cot: CotizacionArriendo): jsPDF {
   doc.text("Envíos nacionales", col1X + 3, y + 5)
   doc.setFont("helvetica", "normal")
   doc.setTextColor(...SLATE)
-  doc.text(DATOS_DEPOSITO.nacional.nombre, col1X + 3, y + 9)
-  doc.text(`RUT ${DATOS_DEPOSITO.nacional.rut}`, col1X + 3, y + 13)
-  doc.text(`${DATOS_DEPOSITO.nacional.banco}`, col1X + 3, y + 17)
-  doc.text(`Cuenta ${DATOS_DEPOSITO.nacional.cuenta}`, col1X + 3, y + 21)
+  doc.text(dep.nacional.nombre, col1X + 3, y + 9)
+  doc.text(`RUT ${dep.nacional.rut}`, col1X + 3, y + 13)
+  doc.text(`${dep.nacional.banco}`, col1X + 3, y + 17)
+  doc.text(`Cuenta ${dep.nacional.cuenta}`, col1X + 3, y + 21)
 
   doc.setFillColor(...BEIGE_CLARO)
   doc.roundedRect(col2X, y, colWidth, 22, RADIUS, RADIUS, "FD")
@@ -304,10 +310,10 @@ export function generarPDFCotizacion(cot: CotizacionArriendo): jsPDF {
   doc.text("Western Union", col2X + 3, y + 5)
   doc.setFont("helvetica", "normal")
   doc.setTextColor(...SLATE)
-  doc.text(DATOS_DEPOSITO.westernUnion.nombre, col2X + 3, y + 9)
-  doc.text(`RUT ${DATOS_DEPOSITO.westernUnion.rut}`, col2X + 3, y + 13)
-  doc.text(DATOS_DEPOSITO.westernUnion.domicilio, col2X + 3, y + 17)
-  doc.text(`Celular ${DATOS_DEPOSITO.westernUnion.celular}`, col2X + 3, y + 21)
+  doc.text(dep.westernUnion.nombre, col2X + 3, y + 9)
+  doc.text(`RUT ${dep.westernUnion.rut}`, col2X + 3, y + 13)
+  doc.text(dep.westernUnion.domicilio, col2X + 3, y + 17)
+  doc.text(`Celular ${dep.westernUnion.celular}`, col2X + 3, y + 21)
 
   y = depEnd + CARD_GAP
 
@@ -352,13 +358,19 @@ export function generarPDFCotizacion(cot: CotizacionArriendo): jsPDF {
   return doc
 }
 
-export function descargarPDFCotizacion(cot: CotizacionArriendo): void {
-  const doc = generarPDFCotizacion(cot)
+export function descargarPDFCotizacion(
+  cot: CotizacionArriendo,
+  datosDeposito?: DatosDepositoParaPDF
+): void {
+  const doc = generarPDFCotizacion(cot, datosDeposito)
   doc.save(nombreArchivoCotizacion(cot))
 }
 
-export function imprimirPDFCotizacion(cot: CotizacionArriendo): void {
-  const doc = generarPDFCotizacion(cot)
+export function imprimirPDFCotizacion(
+  cot: CotizacionArriendo,
+  datosDeposito?: DatosDepositoParaPDF
+): void {
+  const doc = generarPDFCotizacion(cot, datosDeposito)
   const blob = doc.output("blob")
   const url = URL.createObjectURL(blob)
   const win = window.open(url, "_blank")
@@ -375,11 +387,15 @@ export function imprimirPDFCotizacion(cot: CotizacionArriendo): void {
 
 /**
  * Comparte el PDF por WhatsApp usando la Web Share API.
+ * @param datosDeposito - Datos de depósito para el PDF (opcional)
  * Abre el selector nativo de compartir (incluye WhatsApp y lista de contactos).
  * Si no está disponible, descarga el PDF y abre WhatsApp con mensaje.
  */
-export async function compartirPDFWhatsApp(cot: CotizacionArriendo): Promise<void> {
-  const doc = generarPDFCotizacion(cot)
+export async function compartirPDFWhatsApp(
+  cot: CotizacionArriendo,
+  datosDeposito?: DatosDepositoParaPDF
+): Promise<void> {
+  const doc = generarPDFCotizacion(cot, datosDeposito)
   const blob = doc.output("blob")
   const fileName = nombreArchivoCotizacion(cot)
   const file = new File([blob], fileName, { type: "application/pdf" })
@@ -401,7 +417,7 @@ export async function compartirPDFWhatsApp(cot: CotizacionArriendo): Promise<voi
       })
     } catch (err) {
       if ((err as Error).name !== "AbortError") {
-        descargarPDFCotizacion(cot)
+        descargarPDFCotizacion(cot, datosDeposito)
         window.open(
           `https://wa.me/?text=${encodeURIComponent(mensaje + ". El PDF se ha descargado en tu dispositivo.")}`,
           "_blank"
@@ -409,7 +425,7 @@ export async function compartirPDFWhatsApp(cot: CotizacionArriendo): Promise<voi
       }
     }
   } else {
-    descargarPDFCotizacion(cot)
+    descargarPDFCotizacion(cot, datosDeposito)
     window.open(
       `https://wa.me/?text=${encodeURIComponent(mensaje + ". El PDF se ha descargado en tu dispositivo. Adjunta el archivo para compartirlo.")}`,
       "_blank"

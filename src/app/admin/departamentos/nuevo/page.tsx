@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { ArrowLeft, Save, Upload, Loader2 } from "lucide-react"
 import { parsePrecioInput } from "@/lib/precios"
+import { TORRES } from "@/data/departamentos"
 
 export default function NuevoDepartamentoPage() {
   const router = useRouter()
@@ -109,13 +110,16 @@ export default function NuevoDepartamentoPage() {
         </div>
         <div>
           <label className="block text-sm font-medium text-slate-700 mb-1">Torre</label>
-          <input
-            type="text"
+          <select
             value={form.torre}
             onChange={(e) => setForm({ ...form, torre: e.target.value })}
-            placeholder="Ej: Galápagos"
             className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-tita-primary"
-          />
+          >
+            <option value="">Seleccionar torre</option>
+            {TORRES.map((t) => (
+              <option key={t} value={t}>{t}</option>
+            ))}
+          </select>
         </div>
         <div>
           <label className="block text-sm font-medium text-slate-700 mb-1">Precio por noche (CLP)</label>

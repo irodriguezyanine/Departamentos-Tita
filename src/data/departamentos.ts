@@ -1,5 +1,8 @@
 import { Departamento } from "@/types"
 
+/** Las 4 torres del condominio - usar en listas desplegables */
+export const TORRES = ["Galápagos", "Cabo de Hornos", "Isla Grande", "Juan Fernández"] as const
+
 export const DEPARTAMENTOS_INICIALES: Omit<Departamento, "_id" | "createdAt" | "updatedAt">[] = [
   {
     slug: "4c-torre-galapagos",

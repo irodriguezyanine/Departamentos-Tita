@@ -1,10 +1,11 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Save, ArrowLeft, Printer, FileDown, Share2 } from "lucide-react"
+import { Save, ArrowLeft, Printer, FileDown, Share2, Pencil, Plus, Check, X, Trash2 } from "lucide-react"
 import type { CotizacionArriendo } from "@/types/cotizacion"
 import { DATOS_DEPOSITO } from "@/types/cotizacion"
 import { descargarPDFCotizacion, imprimirPDFCotizacion, compartirPDFWhatsApp, UBICACION_SITIO } from "@/lib/cotizacion-pdf"
+import type { DatosDepositoPreset } from "@/types/cotizacion"
 import { formatPrecioCLP, formatPrecioConUsd } from "@/lib/precios"
 import { getEstacionamientos, getTodosEstacionamientosOpciones, COSTO_ESTACIONAMIENTO_DIARIO } from "@/data/estacionamientos"
 import { CODIGOS_PAIS, parseTelefonoConCodigo } from "@/data/codigos-pais"
@@ -15,7 +16,7 @@ interface EstacionamientoOpcion {
 }
 import { parsePrecioInput } from "@/lib/precios"
 
-const TORRES = ["Galápagos", "Cabo de Hornos", "Isla Grande", "Juan Fernández"]
+import { TORRES } from "@/data/departamentos"
 const DEPARTAMENTOS = ["4 C", "13 D", "17 C", "16 C", "18 C"]
 
 interface Props {
@@ -32,6 +33,11 @@ export function CotizacionEditor({ cotizacion, onSave, onBack, isNew }: Props) {
   const [codigoPais, setCodigoPais] = useState("+56")
   const [numeroTelefono, setNumeroTelefono] = useState("")
   const [compartiendo, setCompartiendo] = useState(false)
+  const [presetsDeposito, setPresetsDeposito] = useState<DatosDepositoPreset[]>([])
+  const [activeDepositoId, setActiveDepositoId] = useState<string | null>(null)
+  const [editDeposito, setEditDeposito] = useState<DatosDepositoPreset | null>(null)
+  const [editDepositoMode, setEditDepositoMode] = useState(false)
+  const [savingDeposito, setSavingDeposito] = useState(false)
   const [form, setForm] = useState<CotizacionArriendo>({
     nombreArrendatario: "",
     apellidoArrendatario: "",
@@ -171,6 +177,104 @@ export function CotizacionEditor({ cotizacion, onSave, onBack, isNew }: Props) {
       .then((data) => setUsdPerClp(data?.usdPerClp ?? null))
       .catch(() => setUsdPerClp(null))
   }, [])
+
+  useEffect(() => {
+    fetch("/api/admin/datos-deposito")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.presets) setPresetsDeposito(data.presets)
+        if (data.activeId) setActiveDepositoId(data.activeId)
+      })
+      .catch(() => {})
+  }, [])
+
+  const datosDepositoActivo = activeDepositoId
+    ? presetsDeposito.find((p) => p._id === activeDepositoId)
+    : presetsDeposito[0]
+  const datosParaPDF = datosDepositoActivo
+    ? {
+        nacional: datosDepositoActivo.nacional,
+        westernUnion: datosDepositoActivo.westernUnion,
+      }
+    : DATOS_DEPOSITO
+
+  const handleSetActiveDeposito = async (id: string) => {
+    try {
+      const res = await fetch("/api/admin/datos-deposito/active", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ activeId: id }),
+      })
+      if (res.ok) setActiveDepositoId(id)
+    } catch (e) {
+      console.error(e)
+    }
+  }
+
+  const handleSaveDeposito = async (asNew = false) => {
+    if (!editDeposito) return
+    setSavingDeposito(true)
+    try {
+      if (asNew) {
+        const { _id, ...payload } = editDeposito
+        const res = await fetch("/api/admin/datos-deposito", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...payload, nombre: payload.nombre || "Nuevo" }),
+        })
+        const data = await res.json()
+        if (data.preset) {
+          setPresetsDeposito((prev) => [data.preset, ...prev])
+          setActiveDepositoId(data.preset._id)
+          setEditDepositoMode(false)
+          setEditDeposito(null)
+        }
+      } else if (editDeposito._id) {
+        const res = await fetch(`/api/admin/datos-deposito/${editDeposito._id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(editDeposito),
+        })
+        if (res.ok) {
+          setPresetsDeposito((prev) =>
+            prev.map((p) => (p._id === editDeposito._id ? { ...editDeposito } : p))
+          )
+          setEditDepositoMode(false)
+          setEditDeposito(null)
+        }
+      }
+    } catch (e) {
+      console.error(e)
+    }
+    setSavingDeposito(false)
+  }
+
+  const startEditDeposito = (p: DatosDepositoPreset) => {
+    setEditDeposito({ ...p })
+    setEditDepositoMode(true)
+  }
+
+  const handleDeleteDeposito = async () => {
+    if (!editDeposito?._id || editDeposito._id === activeDepositoId) return
+    if (!confirm("¿Eliminar este conjunto de datos? No se puede deshacer.")) return
+    setSavingDeposito(true)
+    try {
+      const res = await fetch(`/api/admin/datos-deposito/${editDeposito._id}`, {
+        method: "DELETE",
+      })
+      if (res.ok) {
+        setPresetsDeposito((prev) => prev.filter((p) => p._id !== editDeposito._id))
+        setEditDepositoMode(false)
+        setEditDeposito(null)
+      } else {
+        const data = await res.json()
+        alert(data.error || "Error al eliminar")
+      }
+    } catch (e) {
+      console.error(e)
+    }
+    setSavingDeposito(false)
+  }
 
   const formatPrice = (n: number) => formatPrecioCLP(n)
 
@@ -507,22 +611,234 @@ export function CotizacionEditor({ cotizacion, onSave, onBack, isNew }: Props) {
             <h2 className="font-semibold text-tita-verde mb-4 border-b-2 border-tita-oro pb-2">
               Datos para depósito
             </h2>
-            <div className="grid sm:grid-cols-2 gap-6">
-              <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
-                <h3 className="font-medium text-slate-800 mb-2">Envíos nacionales</h3>
-                <p className="text-sm text-slate-600">{DATOS_DEPOSITO.nacional.nombre}</p>
-                <p className="text-sm text-slate-600">Rut {DATOS_DEPOSITO.nacional.rut}</p>
-                <p className="text-sm text-slate-600">{DATOS_DEPOSITO.nacional.banco}</p>
-                <p className="text-sm text-slate-600">Cuenta {DATOS_DEPOSITO.nacional.cuenta}</p>
-              </div>
-              <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
-                <h3 className="font-medium text-slate-800 mb-2">Western Union</h3>
-                <p className="text-sm text-slate-600">{DATOS_DEPOSITO.westernUnion.nombre}</p>
-                <p className="text-sm text-slate-600">RUT {DATOS_DEPOSITO.westernUnion.rut}</p>
-                <p className="text-sm text-slate-600">{DATOS_DEPOSITO.westernUnion.domicilio}</p>
-                <p className="text-sm text-slate-600">Celular {DATOS_DEPOSITO.westernUnion.celular}</p>
-              </div>
+            <p className="text-sm text-slate-600 mb-3">
+              Como las firmas de Outlook: guarda varios conjuntos y selecciona cuál usar en las cotizaciones.
+            </p>
+            <div className="flex flex-wrap items-center gap-3 mb-4">
+              <select
+                value={activeDepositoId || ""}
+                onChange={(e) => {
+                  const id = e.target.value
+                  if (id) handleSetActiveDeposito(id)
+                }}
+                className={`${inputClass} max-w-xs`}
+              >
+                {presetsDeposito.map((p) => (
+                  <option key={p._id} value={p._id}>
+                    {p.nombre}
+                  </option>
+                ))}
+              </select>
+              <button
+                type="button"
+                onClick={() =>
+                  startEditDeposito(
+                    datosDepositoActivo || {
+                      _id: "",
+                      nombre: "Nuevo",
+                      nacional: DATOS_DEPOSITO.nacional,
+                      westernUnion: DATOS_DEPOSITO.westernUnion,
+                    }
+                  )
+                }
+                className="flex items-center gap-2 px-3 py-2 bg-tita-verde text-white rounded-lg hover:bg-tita-verde-medio text-sm"
+              >
+                <Pencil className="w-4 h-4" />
+                Editar
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  startEditDeposito({
+                    _id: "",
+                    nombre: "Nuevo",
+                    nacional: (datosDepositoActivo?.nacional ?? DATOS_DEPOSITO.nacional) as { nombre: string; rut: string; banco: string; cuenta: string },
+                    westernUnion: (datosDepositoActivo?.westernUnion ?? DATOS_DEPOSITO.westernUnion) as { nombre: string; rut: string; domicilio: string; celular: string },
+                  })
+                }
+                className="flex items-center gap-2 px-3 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 text-sm"
+              >
+                <Plus className="w-4 h-4" />
+                Guardar como nuevo
+              </button>
             </div>
+
+            {editDepositoMode && editDeposito ? (
+              <div className="p-4 bg-amber-50 rounded-xl border border-amber-200 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-medium text-slate-800">Editar datos</h3>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={editDeposito.nombre}
+                      onChange={(e) =>
+                        setEditDeposito({ ...editDeposito, nombre: e.target.value })
+                      }
+                      placeholder="Nombre del preset"
+                      className={`${inputClass} max-w-[200px]`}
+                    />
+                    <button
+                      onClick={() => handleSaveDeposito(false)}
+                      disabled={savingDeposito || !editDeposito._id}
+                      className="flex items-center gap-1 px-3 py-1.5 bg-tita-verde text-white rounded-lg text-sm disabled:opacity-50"
+                    >
+                      <Check className="w-4 h-4" />
+                      Guardar
+                    </button>
+                    {!editDeposito._id && (
+                      <button
+                        onClick={() => handleSaveDeposito(true)}
+                        disabled={savingDeposito}
+                        className="flex items-center gap-1 px-3 py-1.5 bg-tita-oro text-slate-800 rounded-lg text-sm font-medium"
+                      >
+                        Crear nuevo
+                      </button>
+                    )}
+                    {editDeposito._id && editDeposito._id !== activeDepositoId && (
+                      <button
+                        onClick={handleDeleteDeposito}
+                        disabled={savingDeposito}
+                        className="flex items-center gap-1 px-3 py-1.5 text-red-600 hover:bg-red-50 rounded-lg text-sm"
+                        title="Eliminar (solo si no está en uso)"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                        Eliminar
+                      </button>
+                    )}
+                    <button
+                      onClick={() => {
+                        setEditDepositoMode(false)
+                        setEditDeposito(null)
+                      }}
+                      className="p-1.5 rounded-lg bg-slate-200 text-slate-600 hover:bg-slate-300"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+                <div className="grid sm:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <h4 className="font-medium text-slate-700">Envíos nacionales</h4>
+                    <input
+                      type="text"
+                      value={editDeposito.nacional.nombre}
+                      onChange={(e) =>
+                        setEditDeposito({
+                          ...editDeposito,
+                          nacional: { ...editDeposito.nacional, nombre: e.target.value },
+                        })
+                      }
+                      placeholder="Nombre"
+                      className={inputClass}
+                    />
+                    <input
+                      type="text"
+                      value={editDeposito.nacional.rut}
+                      onChange={(e) =>
+                        setEditDeposito({
+                          ...editDeposito,
+                          nacional: { ...editDeposito.nacional, rut: e.target.value },
+                        })
+                      }
+                      placeholder="RUT"
+                      className={inputClass}
+                    />
+                    <input
+                      type="text"
+                      value={editDeposito.nacional.banco}
+                      onChange={(e) =>
+                        setEditDeposito({
+                          ...editDeposito,
+                          nacional: { ...editDeposito.nacional, banco: e.target.value },
+                        })
+                      }
+                      placeholder="Banco"
+                      className={inputClass}
+                    />
+                    <input
+                      type="text"
+                      value={editDeposito.nacional.cuenta}
+                      onChange={(e) =>
+                        setEditDeposito({
+                          ...editDeposito,
+                          nacional: { ...editDeposito.nacional, cuenta: e.target.value },
+                        })
+                      }
+                      placeholder="Número de cuenta"
+                      className={inputClass}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <h4 className="font-medium text-slate-700">Western Union</h4>
+                    <input
+                      type="text"
+                      value={editDeposito.westernUnion.nombre}
+                      onChange={(e) =>
+                        setEditDeposito({
+                          ...editDeposito,
+                          westernUnion: { ...editDeposito.westernUnion, nombre: e.target.value },
+                        })
+                      }
+                      placeholder="Nombre"
+                      className={inputClass}
+                    />
+                    <input
+                      type="text"
+                      value={editDeposito.westernUnion.rut}
+                      onChange={(e) =>
+                        setEditDeposito({
+                          ...editDeposito,
+                          westernUnion: { ...editDeposito.westernUnion, rut: e.target.value },
+                        })
+                      }
+                      placeholder="RUT"
+                      className={inputClass}
+                    />
+                    <input
+                      type="text"
+                      value={editDeposito.westernUnion.domicilio}
+                      onChange={(e) =>
+                        setEditDeposito({
+                          ...editDeposito,
+                          westernUnion: { ...editDeposito.westernUnion, domicilio: e.target.value },
+                        })
+                      }
+                      placeholder="Dirección"
+                      className={inputClass}
+                    />
+                    <input
+                      type="text"
+                      value={editDeposito.westernUnion.celular}
+                      onChange={(e) =>
+                        setEditDeposito({
+                          ...editDeposito,
+                          westernUnion: { ...editDeposito.westernUnion, celular: e.target.value },
+                        })
+                      }
+                      placeholder="Celular"
+                      className={inputClass}
+                    />
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="grid sm:grid-cols-2 gap-6">
+                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                  <h3 className="font-medium text-slate-800 mb-2">Envíos nacionales</h3>
+                  <p className="text-sm text-slate-600">{datosParaPDF.nacional.nombre}</p>
+                  <p className="text-sm text-slate-600">Rut {datosParaPDF.nacional.rut}</p>
+                  <p className="text-sm text-slate-600">{datosParaPDF.nacional.banco}</p>
+                  <p className="text-sm text-slate-600">Cuenta {datosParaPDF.nacional.cuenta}</p>
+                </div>
+                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                  <h3 className="font-medium text-slate-800 mb-2">Western Union</h3>
+                  <p className="text-sm text-slate-600">{datosParaPDF.westernUnion.nombre}</p>
+                  <p className="text-sm text-slate-600">RUT {datosParaPDF.westernUnion.rut}</p>
+                  <p className="text-sm text-slate-600">{datosParaPDF.westernUnion.domicilio}</p>
+                  <p className="text-sm text-slate-600">Celular {datosParaPDF.westernUnion.celular}</p>
+                </div>
+              </div>
+            )}
           </section>
 
           <div>
@@ -548,7 +864,7 @@ export function CotizacionEditor({ cotizacion, onSave, onBack, isNew }: Props) {
             onClick={async () => {
               setCompartiendo(true)
               try {
-                await compartirPDFWhatsApp(form)
+                await compartirPDFWhatsApp(form, datosParaPDF)
               } finally {
                 setCompartiendo(false)
               }
@@ -560,14 +876,14 @@ export function CotizacionEditor({ cotizacion, onSave, onBack, isNew }: Props) {
             {compartiendo ? "Compartiendo..." : "Compartir por WhatsApp"}
           </button>
           <button
-            onClick={() => descargarPDFCotizacion(form)}
+            onClick={() => descargarPDFCotizacion(form, datosParaPDF)}
             className="flex items-center gap-2 px-6 py-3 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300"
           >
             <FileDown className="w-4 h-4" />
             Descargar PDF
           </button>
           <button
-            onClick={() => imprimirPDFCotizacion(form)}
+            onClick={() => imprimirPDFCotizacion(form, datosParaPDF)}
             className="flex items-center gap-2 px-6 py-3 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300"
           >
             <Printer className="w-4 h-4" />

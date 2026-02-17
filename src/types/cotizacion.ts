@@ -49,3 +49,12 @@ export const DATOS_DEPOSITO = {
     celular: "9840 22927",
   },
 }
+
+export interface DatosDepositoPreset {
+  _id: string
+  nombre: string
+  nacional: { nombre: string; rut: string; banco: string; cuenta: string }
+  westernUnion: { nombre: string; rut: string; domicilio: string; celular: string }
+  createdAt?: string
+  updatedAt?: string
+}

@@ -16,6 +16,7 @@ import {
   Home,
   Camera,
 } from "lucide-react"
+import { TORRES } from "@/data/departamentos"
 
 export interface DeptForPage {
   slug: string
@@ -317,11 +318,16 @@ export function DepartmentPageContent({
             </h1>
           )}
           {editable && onChange ? (
-            <EditableText
+            <select
               value={dept.torre}
-              field="torre"
-              className="text-white/90 mt-2 text-lg block bg-transparent placeholder-white/60"
-            />
+              onChange={(e) => onChange({ torre: e.target.value })}
+              className="text-white/90 mt-2 text-lg block bg-white/10 border-2 border-dashed border-tita-oro/50 rounded px-2 py-1 focus:border-tita-oro focus:outline-none"
+            >
+              <option value="">Seleccionar torre</option>
+              {TORRES.map((t) => (
+                <option key={t} value={t} className="text-slate-800">{t}</option>
+              ))}
+            </select>
           ) : (
             <p className="text-white/90 mt-2 text-lg">{dept.torre}</p>
           )}

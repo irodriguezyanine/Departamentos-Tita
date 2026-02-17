@@ -6,6 +6,7 @@ import Link from "next/link"
 import { ArrowLeft, Save, Upload, GripVertical, Star, X } from "lucide-react"
 import Image from "next/image"
 import { formatPrecioCLP, parsePrecioInput } from "@/lib/precios"
+import { TORRES } from "@/data/departamentos"
 
 interface ImagenItem {
   url: string
@@ -155,6 +156,19 @@ export default function EditarDepartamentoPage() {
             onChange={(e) => setDept({ ...dept, name: e.target.value })}
             className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-tita-primary"
           />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1">Torre</label>
+          <select
+            value={dept.torre}
+            onChange={(e) => setDept({ ...dept, torre: e.target.value })}
+            className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-tita-primary"
+          >
+            <option value="">Seleccionar torre</option>
+            {TORRES.map((t) => (
+              <option key={t} value={t}>{t}</option>
+            ))}
+          </select>
         </div>
         <div>
           <label className="block text-sm font-medium text-slate-700 mb-1">Precio (por noche)</label>
