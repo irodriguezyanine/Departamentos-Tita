@@ -1,9 +1,10 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useMemo } from "react"
 import { Plus, ParkingCircle, Pencil, Trash2, Check, X } from "lucide-react"
-import { COSTO_ESTACIONAMIENTO_DIARIO } from "@/data/estacionamientos"
+import { COSTO_ESTACIONAMIENTO_DIARIO, getCodigoDepartamento, ESTACIONAMIENTOS_POR_DEPARTAMENTO } from "@/data/estacionamientos"
 import { formatPrecioCLP } from "@/lib/precios"
+import { useTableFilters, TableSearchBar } from "@/components/admin/TableFilters"
 
 interface EstacionamientoItem {
   _id?: string
@@ -13,16 +14,43 @@ interface EstacionamientoItem {
   source?: string
 }
 
-const DEPARTAMENTOS_CODIGOS = ["4 C", "13 D", "15 D", "16 C", "16 D", "17 C", "18 C"]
-
 export default function AdminEstacionamientosPage() {
   const [items, setItems] = useState<EstacionamientoItem[]>([])
+  const [departamentos, setDepartamentos] = useState<{ name: string }[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [showForm, setShowForm] = useState(false)
   const [form, setForm] = useState({ nivel: "", numero: "", codigoDepartamento: "" })
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editForm, setEditForm] = useState({ nivel: "", numero: "", codigoDepartamento: "" })
+
+  const codigosDepartamento = useMemo(() => {
+    const codigos = new Set<string>()
+    for (const d of departamentos) {
+      const c = getCodigoDepartamento(d.name)
+      if (c) codigos.add(c)
+    }
+    if (codigos.size > 0) return Array.from(codigos).sort()
+    return Object.keys(ESTACIONAMIENTOS_POR_DEPARTAMENTO).sort()
+  }, [departamentos])
+
+  const columns = [
+    { key: "nivel", label: "Nivel", getValue: (e: EstacionamientoItem) => e.nivel, filterable: true },
+    { key: "numero", label: "Número", getValue: (e: EstacionamientoItem) => e.numero, filterable: true },
+    { key: "departamento", label: "Departamento", getValue: (e: EstacionamientoItem) => e.codigoDepartamento?.trim() || "—", filterable: true },
+  ]
+  const getSearchText = (e: EstacionamientoItem) =>
+    [e.nivel, e.numero, e.codigoDepartamento].filter(Boolean).join(" ")
+  const {
+    filteredData,
+    search,
+    setSearch,
+    columnFilters,
+    setColumnFilter,
+    uniqueValues,
+    clearFilters,
+    hasActiveFilters,
+  } = useTableFilters(items, columns, getSearchText)
 
   const fetchItems = () => {
     fetch("/api/admin/estacionamientos")
@@ -36,6 +64,15 @@ export default function AdminEstacionamientosPage() {
 
   useEffect(() => {
     fetchItems()
+  }, [])
+
+  useEffect(() => {
+    fetch("/api/admin/departamentos")
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) setDepartamentos(data)
+      })
+      .catch(() => {})
   }, [])
 
   const handleCreate = async () => {
@@ -129,8 +166,8 @@ export default function AdminEstacionamientosPage() {
     setSaving(false)
   }
 
-  const dbItems = items.filter((i) => i.source === "db")
-  const staticItems = items.filter((i) => i.source === "static")
+  const filteredDbItems = filteredData.filter((i) => i.source === "db")
+  const filteredStaticItems = filteredData.filter((i) => i.source === "static")
 
   if (loading) {
     return (
@@ -191,7 +228,7 @@ export default function AdminEstacionamientosPage() {
                 className="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-tita-primary"
               >
                 <option value="">Sin asignar</option>
-                {DEPARTAMENTOS_CODIGOS.map((c) => (
+                {codigosDepartamento.map((c) => (
                   <option key={c} value={c}>{c}</option>
                 ))}
               </select>
@@ -216,18 +253,65 @@ export default function AdminEstacionamientosPage() {
       )}
 
       <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        {items.length > 0 && (
+          <TableSearchBar
+            value={search}
+            onChange={setSearch}
+            placeholder="Buscar por nivel, número, departamento..."
+            resultCount={filteredData.length}
+            totalCount={items.length}
+            onClear={clearFilters}
+            hasActiveFilters={hasActiveFilters}
+          />
+        )}
         <div className="overflow-x-auto">
           <table className="w-full min-w-[480px]">
-            <thead className="bg-slate-50 border-b border-slate-200">
+            <thead className="bg-slate-50 border-b-2 border-slate-200">
               <tr>
-                <th className="text-left px-4 py-3 text-sm font-semibold text-slate-700">
-                  Nivel
+                <th className="text-left px-4 py-2 text-sm font-semibold text-slate-700">
+                  <div className="flex flex-col gap-1">
+                    <span>Nivel</span>
+                    <select
+                      value={columnFilters["nivel"] ?? ""}
+                      onChange={(e) => setColumnFilter("nivel", e.target.value)}
+                      className="text-xs py-1.5 px-2 rounded border border-slate-200 bg-white focus:border-tita-oro focus:ring-0 focus:outline-none min-w-0 max-w-full"
+                    >
+                      <option value="">Todos</option>
+                      {Array.from(uniqueValues["nivel"] || []).sort().map((v) => (
+                        <option key={v} value={v}>{v}</option>
+                      ))}
+                    </select>
+                  </div>
                 </th>
-                <th className="text-left px-4 py-3 text-sm font-semibold text-slate-700">
-                  Número
+                <th className="text-left px-4 py-2 text-sm font-semibold text-slate-700">
+                  <div className="flex flex-col gap-1">
+                    <span>Número</span>
+                    <select
+                      value={columnFilters["numero"] ?? ""}
+                      onChange={(e) => setColumnFilter("numero", e.target.value)}
+                      className="text-xs py-1.5 px-2 rounded border border-slate-200 bg-white focus:border-tita-oro focus:ring-0 focus:outline-none min-w-0 max-w-full"
+                    >
+                      <option value="">Todos</option>
+                      {Array.from(uniqueValues["numero"] || []).sort().map((v) => (
+                        <option key={v} value={v}>{v}</option>
+                      ))}
+                    </select>
+                  </div>
                 </th>
-                <th className="text-left px-4 py-3 text-sm font-semibold text-slate-700">
-                  Departamento
+                <th className="text-left px-4 py-2 text-sm font-semibold text-slate-700">
+                  <div className="flex flex-col gap-1">
+                    <span>Departamento</span>
+                    <select
+                      value={columnFilters["departamento"] ?? ""}
+                      onChange={(e) => setColumnFilter("departamento", e.target.value)}
+                      className="text-xs py-1.5 px-2 rounded border border-slate-200 bg-white focus:border-tita-oro focus:ring-0 focus:outline-none min-w-0 max-w-full"
+                    >
+                      <option value="">Todos</option>
+                      {Array.from(uniqueValues["departamento"] || []).sort().map((v) => (
+                        <option key={v} value={v}>{v}</option>
+                      ))}
+                    </select>
+                  </div>
                 </th>
                 <th className="text-right px-4 py-3 text-sm font-semibold text-slate-700 w-24">
                   Acciones
@@ -235,7 +319,7 @@ export default function AdminEstacionamientosPage() {
               </tr>
             </thead>
             <tbody>
-              {dbItems.map((e, i) => (
+              {filteredDbItems.map((e, i) => (
                 <tr
                   key={e._id || `db-${i}`}
                   className={`border-b border-slate-100 hover:bg-slate-50/50 ${
@@ -269,7 +353,7 @@ export default function AdminEstacionamientosPage() {
                           className="w-full px-2 py-1.5 text-sm rounded border border-slate-200 focus:border-tita-oro focus:ring-0 focus:outline-none"
                         >
                           <option value="">Sin asignar</option>
-                          {DEPARTAMENTOS_CODIGOS.map((c) => (
+                          {codigosDepartamento.map((c) => (
                             <option key={c} value={c}>{c}</option>
                           ))}
                         </select>
@@ -322,7 +406,7 @@ export default function AdminEstacionamientosPage() {
                   )}
                 </tr>
               ))}
-              {staticItems.map((e, i) => (
+              {filteredStaticItems.map((e, i) => (
                 <tr key={`static-${i}`} className="border-b border-slate-100 hover:bg-slate-50/50">
                   <td className="px-4 py-3 text-slate-800">{e.nivel}</td>
                   <td className="px-4 py-3 text-slate-800">{e.numero}</td>

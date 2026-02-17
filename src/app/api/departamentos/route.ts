@@ -8,7 +8,7 @@ export async function GET() {
     const db = await getDb()
     const departamentos = await db
       .collection("departamentos")
-      .find({ disponible: true })
+      .find({})
       .sort({ name: 1 })
       .toArray()
 

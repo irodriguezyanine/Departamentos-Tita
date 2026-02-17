@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import { ArrowLeft, Save, Upload, GripVertical, Star, X } from "lucide-react"
 import Image from "next/image"
+import { formatPrecioCLP, parsePrecioInput } from "@/lib/precios"
 
 interface ImagenItem {
   url: string
@@ -36,6 +37,7 @@ export default function EditarDepartamentoPage() {
   const router = useRouter()
   const id = params.id as string
   const [dept, setDept] = useState<Departamento | null>(null)
+  const [precioInput, setPrecioInput] = useState("")
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
@@ -44,7 +46,10 @@ export default function EditarDepartamentoPage() {
     fetch(`/api/admin/departamentos/${id}`)
       .then((res) => res.json())
       .then((data) => {
-        if (!data.error) setDept(data)
+        if (!data.error) {
+          setDept(data)
+          setPrecioInput(formatPrecioCLP(data.precio || 0))
+        }
         setLoading(false)
       })
       .catch(() => setLoading(false))
@@ -54,7 +59,8 @@ export default function EditarDepartamentoPage() {
     if (!dept) return
     setSaving(true)
     try {
-      const { _id, ...payload } = dept
+      const { _id, ...rest } = dept
+      const payload = { ...rest, precio: parsePrecioInput(precioInput) || rest.precio }
       const res = await fetch(`/api/admin/departamentos/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -153,11 +159,16 @@ export default function EditarDepartamentoPage() {
         <div>
           <label className="block text-sm font-medium text-slate-700 mb-1">Precio (por noche)</label>
           <input
-            type="number"
-            value={dept.precio}
-            onChange={(e) => setDept({ ...dept, precio: parseInt(e.target.value) || 0 })}
+            type="text"
+            inputMode="numeric"
+            value={precioInput}
+            onChange={(e) => setPrecioInput(e.target.value)}
+            placeholder="Ej: 90.000 o 90000"
             className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-tita-primary"
           />
+          <p className="text-xs text-slate-500 mt-1">
+            Formato: 90.000 o 90000. Se mostrará con $ y conversión USD.
+          </p>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div>

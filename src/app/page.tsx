@@ -91,13 +91,16 @@ export default function HomePage() {
       .catch(() => {})
   }, [])
 
-  const DEPARTAMENTOS = [
-    { slug: "4c-torre-galapagos", name: "4 C Torre Galápagos" },
-    { slug: "13d-torre-cabo-hornos", name: "13 D Torre Cabo de Hornos" },
-    { slug: "17c-torre-isla-grande", name: "17 C Torre Isla Grande" },
-    { slug: "16c-torre-juan-fernandez", name: "16 C Torre Juan Fernández" },
-    { slug: "18c-torre-juan-fernandez", name: "18 C Torre Juan Fernández" },
-  ]
+  const DEPARTAMENTOS =
+    deptsFromApi.length > 0
+      ? deptsFromApi.map((d) => ({ slug: d.slug, name: d.name }))
+      : [
+          { slug: "4c-torre-galapagos", name: "4 C Torre Galápagos" },
+          { slug: "13d-torre-cabo-hornos", name: "13 D Torre Cabo de Hornos" },
+          { slug: "17c-torre-isla-grande", name: "17 C Torre Isla Grande" },
+          { slug: "16c-torre-juan-fernandez", name: "16 C Torre Juan Fernández" },
+          { slug: "18c-torre-juan-fernandez", name: "18 C Torre Juan Fernández" },
+        ]
 
   const getThumbUrl = (slug: string) => {
     const fromApi = deptsFromApi.find((d) => d.slug === slug)

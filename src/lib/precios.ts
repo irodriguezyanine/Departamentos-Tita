@@ -3,12 +3,10 @@
  * y conversión a USD
  */
 
-/** Formato chileno: $90.000 (punto como separador de miles) */
+/** Formato chileno: 90.000 (punto como separador de miles, sin espacios) */
 export function formatPrecioCLP(n: number): string {
-  return new Intl.NumberFormat("es-CL", {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(n || 0)
+  const num = Math.round(n || 0)
+  return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")
 }
 
 /** Convierte CLP a USD usando la tasa dada */

@@ -59,8 +59,29 @@ export async function POST(request: Request) {
     const body = await request.json()
     const db = await getDb()
 
+    const name = (body.name || "").trim()
+    const slug =
+      body.slug?.trim() ||
+      name
+        .toLowerCase()
+        .replace(/\s+/g, "-")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9-]/g, "")
+
     const doc = {
-      ...body,
+      name,
+      slug: slug || `dept-${Date.now()}`,
+      torre: body.torre || "",
+      precio: body.precio ?? 90000,
+      descripcion: body.descripcion || "",
+      descripcionLarga: body.descripcionLarga || "",
+      dormitorios: body.dormitorios ?? 4,
+      banos: body.banos ?? 3,
+      terraza: body.terraza ?? true,
+      logia: body.logia ?? true,
+      orientacion: body.orientacion || "",
+      notaEspecial: body.notaEspecial || "",
       disponible: body.disponible ?? true,
       imagenes: body.imagenes || [],
       layout: body.layout || [],

@@ -4,19 +4,28 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { signOut } from "next-auth/react"
 import { Menu, X, Building2, LogIn, LogOut } from "lucide-react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useSession } from "next-auth/react"
 import { clsx } from "clsx"
 
-const NAV_ITEMS = [
-  { href: "/departamentos/4c-torre-galapagos", label: "4 C Galápagos" },
-  { href: "/departamentos/13d-torre-cabo-hornos", label: "13 D Cabo de Hornos" },
-  { href: "/departamentos/17c-torre-isla-grande", label: "17 C Isla Grande" },
-  { href: "/departamentos/16c-torre-juan-fernandez", label: "16 C Juan Fernández" },
-  { href: "/departamentos/18c-torre-juan-fernandez", label: "18 C Juan Fernández" },
-]
-
 export function Header() {
+  const [navItems, setNavItems] = useState<{ href: string; label: string }[]>([])
+
+  useEffect(() => {
+    fetch("/api/departamentos")
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setNavItems(
+            data.map((d: { slug: string; name: string }) => ({
+              href: `/departamentos/${d.slug}`,
+              label: d.name,
+            }))
+          )
+        }
+      })
+      .catch(() => {})
+  }, [])
   const pathname = usePathname()
   const { data: session, status } = useSession()
   const [open, setOpen] = useState(false)
@@ -34,7 +43,7 @@ export function Header() {
           </Link>
 
           <nav className="hidden md:flex items-center gap-1">
-            {NAV_ITEMS.map((item) => (
+            {navItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
@@ -86,7 +95,7 @@ export function Header() {
 
         {open && (
           <nav className="md:hidden py-4 border-t border-tita-oro/40 space-y-1">
-            {NAV_ITEMS.map((item) => (
+            {navItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}

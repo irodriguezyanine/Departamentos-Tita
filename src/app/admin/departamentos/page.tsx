@@ -1,10 +1,11 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useMemo } from "react"
 import Link from "next/link"
 import { Pencil, ExternalLink, Layout, Building2, MoreVertical, Loader2, Plus, Eye, EyeOff } from "lucide-react"
 import { getEstacionamientos, formatEstacionamientos, COSTO_ESTACIONAMIENTO_DIARIO } from "@/data/estacionamientos"
 import { formatPrecioConUsd, formatPrecioCLP } from "@/lib/precios"
+import { useTableFilters, TableSearchBar } from "@/components/admin/TableFilters"
 
 interface Departamento {
   _id: string
@@ -81,6 +82,24 @@ export default function AdminDepartamentosPage() {
   const formatPrecio = (n: number) =>
     formatPrecioConUsd(n, usdPerClp)
 
+  const columns = [
+    { key: "name", label: "Departamento", getValue: (d: Departamento) => d.name, filterable: true },
+    { key: "torre", label: "Torre", getValue: (d: Departamento) => d.torre, filterable: true },
+    { key: "estado", label: "Estado", getValue: (d: Departamento) => (d.disponible ? "Disponible" : "No disponible"), filterable: true },
+  ]
+  const getSearchText = (d: Departamento) =>
+    [d.name, d.torre, d.precio, d.imagenes?.length, d.disponible ? "Disponible" : "No disponible"].join(" ")
+  const {
+    filteredData,
+    search,
+    setSearch,
+    columnFilters,
+    setColumnFilter,
+    uniqueValues,
+    clearFilters,
+    hasActiveFilters,
+  } = useTableFilters(departamentos, columns, getSearchText)
+
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-8">
@@ -107,9 +126,18 @@ export default function AdminDepartamentosPage() {
       <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
         {departamentos.length > 0 && (
           <>
+        <TableSearchBar
+          value={search}
+          onChange={setSearch}
+          placeholder="Buscar por departamento, torre, precio..."
+          resultCount={filteredData.length}
+          totalCount={departamentos.length}
+          onClear={clearFilters}
+          hasActiveFilters={hasActiveFilters}
+        />
         {/* Vista móvil: tarjetas */}
         <div className="md:hidden divide-y divide-slate-100">
-          {departamentos.map((d) => (
+          {filteredData.map((d) => (
             <div key={d._id} className="p-4">
               <div className="flex items-start justify-between gap-3 mb-3">
                 <div>
@@ -189,11 +217,35 @@ export default function AdminDepartamentosPage() {
           <table className="w-full min-w-[720px]">
             <thead className="bg-slate-50 border-b border-slate-200">
               <tr>
-                <th className="text-left px-4 py-3 text-sm font-semibold text-slate-700">
-                  Departamento
+                <th className="text-left px-4 py-2 text-sm font-semibold text-slate-700">
+                  <div className="flex flex-col gap-1">
+                    <span>Departamento</span>
+                    <select
+                      value={columnFilters["name"] ?? ""}
+                      onChange={(e) => setColumnFilter("name", e.target.value)}
+                      className="text-xs py-1.5 px-2 rounded border border-slate-200 bg-white"
+                    >
+                      <option value="">Todos</option>
+                      {Array.from(uniqueValues["name"] || []).sort().map((v) => (
+                        <option key={v} value={v}>{v}</option>
+                      ))}
+                    </select>
+                  </div>
                 </th>
-                <th className="text-left px-4 py-3 text-sm font-semibold text-slate-700">
-                  Torre
+                <th className="text-left px-4 py-2 text-sm font-semibold text-slate-700">
+                  <div className="flex flex-col gap-1">
+                    <span>Torre</span>
+                    <select
+                      value={columnFilters["torre"] ?? ""}
+                      onChange={(e) => setColumnFilter("torre", e.target.value)}
+                      className="text-xs py-1.5 px-2 rounded border border-slate-200 bg-white"
+                    >
+                      <option value="">Todos</option>
+                      {Array.from(uniqueValues["torre"] || []).sort().map((v) => (
+                        <option key={v} value={v}>{v}</option>
+                      ))}
+                    </select>
+                  </div>
                 </th>
                 <th className="text-left px-4 py-3 text-sm font-semibold text-slate-700">
                   <div className="flex items-center gap-2">
@@ -216,8 +268,20 @@ export default function AdminDepartamentosPage() {
                 <th className="text-left px-4 py-3 text-sm font-semibold text-slate-700">
                   Fotos
                 </th>
-                <th className="text-left px-4 py-3 text-sm font-semibold text-slate-700">
-                  Estado
+                <th className="text-left px-4 py-2 text-sm font-semibold text-slate-700">
+                  <div className="flex flex-col gap-1">
+                    <span>Estado</span>
+                    <select
+                      value={columnFilters["estado"] ?? ""}
+                      onChange={(e) => setColumnFilter("estado", e.target.value)}
+                      className="text-xs py-1.5 px-2 rounded border border-slate-200 bg-white"
+                    >
+                      <option value="">Todos</option>
+                      {Array.from(uniqueValues["estado"] || []).sort().map((v) => (
+                        <option key={v} value={v}>{v}</option>
+                      ))}
+                    </select>
+                  </div>
                 </th>
                 <th className="text-right px-4 py-3 text-sm font-semibold text-slate-700">
                   Acciones
@@ -225,7 +289,7 @@ export default function AdminDepartamentosPage() {
               </tr>
             </thead>
             <tbody>
-              {departamentos.map((d) => (
+              {filteredData.map((d) => (
                 <tr key={d._id} className="border-b border-slate-100 hover:bg-slate-50/50">
                   <td className="px-4 py-3 font-medium text-slate-800">{d.name}</td>
                   <td className="px-4 py-3 text-slate-600">{d.torre}</td>
