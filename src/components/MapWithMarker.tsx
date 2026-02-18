@@ -36,7 +36,7 @@ export function MapWithMarker() {
         }}
       >
         <Popup>
-          <strong>Condominio Puerto Pacífico</strong>
+          <strong>Arriendos Puerto Pacífico</strong>
           <br />
           Av. Jorge Montt 1598, Viña del Mar
         </Popup>
