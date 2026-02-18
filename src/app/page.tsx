@@ -134,7 +134,7 @@ export default function HomePage() {
           className="absolute inset-0 bg-cover bg-center bg-no-repeat bg-tita-verde-oscuro"
           style={{ backgroundImage: "url('/assets/hero-portada.png')" }}
           role="img"
-          aria-label="Condominio Puerto Pacífico, Viña del Mar"
+          aria-label="Arriendos Puerto Pacífico, Viña del Mar"
         />
         {/* Overlay verde oscuro cubriendo toda la pantalla sobre la imagen */}
         <div className="absolute inset-0 bg-tita-verde-oscuro/75" />
@@ -153,7 +153,7 @@ export default function HomePage() {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="font-display text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-4 text-tita-beige"
           >
-            Condominio Puerto Pacífico
+            Arriendos Puerto Pacífico
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 30 }}
@@ -215,13 +215,13 @@ export default function HomePage() {
                   nuestraHistoria.imagenUrl.startsWith("http") ? (
                     <img
                       src={nuestraHistoria.imagenUrl}
-                      alt="Dalal Saleme y Enrique Yanine - Dueños de Condominio Puerto Pacífico"
+                      alt="Dalal Saleme y Enrique Yanine - Dueños de Arriendos Puerto Pacífico"
                       className="w-full h-full object-cover object-top"
                     />
                   ) : (
                     <Image
                       src={nuestraHistoria.imagenUrl}
-                      alt="Dalal Saleme y Enrique Yanine - Dueños de Condominio Puerto Pacífico"
+                      alt="Dalal Saleme y Enrique Yanine - Dueños de Arriendos Puerto Pacífico"
                       fill
                       className="object-cover object-top"
                       sizes="(max-width: 768px) 100vw, 50vw"
@@ -231,7 +231,7 @@ export default function HomePage() {
                 ) : (
                   <Image
                     src="/assets/TITA Foto perfil.jpeg"
-                    alt="Dalal Saleme y Enrique Yanine - Dueños de Condominio Puerto Pacífico"
+                    alt="Dalal Saleme y Enrique Yanine - Dueños de Arriendos Puerto Pacífico"
                     fill
                     className="object-cover object-top"
                     sizes="(max-width: 768px) 100vw, 50vw"
@@ -291,7 +291,7 @@ export default function HomePage() {
             className="text-center mb-16"
           >
             <h2 className="font-display text-3xl md:text-4xl font-bold text-tita-verde mb-4">
-              Condominio Puerto Pacífico
+              Arriendos Puerto Pacífico
             </h2>
             <p className="text-slate-600 max-w-2xl mx-auto">
               Emplazado en una de las mejores zonas de Viña del Mar, con comodidad y confort
@@ -484,7 +484,7 @@ export default function HomePage() {
               Cómo llegar
             </h2>
             <p className="text-slate-600 max-w-2xl mx-auto mb-2">
-              Condominio Puerto Pacífico
+              Arriendos Puerto Pacífico
             </p>
             <p className="text-tita-verde font-medium flex items-center justify-center gap-2">
               <MapPin className="w-5 h-5" />

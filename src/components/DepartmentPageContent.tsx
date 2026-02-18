@@ -504,7 +504,7 @@ export function DepartmentPageContent({
               <>
                 <p className="leading-relaxed">
                   {dept.descripcion ||
-                    "Departamento acogedor en el exclusivo Condominio Puerto Pacífico."}
+                    "Departamento acogedor en el exclusivo Arriendos Puerto Pacífico."}
                 </p>
                 <p className="mt-4 leading-relaxed">
                   Ubicado frente a playa Las Salinas, a pasos de Marina Arauco, con piscinas,

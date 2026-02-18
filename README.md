@@ -1,6 +1,6 @@
-# Condominio Puerto Pacífico
+# Arriendos Puerto Pacífico
 
-Sitio web para **Condominio Puerto Pacífico** — arriendo de departamentos en el Condominio Puerto Pacífico, Viña del Mar. Propiedad de Dalal Saleme y Enrique Yanine, con más de 20 años de servicio excepcional.
+Sitio web para **Arriendos Puerto Pacífico** — arriendo de departamentos en Puerto Pacífico, Viña del Mar. Propiedad de Dalal Saleme y Enrique Yanine, con más de 20 años de servicio excepcional.
 
 ## Tecnologías
 
@@ -50,7 +50,7 @@ Abre [http://localhost:3000](http://localhost:3000).
 
 ## Estructura
 
-- **Home**: Hero, historia (Dalal y Enrique), características del condominio Puerto Pacífico, departamentos
+- **Home**: Hero, historia (Dalal y Enrique), características de Arriendos Puerto Pacífico, departamentos
 - **Departamentos**: Página individual por cada departamento con galería artística
 - **Admin** (`/admin`): Panel para gestionar departamentos, subir fotos (Cloudinary), editar precios, layout tipo Canva
 - **Clientes**: Consultas guardadas en MongoDB

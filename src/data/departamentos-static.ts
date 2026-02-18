@@ -35,7 +35,7 @@ El salón-comedor de concepto abierto presenta un sofá seccional de cuero, mesa
 
 Los dormitorios principales cuentan con amplios ventanales que capturan la orientación Reñaca, con vistas a la laguna, palmeras y el horizonte marino. La terraza privada con mobiliario de exterior invita al esparcimiento al aire libre, mientras que la logia ofrece un refugio adicional para disfrutar del clima costero.
 
-Ubicado en el exclusivo Condominio Puerto Pacífico, frente a playa Las Salinas y a pasos de Marina Arauco, este departamento representa la cumbre del confort y la ubicación privilegiada en Viña del Mar.`,
+Ubicado en el exclusivo Arriendos Puerto Pacífico, frente a playa Las Salinas y a pasos de Marina Arauco, este departamento representa la cumbre del confort y la ubicación privilegiada en Viña del Mar.`,
     dormitorios: 4,
     banos: 3,
     terraza: true,
@@ -65,7 +65,7 @@ Ubicado en el exclusivo Condominio Puerto Pacífico, frente a playa Las Salinas 
 
 Con cuatro dormitorios y tres baños, destaca la configuración de dos dormitorios unidos que amplían el espacio y ofrecen versatilidad para familias o grupos. La orientación Valparaíso garantiza vistas privilegiadas al puerto histórico.
 
-Ubicado en el Condominio Puerto Pacífico, combina la tranquilidad residencial con la proximidad a Marina Arauco, playa Las Salinas y todos los servicios. Un refugio de confort y elegancia en Viña del Mar.`,
+Ubicado en el Arriendos Puerto Pacífico, combina la tranquilidad residencial con la proximidad a Marina Arauco, playa Las Salinas y todos los servicios. Un refugio de confort y elegancia en Viña del Mar.`,
     dormitorios: 4,
     banos: 3,
     terraza: true,
@@ -94,7 +94,7 @@ Ubicado en el Condominio Puerto Pacífico, combina la tranquilidad residencial c
       "Departamento luminoso con todas las comodidades. Ubicación privilegiada frente a la playa, orientación Reñaca. Terraza y logia para disfrutar del clima costero.",
     descripcionLarga: `El departamento 17 C de la Torre Isla Grande representa la excelencia en vida costera. Con cuatro dormitorios, tres baños, terraza y logia, ofrece un espacio generoso bañado por luz natural gracias a su orientación Reñaca.
 
-Emplazado frente a playa Las Salinas, disfrute de piscinas, gimnasio, conserjería 24 horas y todas las amenidades del Condominio Puerto Pacífico. Ideal para familias que buscan confort, seguridad y una ubicación inmejorable en Viña del Mar.`,
+Emplazado frente a playa Las Salinas, disfrute de piscinas, gimnasio, conserjería 24 horas y todas las amenidades del Arriendos Puerto Pacífico. Ideal para familias que buscan confort, seguridad y una ubicación inmejorable en Viña del Mar.`,
     dormitorios: 4,
     banos: 3,
     terraza: true,
@@ -128,7 +128,7 @@ Con terraza y logia, el espacio se extiende al aire libre para disfrutar del cli
       "Departamento de lujo con las mejores vistas. Dos dormitorios unidos para mayor espacio. Ideal para una estadía inolvidable en Puerto Pacífico.",
     descripcionLarga: `El departamento 18 C de la Torre Juan Fernández ofrece una experiencia de vida premium. Con cuatro dormitorios, tres baños y la configuración exclusiva de dos dormitorios unidos, maximiza el espacio y la versatilidad.
 
-Orientación Reñaca, terraza y logia completan un perfil residencial de primer nivel. En el Condominio Puerto Pacífico, frente a playa Las Salinas, este inmueble representa la cumbre del confort y la ubicación privilegiada.`,
+Orientación Reñaca, terraza y logia completan un perfil residencial de primer nivel. En el Arriendos Puerto Pacífico, frente a playa Las Salinas, este inmueble representa la cumbre del confort y la ubicación privilegiada.`,
     dormitorios: 4,
     banos: 3,
     terraza: true,

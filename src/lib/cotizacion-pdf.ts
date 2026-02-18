@@ -1,5 +1,5 @@
 /**
- * Generación de PDF profesional para cotizaciones - Condominio Puerto Pacífico
+ * Generación de PDF profesional para cotizaciones - Arriendos Puerto Pacífico
  * Diseño tipo tarjetas con bordes redondeados y columnas alineadas
  */
 
@@ -74,12 +74,12 @@ function drawHeader(doc: jsPDF, cot: CotizacionArriendo): number {
   doc.setTextColor(255, 255, 255)
   doc.setFontSize(18)
   doc.setFont("helvetica", "bold")
-  doc.text("Condominio Puerto Pacífico", MARGIN, 14)
+  doc.text("Arriendos Puerto Pacífico", MARGIN, 14)
 
   doc.setFontSize(8)
   doc.setFont("helvetica", "normal")
   doc.setTextColor(...BEIGE)
-  doc.text("Condominio Puerto Pacífico", MARGIN, 20)
+  doc.text("Arriendos Puerto Pacífico", MARGIN, 20)
   doc.text(UBICACION_SITIO, MARGIN, 26)
 
   const clienteX = PAGE_WIDTH - MARGIN
@@ -217,7 +217,7 @@ export function generarPDFCotizacion(
   doc.text(UBICACION_SITIO, LABEL_LEFT, ubY + 5)
   doc.setFontSize(7)
   doc.setTextColor(...SLATE_LIGHT)
-  doc.text("Condominio Puerto Pacífico · Frente a playa Las Salinas", LABEL_LEFT, ubY + 9)
+  doc.text("Arriendos Puerto Pacífico · Frente a playa Las Salinas", LABEL_LEFT, ubY + 9)
   y = ubEnd + CARD_GAP
 
   // ─── Tarjeta: Datos del arriendo ───
@@ -341,7 +341,7 @@ export function generarPDFCotizacion(
     doc.setFontSize(6)
     doc.setTextColor(...SLATE_LIGHT)
     doc.text(
-      `Condominio Puerto Pacífico · ${UBICACION_SITIO} · www.condominiopuertopacifico.cl`,
+      `Arriendos Puerto Pacífico · ${UBICACION_SITIO} · www.condominiopuertopacifico.cl`,
       PAGE_WIDTH / 2,
       footerY - 1,
       { align: "center" }
@@ -401,7 +401,7 @@ export async function compartirPDFWhatsApp(
   const file = new File([blob], fileName, { type: "application/pdf" })
 
   const nombreCliente = [cot.nombreArrendatario, cot.apellidoArrendatario].filter(Boolean).join(" ") || "Cliente"
-  const mensaje = `Cotización Condominio Puerto Pacífico - ${cot.numero || ""} - ${nombreCliente}`
+  const mensaje = `Cotización Arriendos Puerto Pacífico - ${cot.numero || ""} - ${nombreCliente}`
 
   const puedeCompartir =
     typeof navigator !== "undefined" &&
@@ -411,7 +411,7 @@ export async function compartirPDFWhatsApp(
   if (puedeCompartir) {
     try {
       await navigator.share({
-        title: "Cotización Condominio Puerto Pacífico",
+        title: "Cotización Arriendos Puerto Pacífico",
         text: mensaje,
         files: [file],
       })

@@ -28,7 +28,7 @@ const DEFAULT_NUESTRA_HISTORIA: NuestraHistoria = {
 
 const DEFAULT_OG: OgSettings = {
   ogImage: "/og-image.png",
-  ogTitle: "Condominio Puerto Pacífico | Arriendo en Viña del Mar, Dalal Saleme",
+  ogTitle: "Arriendos Puerto Pacífico | Arriendo en Viña del Mar, Dalal Saleme",
   ogDescription: "5 departamentos en arriendo primera línea de playa. Entra y reserva.",
 }
 
@@ -367,7 +367,7 @@ export function NuestraHistoriaEditor() {
               type="text"
               value={og.ogTitle}
               onChange={(e) => setOg((prev) => ({ ...prev, ogTitle: e.target.value }))}
-              placeholder="Condominio Puerto Pacífico | ..."
+              placeholder="Arriendos Puerto Pacífico | ..."
               className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-tita-primary focus:border-tita-primary"
             />
           </div>

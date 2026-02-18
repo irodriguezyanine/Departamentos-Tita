@@ -8,11 +8,11 @@ export function Footer() {
         <div className="grid md:grid-cols-3 gap-8">
           <div>
             <h3 className="text-tita-beige font-display font-semibold text-lg mb-4">
-              Condominio Puerto Pacífico
+              Arriendos Puerto Pacífico
             </h3>
             <p className="text-sm leading-relaxed text-tita-beige/90">
               Más de 20 años ofreciendo un servicio excepcional en el corazón de Viña del Mar.
-              Condominio Puerto Pacífico — tu hogar frente al mar.
+              Arriendos Puerto Pacífico — tu hogar frente al mar.
             </p>
           </div>
           <div>
@@ -22,7 +22,7 @@ export function Footer() {
             <div className="flex items-start gap-3 text-sm text-tita-beige/90">
               <MapPin className="w-5 h-5 text-tita-oro flex-shrink-0 mt-0.5" />
               <p>
-                Condominio Puerto Pacífico
+                Arriendos Puerto Pacífico
                 <br />
                 Viña del Mar, Región de Valparaíso
                 <br />
@@ -55,7 +55,7 @@ export function Footer() {
           </div>
         </div>
         <div className="mt-12 pt-8 border-t border-tita-oro/40 text-center text-sm text-tita-beige/80">
-          <p>© {new Date().getFullYear()} Condominio Puerto Pacífico. Dalal Saleme & Enrique Yanine.</p>
+          <p>© {new Date().getFullYear()} Arriendos Puerto Pacífico. Dalal Saleme & Enrique Yanine.</p>
         </div>
       </div>
     </footer>

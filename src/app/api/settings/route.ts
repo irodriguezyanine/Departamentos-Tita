@@ -16,7 +16,7 @@ const DEFAULT_NUESTRA_HISTORIA = {
 
 const DEFAULT_OG = {
   ogImage: "/og-image.png",
-  ogTitle: "Condominio Puerto Pacífico | Arriendo en Viña del Mar, Dalal Saleme",
+  ogTitle: "Arriendos Puerto Pacífico | Arriendo en Viña del Mar, Dalal Saleme",
   ogDescription: "5 departamentos en arriendo primera línea de playa. Entra y reserva.",
 }
 

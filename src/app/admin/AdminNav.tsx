@@ -41,7 +41,7 @@ export function AdminNav() {
               {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
             <Link href="/" className="font-display font-semibold text-tita-primary hover:text-tita-verde transition-colors" title="Volver al inicio">
-              Condominio Puerto Pacífico
+              Arriendos Puerto Pacífico
             </Link>
           </div>
 

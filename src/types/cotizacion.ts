@@ -1,5 +1,5 @@
 /**
- * Cotización de arriendo - Condominio Puerto Pacífico
+ * Cotización de arriendo - Arriendos Puerto Pacífico
  * Basado en formato de cotización de arriendo
  */
 

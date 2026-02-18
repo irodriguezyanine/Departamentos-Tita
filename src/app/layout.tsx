@@ -8,7 +8,7 @@ import { WhatsAppButton } from "@/components/WhatsAppButton"
 import { SessionProvider } from "@/components/SessionProvider"
 
 const DEFAULT_OG = {
-  title: "Condominio Puerto Pacífico | Arriendo en Viña del Mar, Dalal Saleme",
+  title: "Arriendos Puerto Pacífico | Arriendo en Viña del Mar, Dalal Saleme",
   description: "5 departamentos en arriendo primera línea de playa. Entra y reserva.",
   image: "/og-image.png",
 }
@@ -49,7 +49,7 @@ export async function generateMetadata(): Promise<Metadata> {
       title,
       description,
       url: "https://www.condominiopuertopacifico.cl",
-      siteName: "Condominio Puerto Pacífico",
+      siteName: "Arriendos Puerto Pacífico",
       locale: "es_CL",
       images: [{ url: imageUrl, width: 1200, height: 630, alt: title }],
     },
