@@ -8,14 +8,22 @@ import { useState, useEffect } from "react"
 import { useSession } from "next-auth/react"
 import { clsx } from "clsx"
 
+const NAV_ITEMS_FALLBACK: { href: string; label: string }[] = [
+  { href: "/departamentos/4c-torre-galapagos", label: "4 C Torre Galápagos" },
+  { href: "/departamentos/13d-torre-cabo-hornos", label: "13 D Torre Cabo de Hornos" },
+  { href: "/departamentos/17c-torre-isla-grande", label: "17 C Torre Isla Grande" },
+  { href: "/departamentos/16c-torre-juan-fernandez", label: "16 C Torre Juan Fernández" },
+  { href: "/departamentos/18c-torre-juan-fernandez", label: "18 C Torre Juan Fernández" },
+]
+
 export function Header() {
-  const [navItems, setNavItems] = useState<{ href: string; label: string }[]>([])
+  const [navItems, setNavItems] = useState<{ href: string; label: string }[]>(NAV_ITEMS_FALLBACK)
 
   useEffect(() => {
     fetch("/api/departamentos")
       .then((res) => res.json())
       .then((data) => {
-        if (Array.isArray(data)) {
+        if (Array.isArray(data) && data.length > 0) {
           setNavItems(
             data.map((d: { slug: string; name: string }) => ({
               href: `/departamentos/${d.slug}`,
@@ -36,10 +44,11 @@ export function Header() {
         <div className="flex items-center justify-between h-16 md:h-20">
           <Link
             href="/"
-            className="text-xl md:text-2xl font-display font-semibold text-tita-beige tracking-tight hover:text-tita-oro-claro transition-colors"
+            className="text-xl md:text-2xl font-display font-semibold text-tita-beige tracking-tight hover:text-tita-oro-claro transition-colors leading-tight"
             title="Volver al inicio"
           >
-            Arriendos Puerto Pacífico
+            <span className="block">Arriendos</span>
+            <span className="block">Puerto Pacífico</span>
           </Link>
 
           <nav className="hidden md:flex items-center gap-1">
